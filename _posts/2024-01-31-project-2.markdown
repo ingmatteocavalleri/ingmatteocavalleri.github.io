@@ -1,0 +1,15 @@
+---
+title: BitEvent
+subtitle: Application prototyping
+layout: default
+modal-id: 2
+date: 2024-01-31
+img: bitevent.png
+thumbnail: bitevent-thumbnail.png
+alt: image-alt
+project-date: April 2014
+client: Politecnico di Milano
+category: App Development
+description: Il progetto ha riguardato lo sviluppo e la prototipizzazione di un applicazione mobile mediante Figma
+
+---
