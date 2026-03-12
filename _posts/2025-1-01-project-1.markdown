@@ -1,6 +1,6 @@
 ---
-title: Electrical Machine and Drives
-subtitle: DC motor
+title: Tramway problem
+subtitle: 
 layout: default
 modal-id: 1
 date: 2025-11-01
@@ -10,6 +10,6 @@ alt: image-alt
 project-date: July 2026
 client: Politecnico di Milano
 category: Drive control
-description: Il progetto consiste nel controllo di un motore in corrente continua....
+description: Il progetto consiste nella modellizzazione e controllo di un problema reale.
 
 ---
