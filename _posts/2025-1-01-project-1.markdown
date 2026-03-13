@@ -10,6 +10,6 @@ alt: image-alt
 project-date: July 2026
 client: Politecnico di Milano
 category: Drive control
-description: Il progetto consiste nella modellizzazione e controllo di un problema reale.
+description: Il progetto consiste nella modellizzazione e controllo di un problema reale. Per maggiori informazioni prego consulatre il seguente [link](https://ingmatteocavalleri.github.io/MachineControlSystem).
 
 ---
