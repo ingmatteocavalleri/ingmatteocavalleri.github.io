@@ -1,59 +1,12 @@
-url: https://teocavaa.github.io
-baseurl: 
-
 # Site settings
-title: Ing. Matteo Cavalleri
-email: mattecava02@gmail.com
-description: "Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description."
+title:
+email:
+description: > # this means to ignore newlines until "baseurl:"
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "" # the base hostname & protocol for your site
 
-
-# Team names, titles and social links
-people:
-- name: Matteo Cavalleri
-  pic: 1
-  position: Process Engineer
-  social:
-    - title: linkedin
-      url: "https://www.linkedin.com/in/matteocavallerii"
-   #- title: google-plus
-   #   url: #
-   # - title: facebook
-   #   url: #
-
-#- name: Larry Parker
-#  pic: 2
-#  position: Lead Marketer
-#  social:
-#    - title: twitter
-#      url: #
-#    - title: facebook
-#      url: #
-#    - title: linkedin
-#      url: #
-
-#- name: Diana Petersen
-#  pic: 3
-#  position: Lead Developer
-#  social:
-#    - title: twitter
-#      url: #
-#    - title: facebook
-#      url: #
-#    - title: google-plus
-#      url: #
-
-# Social networks usernames (many more available: google-plus, flickr, dribbble, pinterest, instagram, tumblr, linkedin, etc.)
-social:
-  - title: stack-overflow
-    url: http://stackoverflow.com/
-  - title: github
-    url: http://github.com/teocavaa
-
-# Postal address (add as many lines as necessary)
-address:
-  - line: 3481 Melrose Place
-  - line: Beverly Hills, CA 90210
+twitter_username:
+github_username:
 
 # Build settings
 markdown: kramdown
-permalink: pretty
