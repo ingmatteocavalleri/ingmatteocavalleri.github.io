@@ -1,4 +1,7 @@
---- --- @charset "utf-8";
+---
+---
+
+@charset "utf-8";
 
 // Example Defaults
 // $base-font-family: Helvetica, Arial, sans-serif;
@@ -35,58 +38,7 @@ $theme-primary: #2463af;
 $theme-dark: #222;
 
 // Import partials from `sass_dir` (defaults to `_sass`)
-@import "mixins",
-"base"
+@import
+        "mixins",
+        "base"
 ;
-
-.team-section {
-        padding: 100px 0;
-}
-
-.team-grid {
-        display: flex;
-        justify-content: center;
-        gap: 40px;
-        flex-wrap: wrap;
-        margin-top: 50px;
-}
-
-.team-member {
-        max-width: 200px;
-        text-align: center;
-}
-
-.member-photo {
-        width: 150px;
-        height: 150px;
-        margin: 0 auto 15px;
-        border-radius: 50%;
-        /* Rende l'immagine un cerchio perfetto */
-        overflow: hidden;
-        border: 3px solid var(--primary-color);
-        /* Opzionale: un bordo del colore principale */
-        transition: transform 0.3s ease;
-}
-
-.member-photo img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        /* Evita che la foto si deformi */
-}
-
-.team-member:hover .member-photo {
-        transform: scale(1.05);
-        /* Effetto zoom al passaggio del mouse */
-}
-
-.team-member h4 {
-        margin-bottom: 5px;
-        color: white;
-        /* Dato che lo sfondo è bg-dark */
-}
-
-.team-member p {
-        font-size: 0.9rem;
-        color: #8b949e;
-}
