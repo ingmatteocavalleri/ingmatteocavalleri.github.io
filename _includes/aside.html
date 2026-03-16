@@ -1,8 +1,65 @@
-  <aside class="bg-dark">
-      <div class="container text-center">
-          <div class="call-to-action">
-              <h2>Ultimo progetto!</h2>
-              <a href="#" class="btn btn-default btn-xl wow tada">Clicca qui</a>
-          </div>
-      </div>
-  </aside>
+<aside class="bg-dark text-center" style="padding: 80px 0; background-color: #24292e; color: white;">
+    <div class="container">
+        <div class="call-to-action">
+            <h2 style="margin-bottom: 50px;">Il mio Team</h2>
+
+            <div class="team-container"
+                style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin-bottom: 40px;">
+
+                <div class="team-member" style="max-width: 200px;">
+                    <div class="member-oval">
+                        <img src="https://i.pravatar.cc/150?u=1" alt="Membro Team"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h4 style="margin-top: 15px;">Nome Cognome</h4>
+                    <p style="color: #8b949e; font-size: 0.9rem;">Ruolo Tecnico</p>
+                </div>
+
+                <div class="team-member" style="max-width: 200px;">
+                    <div class="member-oval">
+                        <img src="https://i.pravatar.cc/150?u=2" alt="Membro Team"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h4 style="margin-top: 15px;">Nome Cognome</h4>
+                    <p style="color: #8b949e; font-size: 0.9rem;">Ruolo Tecnico</p>
+                </div>
+
+                <div class="team-member" style="max-width: 200px;">
+                    <div class="member-oval">
+                        <img src="https://i.pravatar.cc/150?u=3" alt="Membro Team"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h4 style="margin-top: 15px;">Nome Cognome</h4>
+                    <p style="color: #8b949e; font-size: 0.9rem;">Ruolo Tecnico</p>
+                </div>
+
+            </div>
+
+            <a href="mailto:tuaemail@esempio.com" class="btn btn-default btn-xl wow tada">Contattaci</a>
+        </div>
+    </div>
+
+    <style>
+        .member-oval {
+            width: 140px;
+            height: 180px;
+            /* Altezza maggiore della larghezza per l'effetto ovale */
+            margin: 0 auto;
+            border-radius: 50% / 40%;
+            /* Crea la curvatura a uovo/ovale */
+            overflow: hidden;
+            border: 3px solid #0366d6;
+            transition: transform 0.3s ease;
+            background-color: #f6f8fa;
+        }
+
+        .member-oval:hover {
+            transform: scale(1.05);
+            border-color: white;
+        }
+
+        .bg-dark {
+            background-color: #24292e !important;
+        }
+    </style>
+</aside>
