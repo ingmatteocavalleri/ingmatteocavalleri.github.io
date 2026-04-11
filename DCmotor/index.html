@@ -36,8 +36,9 @@
             <span class="meta-tag tag-dc">Separately Excited DC Motor</span>
             <span class="meta-tag tag-ctrl">Cascade Speed Control</span>
             <span class="meta-tag tag-atm">ATM Milano</span>
+            <span class="meta-tag tag-polimi">PoliMi — 10 CFU</span>
         </div>
-        <h1>Tramway <em>"Carelli 1928"</em><br>Speed Control of a DC motor</h1>
+        <h1>Tramway <em>"Carelli 1928"</em><br>Speed Control of a DC Drive</h1>
         <p class="subtitle">
             Design and simulation of a cascade speed controller for the ATM Milano historic tramway. Four separately excited DC motors, 600 V DC supply, three nested PI loops with field-weakening and anti-windup back-calculation, simulated over a 10 km urban route with slope variations.
         </p>
@@ -110,6 +111,7 @@
                 <li><a href="#results">5. Results</a></li>
                 <li><a href="#conclusions">6. Conclusions</a></li>
                 <li><a href="#matlab">7. MATLAB Code</a></li>
+                <li><a href="#download">8. Download</a></li>
             </ul>
         </nav>
 
@@ -451,14 +453,73 @@ ome_max  = v_max_ms/(rho*d/<span class="v">2</span>);   <span class="c">% max sh
 <span class="c">%%                           En/(Ks*omega) if omega >  ome_base</span></pre></div>
             </div>
 
+            <!-- ══ 8 DOWNLOAD ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="download"></span>
+                <h2><span class="sec-num">08</span> Download — File di Progetto</h2>
+                <p>
+                    Il progetto completo include il codice MATLAB per l'identificazione dei parametri e la sintesi dei controllori PI, il modello Simulink con tutti i blocchi di controllo in cascata, e il report tecnico completo. Tutti i file sono disponibili nel repository GitHub.
+                </p>
+                <div class="download-grid">
+                    <div class="download-card">
+                        <div class="download-icon"><i class="fa-solid fa-play-circle"></i></div>
+                        <div class="download-name">Simulazione Interattiva</div>
+                        <div class="download-desc">Simulazione JavaScript real-time del controllo in cascata: 3 loop PI con i parametri esatti del report, field weakening, anti-windup, profilo 10 km con pendenze.</div>
+                        <a href="./simulation.html" class="download-btn">
+                            <i class="fa-solid fa-arrow-right"></i> Apri Simulazione
+                        </a>
+                        <div class="download-note">// Runs in browser · No install required</div>
+                    </div>
+                    <div class="download-card">
+                        <div class="download-icon"><i class="fa-solid fa-code"></i></div>
+                        <div class="download-name">MATLAB Script</div>
+                        <div class="download-desc">Script completo: identificazione parametri, verifica KVL, calcolo guadagni PI con pole-zero cancellation, anti-windup e field weakening. Variabili pronte per Simulink.</div>
+                        <a href="https://github.com/ingmatteocavalleri/MachineControlSystem" target="_blank" class="download-btn">
+                            <i class="fa-brands fa-github"></i> GitHub Repository
+                        </a>
+                        <div class="download-note">// MATLAB R2024b · .m script</div>
+                    </div>
+                    <div class="download-card">
+                        <div class="download-icon"><i class="fa-solid fa-diagram-project"></i></div>
+                        <div class="download-name">Modello Simulink</div>
+                        <div class="download-desc">Schema Simulink completo con catena di controllo in cascata: blocchi PI con anti-windup back-calculation, field weakening, profilo cinematico e generatore di disturbo.</div>
+                        <a href="https://github.com/ingmatteocavalleri/MachineControlSystem" target="_blank" class="download-btn">
+                            <i class="fa-brands fa-github"></i> GitHub Repository
+                        </a>
+                        <div class="download-note">// Simulink · Simscape Electrical · .slx</div>
+                    </div>
+                    <div class="download-card">
+                        <div class="download-icon"><i class="fa-solid fa-file-pdf"></i></div>
+                        <div class="download-name">Report Tecnico</div>
+                        <div class="download-desc">Documentazione completa del progetto: identificazione parametri, modellazione, progetto del controllore, risultati di simulazione e conclusioni. Corso DEMD — PoliMi.</div>
+                        <a href="https://github.com/ingmatteocavalleri/MachineControlSystem" target="_blank" class="download-btn">
+                            <i class="fa-brands fa-github"></i> GitHub Repository
+                        </a>
+                        <div class="download-note">// PDF · Politecnico di Milano · 2026</div>
+                    </div>
+                </div>
+            </div>
+
         </article>
     </div><!-- /doc-layout -->
+
+    <!-- SIMULATION BANNER -->
+    <div style="margin:0 0 56px;padding:20px 24px;background:var(--surface);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+        <div>
+            <div style="font-family:var(--mono);font-size:.65rem;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">// Interactive Simulation</div>
+            <div style="font-family:var(--display);font-size:1.05rem;font-weight:700;margin-bottom:5px">Cascade PI Simulation — Carelli 1928</div>
+            <div style="color:var(--muted);font-size:.85rem">Simulazione JavaScript real-time con i parametri esatti del report: 3 loop PI, field weakening, anti-windup, profilo 10 km.</div>
+        </div>
+        <a href="./simulation.html" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.78rem;font-weight:600;background:var(--accent);color:var(--bg);padding:10px 22px;border-radius:3px;text-decoration:none;white-space:nowrap;flex-shrink:0">
+            ▶ Apri Simulazione
+        </a>
+    </div>
 
 </div><!-- /page-wrapper -->
 
 <footer>
-    <p>© 2026 Matteo Cavalleri · Politecnico di Milano</p>
-    <p>dockhub.net/DCmotor</p>
+    <p>© 2026 Matteo Cavalleri · Politecnico di Milano · ID 10768765</p>
+    <p>dockhub.net/MachineControlSystem</p>
 </footer>
 
 <script>

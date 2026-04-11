@@ -282,3 +282,29 @@ footer p { font-family: var(--mono); font-size: .72rem; color: var(--muted); }
     .course-cell { border-right: none; border-bottom: 1px solid var(--border); }
     .two-col    { grid-template-columns: 1fr; }
 }
+
+/* ── DOWNLOAD SECTION ── */
+.download-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px; margin: 16px 0;
+}
+.download-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 10px;
+    transition: border-color .3s, transform .25s;
+}
+.download-card:hover { border-color: rgba(0,212,255,.35); transform: translateY(-2px); }
+.download-icon { font-size: 1.4rem; color: var(--accent); }
+.download-name { font-family: var(--display); font-size: .95rem; font-weight: 700; }
+.download-desc { color: var(--muted); font-size: .8rem; line-height: 1.55; flex: 1; }
+.download-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .04em;
+    background: rgba(0,212,255,.08); color: var(--accent);
+    border: 1px solid rgba(0,212,255,.25); padding: 7px 14px; border-radius: 3px;
+    text-decoration: none; transition: background .2s, border-color .2s;
+    align-self: flex-start;
+}
+.download-btn:hover { background: rgba(0,212,255,.16); border-color: var(--accent); }
+.download-note { font-family: var(--mono); font-size: .63rem; color: var(--muted); }
