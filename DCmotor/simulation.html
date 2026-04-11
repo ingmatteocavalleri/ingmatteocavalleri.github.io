@@ -1,348 +1,448 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DC Motor Simulation — Carelli 1928 | Matteo Cavalleri</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap"
-    rel="stylesheet">
-
-  <style>
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0
-    }
-
-    :root {
-      --bg: #080c10;
-      --surface: #0d1117;
-      --surface2: #161b22;
-      --border: #21262d;
-      --accent: #00d4ff;
-      --accent2: #ff6b35;
-      --green: #3fb950;
-      --yellow: #e3b341;
-      --text: #e6edf3;
-      --muted: #8b949e;
-      --mono: 'IBM Plex Mono', monospace;
-      --display: 'Syne', sans-serif;
-      --body: 'Inter', sans-serif;
-    }
-
-    html,
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--body);
-      line-height: 1.5
-    }
-
-    nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 32px;
-      height: 56px;
-      background: rgba(8, 12, 16, .97);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 100
-    }
-
-    .nav-logo {
-      font-family: var(--mono);
-      font-size: .85rem;
-      color: var(--accent);
-      text-decoration: none
-    }
-
-    .nav-back {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-family: var(--mono);
-      font-size: .78rem;
-      color: var(--text);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      padding: 5px 12px;
-      border-radius: 3px;
-      text-decoration: none
-    }
-
-    .wrapper {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 24px 32px 60px
-    }
-
-    .page-title {
-      font-family: var(--display);
-      font-size: 1.6rem;
-      font-weight: 800;
-      margin-bottom: 4px
-    }
-
-    .page-sub {
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: .72rem;
-      margin-bottom: 20px
-    }
-
-    .ctrl {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 12px 16px;
-      margin-bottom: 14px
-    }
-
-    .btn {
-      font-family: var(--mono);
-      font-size: .78rem;
-      font-weight: 600;
-      padding: 8px 18px;
-      border-radius: 3px;
-      border: none;
-      cursor: pointer
-    }
-
-    .btn-play {
-      background: var(--accent);
-      color: #080c10
-    }
-
-    .btn-stop {
-      background: rgba(255, 107, 53, .15);
-      color: var(--accent2);
-      border: 1px solid rgba(255, 107, 53, .3)
-    }
-
-    canvas {
-      display: block;
-      width: 100%
-    }
-
-    .plots {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 14px
-    }
-
-    .pc {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 12px 14px
-    }
-
-    .pc-title {
-      font-family: var(--mono);
-      font-size: .6rem;
-      color: var(--muted);
-      letter-spacing: .07em;
-      text-transform: uppercase
-    }
-
-    .track-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 12px 14px;
-      margin-bottom: 14px
-    }
-
-    .track-hdr {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px
-    }
-
-    .track-lbl {
-      font-family: var(--mono);
-      font-size: .62rem;
-      color: var(--accent)
-    }
-
-    .track-km {
-      font-family: var(--mono);
-      font-size: .72rem
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DC Motor Simulation — Carelli 1928 | Matteo Cavalleri</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c10;--surface:#0d1117;--surface2:#161b22;--border:#21262d;
+  --accent:#00d4ff;--accent2:#ff6b35;--green:#3fb950;--yellow:#e3b341;
+  --text:#e6edf3;--muted:#8b949e;
+  --mono:'IBM Plex Mono',monospace;--display:'Syne',sans-serif;--body:'Inter',sans-serif;
+}
+html,body{background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.5}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;
+  background:rgba(8,12,16,.97);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.nav-logo{font-family:var(--mono);font-size:.85rem;color:var(--accent);text-decoration:none}
+.nav-back{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:.78rem;
+  color:var(--text);background:var(--surface2);border:1px solid var(--border);
+  padding:5px 12px;border-radius:3px;text-decoration:none;transition:border-color .2s,color .2s}
+.nav-back:hover{border-color:var(--accent);color:var(--accent)}
+.wrapper{max-width:1200px;margin:0 auto;padding:24px 32px 60px}
+.page-title{font-family:var(--display);font-size:1.6rem;font-weight:800;margin-bottom:4px}
+.page-sub{color:var(--muted);font-family:var(--mono);font-size:.72rem;margin-bottom:20px}
+.ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);
+  border:1px solid var(--border);border-radius:6px;padding:12px 16px;margin-bottom:14px}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.78rem;
+  font-weight:600;padding:8px 18px;border-radius:3px;border:none;cursor:pointer;transition:opacity .15s,transform .1s}
+.btn:active{transform:translateY(1px)}
+.btn-play{background:var(--accent);color:#080c10}
+.btn-stop{background:rgba(255,107,53,.15);color:var(--accent2);border:1px solid rgba(255,107,53,.3)}
+.sep{width:1px;height:22px;background:var(--border)}
+.lbl{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+select.spd{font-family:var(--mono);font-size:.75rem;background:var(--surface2);color:var(--text);
+  border:1px solid var(--border);padding:6px 10px;border-radius:3px;outline:none}
+.badge{font-family:var(--mono);font-size:.7rem;padding:5px 12px;border-radius:2px}
+.stats{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;border:1px solid var(--border);
+  border-radius:6px;overflow:hidden;margin-bottom:14px}
+.sc{background:var(--surface);padding:10px 12px}
+.sc-label{font-family:var(--mono);font-size:.56rem;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px}
+.sc-val{font-family:var(--display);font-size:1.2rem;font-weight:800;line-height:1}
+.sc-unit{font-size:.68rem;color:var(--accent)}
+.track-wrap{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px 14px;margin-bottom:14px}
+.track-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.track-lbl{font-family:var(--mono);font-size:.62rem;color:var(--accent);letter-spacing:.1em;text-transform:uppercase}
+.track-km{font-family:var(--mono);font-size:.72rem;color:var(--text)}
+/* Canvas: display block, width fills container. Height set by JS attribute. */
+canvas{display:block;width:100%}
+.plots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.pc{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
+.pc-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.pc-title{font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
+.pc-val{font-family:var(--mono);font-size:.78rem;font-weight:600}
+.info{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ic{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
+.ic h4{font-family:var(--mono);font-size:.62rem;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.ir{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border)}
+.ir:last-child{border-bottom:none}
+.ik{font-family:var(--mono);font-size:.68rem;color:var(--muted)}
+.iv{font-family:var(--mono);font-size:.68rem;color:var(--text)}
+@media(max-width:800px){.plots{grid-template-columns:1fr}.info{grid-template-columns:1fr}.stats{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:500px){.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
 </head>
-
 <body>
-
-  <nav>
-    <a href="./" class="nav-logo">mc.eng / carelli-1928</a>
-    <a href="./" class="nav-back">← Report</a>
-  </nav>
-
-  <div class="wrapper">
-
-    <div class="page-title">Cascade PI Simulation</div>
-    <div class="page-sub">// Tramway "Carelli 1928" · DC Motor Speed Control</div>
-
-    <div class="ctrl">
-      <button class="btn btn-play" id="btnPlay">▶ Start</button>
-      <button class="btn btn-stop" id="btnStop" disabled>⏹ Stop</button>
-    </div>
-
-    <div class="track-wrap">
-      <div class="track-hdr">
-        <span class="track-lbl">// Percorso</span>
-        <span class="track-km" id="track-km">0.00 / 10.00 km</span>
-      </div>
-      <canvas id="cTrack"></canvas>
-    </div>
-
-    <div class="plots">
-      <div class="pc">
-        <div class="pc-title">Velocità</div>
-        <canvas id="cSpeed"></canvas>
-      </div>
-
-      <div class="pc">
-        <div class="pc-title">Corrente armatura</div>
-        <canvas id="cIa"></canvas>
-      </div>
-
-      <div class="pc">
-        <div class="pc-title">Corrente eccitatrice</div>
-        <canvas id="cIe"></canvas>
-      </div>
-
-      <div class="pc">
-        <div class="pc-title">Coppia</div>
-        <canvas id="cTe"></canvas>
-      </div>
-    </div>
-
+<nav>
+  <a href="./" class="nav-logo">mc.eng / carelli-1928</a>
+  <a href="./" class="nav-back">← Report</a>
+</nav>
+<div class="wrapper">
+  <div class="page-title">Cascade PI Simulation</div>
+  <div class="page-sub">// Tramway "Carelli 1928" · DC Motor Speed Control · 10 km Urban Track · Parametri reali dal report PoliMi</div>
+  <div class="ctrl">
+    <button class="btn btn-play" id="btnPlay">▶ Start</button>
+    <button class="btn btn-stop" id="btnStop" disabled>⏹ Stop &amp; Reset</button>
+    <div class="sep"></div>
+    <span class="lbl">Velocità sim.</span>
+    <select class="spd" id="simSpeed">
+      <option value="20">20×</option><option value="50" selected>50×</option>
+      <option value="100">100×</option><option value="200">200×</option>
+    </select>
+    <div class="sep"></div>
+    <span class="badge" id="regionBadge" style="background:rgba(63,185,80,.1);color:var(--green);border:1px solid rgba(63,185,80,.25)">Constant Flux</span>
   </div>
+  <div class="stats">
+    <div class="sc"><div class="sc-label">Posizione</div><div class="sc-val"><span id="sv-pos">0.00</span><span class="sc-unit"> km</span></div></div>
+    <div class="sc"><div class="sc-label">Velocità</div><div class="sc-val"><span id="sv-v">0.00</span><span class="sc-unit"> m/s</span></div></div>
+    <div class="sc"><div class="sc-label">Vel. motore</div><div class="sc-val"><span id="sv-om">0.0</span><span class="sc-unit"> r/s</span></div></div>
+    <div class="sc" id="sc-ia"><div class="sc-label">Corrente arm.</div><div class="sc-val"><span id="sv-ia">0.0</span><span class="sc-unit"> A</span></div></div>
+    <div class="sc" id="sc-ie"><div class="sc-label">Corrente eccit.</div><div class="sc-val"><span id="sv-ie">5.00</span><span class="sc-unit"> A</span></div></div>
+    <div class="sc"><div class="sc-label">Coppia Te</div><div class="sc-val"><span id="sv-te">0</span><span class="sc-unit"> Nm</span></div></div>
+    <div class="sc"><div class="sc-label">Pendenza</div><div class="sc-val"><span id="sv-sl">0</span><span class="sc-unit"> %</span></div></div>
+    <div class="sc"><div class="sc-label">Tempo sim.</div><div class="sc-val"><span id="sv-t">0</span><span class="sc-unit"> s</span></div></div>
+  </div>
+  <div class="track-wrap">
+    <div class="track-hdr">
+      <span class="track-lbl">// Percorso 10 km — Profilo velocità e pendenza</span>
+      <span class="track-km" id="track-km">0.00 / 10.00 km</span>
+    </div>
+    <canvas id="cTrack"></canvas>
+  </div>
+  <div class="plots">
+    <div class="pc"><div class="pc-hdr"><span class="pc-title">// Velocità v(t) vs v_ref(t)</span><span class="pc-val" id="pv-v" style="color:var(--accent)">0.00 m/s</span></div><canvas id="cSpeed"></canvas></div>
+    <div class="pc"><div class="pc-hdr"><span class="pc-title">// Corrente armatura i_a(t)</span><span class="pc-val" id="pv-ia" style="color:var(--accent2)">0.0 A</span></div><canvas id="cIa"></canvas></div>
+    <div class="pc"><div class="pc-hdr"><span class="pc-title">// Corrente eccitatrice i_e(t) — Field weakening</span><span class="pc-val" id="pv-ie" style="color:var(--yellow)">5.00 A</span></div><canvas id="cIe"></canvas></div>
+    <div class="pc"><div class="pc-hdr"><span class="pc-title">// Coppia elettromagnetica T_e(t)</span><span class="pc-val" id="pv-te" style="color:var(--green)">0 Nm</span></div><canvas id="cTe"></canvas></div>
+  </div>
+  <div class="info">
+    <div class="ic"><h4>Parametri motore</h4>
+      <div class="ir"><span class="ik">Ks = Kt</span><span class="iv">1.06 Nm/A²</span></div>
+      <div class="ir"><span class="ik">Ra</span><span class="iv">0.39 Ω</span></div>
+      <div class="ir"><span class="ik">La</span><span class="iv">3.9 mH</span></div>
+      <div class="ir"><span class="ik">Re</span><span class="iv">12 Ω</span></div>
+      <div class="ir"><span class="ik">Le</span><span class="iv">1.2 H</span></div>
+      <div class="ir"><span class="ik">V_dc</span><span class="iv">600 V</span></div>
+      <div class="ir"><span class="ik">ω_base</span><span class="iv">101.6 rad/s</span></div>
+    </div>
+    <div class="ic"><h4>Guadagni PI</h4>
+      <div class="ir"><span class="ik">Kp velocità</span><span class="iv">181.2</span></div>
+      <div class="ir"><span class="ik">Ki velocità</span><span class="iv">1.62</span></div>
+      <div class="ir"><span class="ik">Kp armatura</span><span class="iv">0.078</span></div>
+      <div class="ir"><span class="ik">Ki armatura</span><span class="iv">7.8</span></div>
+      <div class="ir"><span class="ik">Kp eccitazione</span><span class="iv">48</span></div>
+      <div class="ir"><span class="ik">Ki eccitazione</span><span class="iv">480</span></div>
+      <div class="ir"><span class="ik">PM tutti i loop</span><span class="iv">90°</span></div>
+    </div>
+    <div class="ic"><h4>Parametri veicolo</h4>
+      <div class="ir"><span class="ik">Massa M</span><span class="iv">25 400 kg</span></div>
+      <div class="ir"><span class="ik">Inerzia J</span><span class="iv">9.10 kg·m²</span></div>
+      <div class="ir"><span class="ik">Riduttore ρ</span><span class="iv">13/74</span></div>
+      <div class="ir"><span class="ik">Ruota d</span><span class="iv">680 mm</span></div>
+      <div class="ir"><span class="ik">Ia_max</span><span class="iv">156 A</span></div>
+      <div class="ir"><span class="ik">a_max</span><span class="iv">1.0 m/s²</span></div>
+      <div class="ir"><span class="ik">Percorso</span><span class="iv">10 km</span></div>
+    </div>
+  </div>
+</div>
+<script>
+// ═══════════════════════════════════════
+// PHYSICS (exact values from PoliMi report)
+// ═══════════════════════════════════════
+const Ra=0.39,La=3.9e-3,Re=12,Le=1.2;
+const Ks=1.06,Ie_rated=5,Imax=156,Vdc=600;
+const rho=13/74,d=0.68,J=9.10,beta=0.81;
+const M=25400,g=9.81,a_max=1.0;
+const omega_base=101.6,En=Ks*Ie_rated*omega_base;
+const KpM=181.2,KiM=1.62,Kb_m=0.0089;
+const KpA=0.078,KiA=7.8,Kb_a=100;
+const KpE=48,KiE=480,Kb_e=10;
+const Te_max=Ks*Ie_rated*Imax;
+const Ts=0.005;
+const vr=11.67,vr2=vr/2;
+const PROFILE=[
+  {s:0,e:1,v:vr2,slope:0},{s:1,e:3,v:vr,slope:0},
+  {s:3,e:4,v:vr,slope:5},{s:4,e:6,v:vr,slope:0},
+  {s:6,e:8,v:vr,slope:0},{s:8,e:9,v:vr,slope:-5},
+  {s:9,e:10,v:vr2,slope:0}
+];
+function getRef(xm){
+  const km=xm/1e3;
+  for(const s of PROFILE)if(km>=s.s&&km<s.e)return s;
+  return{v:0,slope:0};
+}
 
-  <script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let t,x,v_veh,omega,ia,ie,ia_int,ie_int,omega_int,v_ref_prev;
+let running=false,rafId=null,finished=false,hist_last_t=-999;
+const HMAX=500;
+const h_v=[],h_vref=[],h_ia=[],h_ie=[],h_te=[];
 
-    const DPR = window.devicePixelRatio || 1;
-    const CV = {};
+function resetSim(){
+  t=x=v_veh=omega=ia=ia_int=ie_int=omega_int=v_ref_prev=0;
+  ie=Ie_rated;finished=false;hist_last_t=-999;
+  h_v.length=h_vref.length=h_ia.length=h_ie.length=h_te.length=0;
+}
 
-    function setupCanvas(id, h) {
+function simStep(){
+  const seg=getRef(x);
+  const slope=seg.slope/100;
+  const dmax=a_max*Ts;
+  let v_ref=v_ref_prev;
+  if(seg.v>v_ref)v_ref=Math.min(v_ref+dmax,seg.v);
+  else v_ref=Math.max(v_ref-dmax,seg.v);
+  v_ref_prev=v_ref;
+  const omega_ref=v_ref/(rho*d/2);
+  const e_om=omega_ref-omega;
+  let Te_ref=KpM*e_om+omega_int;
+  const Te_sat=Math.max(-Te_max,Math.min(Te_max,Te_ref));
+  omega_int+=Ts*(KiM*e_om+Kb_m*(Te_sat-Te_ref));
+  const ie_ref=Math.min(Ie_rated,omega>1?En/(Ks*omega):Ie_rated);
+  const ia_ref=Math.max(-Imax,Math.min(Imax,Te_sat/(Ks*Math.max(ie,0.01))));
+  const e_ie=ie_ref-ie;
+  let Ve=KpE*e_ie+ie_int;
+  const Ve_sat=Math.max(0,Math.min(60,Ve));
+  ie_int+=Ts*(KiE*e_ie+Kb_e*(Ve_sat-Ve));
+  const e_ia=ia_ref-ia;
+  let Va=KpA*e_ia+ia_int+Ks*ie*omega;
+  const Va_sat=Math.max(-Vdc,Math.min(Vdc,Va));
+  ia_int+=Ts*(KiA*e_ia+Kb_a*(Va_sat-Va));
+  ia+=Ts*(Va_sat-Ra*ia-Ks*ie*omega)/La;
+  ia=Math.max(-Imax,Math.min(Imax,ia));
+  ie+=Ts*(Ve_sat-Re*ie)/Le;
+  ie=Math.max(0,Math.min(Ie_rated,ie));
+  const Te=Ks*ie*ia;
+  const T_slope=M*g*Math.sin(Math.atan(slope))*(rho*d/2);
+  omega+=Ts*(Te-beta*omega-T_slope)/J;
+  omega=Math.max(0,omega);
+  v_veh=omega*(rho*d/2);
+  x+=Ts*v_veh;t+=Ts;
+  if(t-hist_last_t>=0.4){
+    hist_last_t=t;
+    h_v.push(v_veh);h_vref.push(v_ref);h_ia.push(ia);h_ie.push(ie);h_te.push(Te);
+    if(h_v.length>HMAX){h_v.shift();h_vref.shift();h_ia.shift();h_ie.shift();h_te.shift();}
+  }
+  if(x>=10000){x=10000;finished=true;}
+  return{v_ref,Te,slope:seg.slope};
+}
 
-      const c = document.getElementById(id);
-      const rect = c.getBoundingClientRect();
-      const w = rect.width || c.parentElement.clientWidth;
+// ═══════════════════════════════════════
+// CANVAS
+//
+// ROOT CAUSE OF BLANK CANVAS (explained):
+//   ctx.scale(DPR,DPR) is RELATIVE — it multiplies the current transform.
+//   Called once per frame: frame 1 → scale=DPR, frame 2 → scale=DPR², …
+//   After ~30 frames the scale is DPR^30 ≈ 10^9 → everything is drawn
+//   billions of pixels off-screen → blank canvas.
+//
+//   ctx.setTransform(DPR,0,0,DPR,0,0) is ABSOLUTE — always identity×DPR.
+//   Calling it 10000 times has the same effect as calling it once. ✓
+//
+// WIDTH STRATEGY:
+//   canvas.offsetWidth reads the CSS-rendered width (requires display:block +
+//   width:100% in CSS, which guarantees the canvas fills its container).
+//   H is passed explicitly — never inferred from DOM.
+//   We read offsetWidth inside requestAnimationFrame so the first paint
+//   has completed and layout is guaranteed non-zero.
+// ═══════════════════════════════════════
+const DPR=window.devicePixelRatio||1;
+const CV={};
 
-      if (!w) return false;
+function setupCanvas(id,H){
+  const c=document.getElementById(id);
+  // offsetWidth: rendered CSS width. Requires canvas{display:block;width:100%} in CSS.
+  // This is ALWAYS correct after first paint — no wrapper dependency.
+  const W=c.offsetWidth;
+  if(!W)return false;
+  c.width=Math.round(W*DPR);
+  c.height=Math.round(H*DPR);
+  // canvas.style.height must be set so the element has the right CSS height
+  // (canvas{width:100%} only sets width; height is determined by the attribute by default)
+  c.style.height=H+'px';
+  const ctx=c.getContext('2d');
+  // ABSOLUTE transform — safe to call every frame with no accumulation
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  CV[id]={ctx,W,H};
+  return true;
+}
 
-      c.width = w * DPR;
-      c.height = h * DPR;
+function setupAll(){
+  setupCanvas('cTrack',52);
+  setupCanvas('cSpeed',160);
+  setupCanvas('cIa',160);
+  setupCanvas('cIe',160);
+  setupCanvas('cTe',160);
+}
 
-      c.style.height = h + "px";
-
-      const ctx = c.getContext("2d");
-      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-
-      CV[id] = { ctx, w, h };
-
-      return true;
+// ═══════════════════════════════════════
+// DRAWING
+// ═══════════════════════════════════════
+function drawTrack(){
+  const cv=CV.cTrack;if(!cv)return;
+  const{ctx,W,H}=cv;
+  ctx.clearRect(0,0,W,H);
+  const segCol={0:'#161b22',5:'rgba(227,179,65,.12)',-5:'rgba(0,212,255,.08)'};
+  for(const seg of PROFILE){
+    const x0=seg.s/10*W,x1=seg.e/10*W;
+    ctx.fillStyle=segCol[seg.slope]||'#161b22';
+    ctx.fillRect(x0,0,x1-x0,H);
+    ctx.strokeStyle='#21262d';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(x0,0);ctx.lineTo(x0,H);ctx.stroke();
+    ctx.fillStyle='#8b949e';ctx.font=`10px 'IBM Plex Mono'`;ctx.textAlign='center';
+    ctx.fillText(seg.v.toFixed(1)+' m/s',(x0+x1)/2,H/2+4);
+    if(seg.slope!==0){
+      ctx.fillStyle=seg.slope>0?'#e3b341':'#00d4ff';
+      ctx.font=`bold 9px 'IBM Plex Mono'`;
+      ctx.fillText((seg.slope>0?'+':'')+seg.slope+'%',(x0+x1)/2,H-5);
     }
+  }
+  for(let i=0;i<=10;i++){
+    const px=i/10*W;
+    ctx.strokeStyle='#21262d';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(px,0);ctx.lineTo(px,6);ctx.stroke();
+    ctx.fillStyle='#8b949e';ctx.font=`8px 'IBM Plex Mono'`;ctx.textAlign='center';
+    ctx.fillText(i,px,H-1);
+  }
+  const cx=Math.min(x/10000,1)*W;
+  ctx.strokeStyle='#00d4ff';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(cx,0);ctx.lineTo(cx,H);ctx.stroke();
+  ctx.fillStyle='#00d4ff';
+  ctx.beginPath();ctx.arc(cx,H/2,5,0,Math.PI*2);ctx.fill();
+}
 
-    function setupAll() {
+function clearPlot(id){
+  const cv=CV[id];if(!cv)return;
+  const{ctx,W,H}=cv;
+  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<=4;i++){
+    const y=H*i/4;
+    ctx.strokeStyle='#21262d';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+  }
+}
 
-      if (!setupCanvas("cTrack", 60)) return requestAnimationFrame(setupAll);
-      if (!setupCanvas("cSpeed", 160)) return requestAnimationFrame(setupAll);
-      if (!setupCanvas("cIa", 160)) return requestAnimationFrame(setupAll);
-      if (!setupCanvas("cIe", 160)) return requestAnimationFrame(setupAll);
-      if (!setupCanvas("cTe", 160)) return requestAnimationFrame(setupAll);
+function drawPlot(id,data,ref,yMin,yMax,col,refCol,satLine){
+  const cv=CV[id];if(!cv||data.length<2)return;
+  const{ctx,W,H}=cv;
+  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<=4;i++){
+    const y=H*i/4,val=yMax-(yMax-yMin)*i/4;
+    ctx.strokeStyle='#21262d';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+    ctx.fillStyle='#8b949e';ctx.font=`9px 'IBM Plex Mono'`;ctx.textAlign='left';
+    ctx.fillText(Math.abs(val)>=100?val.toFixed(0):val.toFixed(1),3,y>8?y-2:10);
+  }
+  const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const my=v=>H-(cl(v,yMin,yMax)-yMin)/(yMax-yMin)*H;
+  if(satLine!=null){
+    ctx.strokeStyle='rgba(255,107,53,.45)';ctx.lineWidth=1;ctx.setLineDash([5,4]);
+    const sy=my(satLine);ctx.beginPath();ctx.moveTo(0,sy);ctx.lineTo(W,sy);ctx.stroke();
+    const sy2=my(-satLine);if(sy2>=0&&sy2<=H){ctx.beginPath();ctx.moveTo(0,sy2);ctx.lineTo(W,sy2);ctx.stroke();}
+    ctx.setLineDash([]);
+  }
+  if(ref&&ref.length===data.length){
+    ctx.strokeStyle=refCol||'rgba(255,255,255,.2)';ctx.lineWidth=1.5;ctx.setLineDash([5,3]);
+    ctx.beginPath();ref.forEach((v,i)=>{const p=i/(data.length-1)*W,q=my(v);i===0?ctx.moveTo(p,q):ctx.lineTo(p,q);});
+    ctx.stroke();ctx.setLineDash([]);
+  }
+  ctx.strokeStyle=col;ctx.lineWidth=2;
+  ctx.beginPath();data.forEach((v,i)=>{const p=i/(data.length-1)*W,q=my(v);i===0?ctx.moveTo(p,q):ctx.lineTo(p,q);});
+  ctx.stroke();
+}
 
-    }
+// ═══════════════════════════════════════
+// ANIMATION LOOP
+// ═══════════════════════════════════════
+let lastEx={Te:0,slope:0};
+function frame(){
+  if(!running){rafId=null;return;}
+  const spd=parseInt(document.getElementById('simSpeed').value);
+  const steps=Math.max(1,Math.round(spd/60/Ts));
+  let ex=lastEx;
+  for(let i=0;i<steps&&!finished;i++)ex=simStep();
+  lastEx=ex;
+  const fw=omega>omega_base,satIa=Math.abs(ia)>=Imax*0.97;
+  document.getElementById('sv-pos').textContent=(x/1e3).toFixed(2);
+  document.getElementById('sv-v').textContent=v_veh.toFixed(2);
+  document.getElementById('sv-om').textContent=omega.toFixed(1);
+  document.getElementById('sv-ia').textContent=ia.toFixed(1);
+  document.getElementById('sv-ie').textContent=ie.toFixed(2);
+  document.getElementById('sv-te').textContent=Math.round(ex.Te);
+  document.getElementById('sv-sl').textContent=ex.slope;
+  document.getElementById('sv-t').textContent=Math.round(t);
+  document.getElementById('track-km').textContent=(x/1e3).toFixed(2)+' / 10.00 km';
+  const b=document.getElementById('regionBadge');
+  if(fw){b.textContent='Field Weakening';b.style.cssText='background:rgba(227,179,65,.1);color:#e3b341;border:1px solid rgba(227,179,65,.3);font-family:var(--mono);font-size:.7rem;padding:5px 12px;border-radius:2px';}
+  else{b.textContent='Constant Flux';b.style.cssText='background:rgba(63,185,80,.1);color:#3fb950;border:1px solid rgba(63,185,80,.25);font-family:var(--mono);font-size:.7rem;padding:5px 12px;border-radius:2px';}
+  document.getElementById('sc-ia').style.background=satIa?'rgba(255,107,53,.06)':'';
+  document.getElementById('sc-ie').style.background=fw?'rgba(227,179,65,.06)':'';
+  document.getElementById('pv-v').textContent=v_veh.toFixed(2)+' m/s';
+  document.getElementById('pv-ia').textContent=ia.toFixed(1)+' A';
+  document.getElementById('pv-ie').textContent=ie.toFixed(2)+' A';
+  document.getElementById('pv-te').textContent=Math.round(ex.Te)+' Nm';
+  drawTrack();
+  drawPlot('cSpeed',h_v,h_vref,0,14,'#00d4ff','rgba(255,255,255,.3)');
+  drawPlot('cIa',h_ia,null,-170,170,'#ff6b35',null,Imax);
+  drawPlot('cIe',h_ie,null,0,5.5,'#e3b341');
+  drawPlot('cTe',h_te,null,-900,900,'#3fb950',null,Te_max);
+  if(finished){
+    running=false;rafId=null;
+    const bp=document.getElementById('btnPlay');
+    bp.textContent='✓ Completato';bp.style.background='var(--green)';bp.disabled=true;
+    document.getElementById('btnStop').disabled=true;
+    return;
+  }
+  rafId=requestAnimationFrame(frame);
+}
 
-    function clearPlot(id) {
+// ═══════════════════════════════════════
+// BUTTONS
+// ═══════════════════════════════════════
+function uiReset(){
+  running=false;cancelAnimationFrame(rafId);rafId=null;
+  resetSim();
+  const bp=document.getElementById('btnPlay');
+  bp.textContent='▶ Start';bp.style.background='var(--accent)';bp.style.color='#080c10';bp.disabled=false;
+  document.getElementById('btnStop').disabled=true;
+  ['sv-pos','sv-v','sv-om','sv-ia','sv-te','sv-t'].forEach(id=>document.getElementById(id).textContent='0');
+  document.getElementById('sv-ie').textContent='5.00';document.getElementById('sv-sl').textContent='0';
+  document.getElementById('sc-ia').style.background='';document.getElementById('sc-ie').style.background='';
+  document.getElementById('track-km').textContent='0.00 / 10.00 km';
+  const b=document.getElementById('regionBadge');
+  b.textContent='Constant Flux';b.style.cssText='background:rgba(63,185,80,.1);color:#3fb950;border:1px solid rgba(63,185,80,.25);font-family:var(--mono);font-size:.7rem;padding:5px 12px;border-radius:2px';
+  setupAll();drawTrack();['cSpeed','cIa','cIe','cTe'].forEach(id=>clearPlot(id));
+}
 
-      const cv = CV[id];
-      if (!cv) return;
+document.getElementById('btnPlay').addEventListener('click',()=>{
+  if(finished)return;
+  if(!running){
+    running=true;
+    const bp=document.getElementById('btnPlay');
+    bp.textContent='⏸ Pausa';bp.style.background='var(--yellow)';bp.style.color='#080c10';
+    document.getElementById('btnStop').disabled=false;
+    if(!rafId)rafId=requestAnimationFrame(frame);
+  }else{
+    running=false;
+    const bp=document.getElementById('btnPlay');
+    bp.textContent='▶ Riprendi';bp.style.background='var(--accent)';bp.style.color='#080c10';
+  }
+});
+document.getElementById('btnStop').addEventListener('click',uiReset);
+window.addEventListener('resize',()=>{
+  setupAll();drawTrack();
+  if(h_v.length>1){
+    drawPlot('cSpeed',h_v,h_vref,0,14,'#00d4ff','rgba(255,255,255,.3)');
+    drawPlot('cIa',h_ia,null,-170,170,'#ff6b35',null,Imax);
+    drawPlot('cIe',h_ie,null,0,5.5,'#e3b341');
+    drawPlot('cTe',h_te,null,-900,900,'#3fb950',null,Te_max);
+  }else{['cSpeed','cIa','cIe','cTe'].forEach(id=>clearPlot(id));}
+});
 
-      const { ctx, w, h } = cv;
-
-      ctx.fillStyle = "#0d1117";
-      ctx.fillRect(0, 0, w, h);
-
-    }
-
-    function drawTrack() {
-
-      const cv = CV.cTrack;
-      if (!cv) return;
-
-      const { ctx, w, h } = cv;
-
-      ctx.clearRect(0, 0, w, h);
-
-      ctx.strokeStyle = "#00d4ff";
-      ctx.lineWidth = 2;
-
-      ctx.beginPath();
-      ctx.moveTo(0, h / 2);
-      ctx.lineTo(w, h / 2);
-      ctx.stroke();
-
-    }
-
-    let running = false;
-    let raf;
-
-    function frame() {
-
-      if (!running) return;
-
-      drawTrack();
-
-      requestAnimationFrame(frame);
-
-    }
-
-    document.getElementById("btnPlay").onclick = () => {
-
-      if (!running) {
-        running = true;
-        frame();
-      }
-
-    }
-
-    document.getElementById("btnStop").onclick = () => {
-
-      running = false;
-
-    }
-
-    function init() {
-
-      setupAll();
-
-      if (!CV.cTrack) return requestAnimationFrame(init);
-
-      drawTrack();
-
-      ["cSpeed", "cIa", "cIe", "cTe"].forEach(clearPlot);
-
-    }
-
-    requestAnimationFrame(init);
-
-  </script>
-
+// ═══════════════════════════════════════
+// INIT
+// requestAnimationFrame fires AFTER the first paint — layout is complete,
+// offsetWidth is guaranteed non-zero. This is the safest init timing.
+// ═══════════════════════════════════════
+resetSim();
+requestAnimationFrame(()=>{
+  setupAll();
+  drawTrack();
+  ['cSpeed','cIa','cIe','cTe'].forEach(id=>clearPlot(id));
+});
+</script>
 </body>
-
 </html>
