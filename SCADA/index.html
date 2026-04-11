@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCADA — Water Treatment Plant | Matteo Cavalleri</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="top-nav">
+    <a href="https://www.dockhub.net" class="nav-logo">mc.eng</a>
+    <a href="https://www.dockhub.net" class="nav-back">
+        <i class="fa-solid fa-arrow-left"></i> Home
+    </a>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE WRAPPER — unico contenitore di centratura.
+     Header e doc-layout sono figli diretti: stessi margini,
+     stesso padding orizzontale, allineamento garantito.
+════════════════════════════════════════════════════════════ -->
+<div class="page-wrapper">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div class="page-header-meta">
+            <span class="meta-tag tag-sw">Software Engineering</span>
+            <span class="meta-tag tag-scada">SCADA</span>
+            <span class="meta-tag tag-water">Water Treatment</span>
+            <span class="meta-tag tag-iec">IEC 62443</span>
+        </div>
+        <h1>SCADA per<br><em>Water Treatment Plant</em></h1>
+        <p class="subtitle">
+            Progettazione e sviluppo di un sistema SCADA completo per un impianto di potabilizzazione. Architettura PLC Siemens multi-livello conforme ISA-95, HMI Ignition, comunicazione OPC-UA, gestione allarmi ISA-18.2 e cybersecurity IEC 62443.
+        </p>
+        <div class="course-bar">
+            <div class="course-cell">
+                <div class="cc-label">Corso</div>
+                <div class="cc-val">Software Engineering for Automation</div>
+            </div>
+            <div class="course-cell">
+                <div class="cc-label">Programma</div>
+                <div class="cc-val">MSc Automation and Control Engineering</div>
+            </div>
+            <div class="course-cell">
+                <div class="cc-label">Autori</div>
+                <div class="cc-val">Matteo Cavalleri · Samuele Galbiati</div>
+            </div>
+            <div class="course-cell">
+                <div class="cc-label">Istituzione</div>
+                <div class="cc-val">Politecnico di Milano</div>
+            </div>
+        </div>
+        <div class="specs-bar">
+            <div class="spec-cell">
+                <div class="spec-val">5<span class="unit"> PLC</span></div>
+                <div class="spec-key">Nodi di campo</div>
+            </div>
+            <div class="spec-cell">
+                <div class="spec-val">~400<span class="unit"> tag</span></div>
+                <div class="spec-key">I/O di processo</div>
+            </div>
+            <div class="spec-cell">
+                <div class="spec-val">4<span class="unit"> fasi</span></div>
+                <div class="spec-key">Stadi trattamento</div>
+            </div>
+            <div class="spec-cell">
+                <div class="spec-val">OPC-UA</div>
+                <div class="spec-key">Protocollo</div>
+            </div>
+            <div class="spec-cell">
+                <div class="spec-val">ISA<span class="unit">-18.2</span></div>
+                <div class="spec-key">Allarmi</div>
+            </div>
+            <div class="spec-cell">
+                <div class="spec-val">SL<span class="unit">-2</span></div>
+                <div class="spec-key">Security Level</div>
+            </div>
+        </div>
+    </div><!-- /page-header -->
+
+    <!-- DOC LAYOUT — condivide il wrapper, sempre allineato all'header -->
+    <div class="doc-layout">
+
+        <!-- TOC -->
+        <nav class="doc-toc" aria-label="Indice contenuti">
+            <div class="toc-label">Contenuti</div>
+            <ul class="toc-list">
+                <li><a href="#processo">1. Il processo</a></li>
+                <li><a href="#architettura">2. Architettura</a></li>
+                <li class="toc-sub"><a href="#isa95">→ ISA-95</a></li>
+                <li class="toc-sub"><a href="#software">→ Stack software</a></li>
+                <li><a href="#plc">3. Programmazione PLC</a></li>
+                <li><a href="#hmi">4. HMI Ignition</a></li>
+                <li><a href="#allarmi">5. Gestione allarmi</a></li>
+                <li><a href="#protocolli">6. Protocolli</a></li>
+                <li><a href="#security">7. Cybersecurity</a></li>
+                <li><a href="#risultati">8. Risultati</a></li>
+                <li><a href="#download">9. Download</a></li>
+            </ul>
+        </nav>
+
+        <!-- CONTENUTO -->
+        <article class="doc-content">
+
+            <!-- ══ 1. PROCESSO ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="processo"></span>
+                <h2><span class="sec-num">01</span> Il Processo — Trattamento Acque Potabili</h2>
+                <p>
+                    Un impianto di potabilizzazione trasforma acqua grezza (da sorgente, lago o falda) in acqua conforme al D.Lgs. 31/2001, recepimento della Direttiva europea 98/83/CE. Il processo si articola in quattro stadi sequenziali, ciascuno con propri parametri critici da monitorare e controllare in continuo: qualità dell'acqua, portate, dosaggi chimici e stato degli equipaggiamenti.
+                </p>
+                <div class="arch-box">
+                    <div class="arch-label">// FLOW DIAGRAM — PROCESSO DI POTABILIZZAZIONE</div>
+                    <div class="process-flow">
+                        <div class="pf-stage hl-blue">
+                            <div class="pf-icon">💧</div>
+                            <div class="pf-name">Captazione</div>
+                            <div class="pf-sub">Pompe P-01/02</div>
+                        </div>
+                        <div class="pf-arrow">→</div>
+                        <div class="pf-stage">
+                            <div class="pf-icon">🌀</div>
+                            <div class="pf-name">Coagulazione</div>
+                            <div class="pf-sub">Dosaggio Al₂SO₄</div>
+                        </div>
+                        <div class="pf-arrow">→</div>
+                        <div class="pf-stage">
+                            <div class="pf-icon">▽</div>
+                            <div class="pf-name">Sedimentazione</div>
+                            <div class="pf-sub">Vasche decantaz.</div>
+                        </div>
+                        <div class="pf-arrow">→</div>
+                        <div class="pf-stage hl-green">
+                            <div class="pf-icon">⬛</div>
+                            <div class="pf-name">Filtrazione</div>
+                            <div class="pf-sub">Sabbia + carbone</div>
+                        </div>
+                        <div class="pf-arrow">→</div>
+                        <div class="pf-stage hl-yell">
+                            <div class="pf-icon">⚗</div>
+                            <div class="pf-name">Disinfezione</div>
+                            <div class="pf-sub">Dosaggio Cl₂ / UV</div>
+                        </div>
+                        <div class="pf-arrow">→</div>
+                        <div class="pf-stage hl-blue">
+                            <div class="pf-icon">🏗</div>
+                            <div class="pf-name">Distribuzione</div>
+                            <div class="pf-sub">Serbatoi · Rete</div>
+                        </div>
+                    </div>
+                </div>
+                <p>Le variabili di processo monitorate in continuo dal sistema SCADA includono:</p>
+                <ul>
+                    <li><strong>Portata:</strong> misuratori elettromagnetici a ogni stazione di pompaggio (±0.3% FS)</li>
+                    <li><strong>Torbidità:</strong> sensori nefelometrici in uscita dai filtri — target &lt; 1 NTU</li>
+                    <li><strong>pH:</strong> elettrodi combinati in ingresso, post-coagulazione e distribuzione — target 6.5–8.5</li>
+                    <li><strong>Cloro residuo:</strong> analizzatori amperometrici in uscita — target 0.2–0.5 mg/L</li>
+                    <li><strong>Conducibilità, temperatura</strong> e pressione su tutti i tratti principali</li>
+                </ul>
+                <div class="callout callout-warn">
+                    <i class="fa-solid fa-droplet"></i>
+                    <p>Il dosaggio di cloro è il parametro più critico per la sicurezza: in difetto si rischia contaminazione microbiologica, in eccesso si formano trialometani (THM) cancerogeni. Il controllo in feedback sul cloro residuo è il loop più importante dell'intero impianto.</p>
+                </div>
+            </div>
+
+            <!-- ══ 2. ARCHITETTURA ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="architettura"></span>
+                <h2><span class="sec-num">02</span> Architettura del Sistema</h2>
+
+                <h3 id="isa95">2.1 Piramide ISA-95</h3>
+                <p>
+                    Il sistema segue la classica architettura ISA-95 su tre livelli. Il principio guida è il <strong style="color:var(--text)">fail-safe locale</strong>: ogni PLC di sezione opera in autonomia completa anche in assenza di connettività con il livello SCADA, garantendo la continuità del processo.
+                </p>
+                <div class="arch-box">
+                    <div class="arch-label">// ARCHITETTURA ISA-95 — PIRAMIDE DI AUTOMAZIONE</div>
+                    <div style="display:flex; flex-direction:column; gap:3px;">
+                        <div class="arch-block hl4" style="width:100%; min-width:unset; border-radius:4px; padding:12px 16px; text-align:left;">
+                            <div class="blk-name">Livello 3 — MES / Historian</div>
+                            <div class="blk-sub">Server storico · Report KPI · Integrazione ERP · Billing acqua</div>
+                        </div>
+                        <div style="text-align:center; font-family:var(--mono); font-size:.7rem; color:var(--accent); padding:2px 0;">↕ OPC-UA / MQTT Sparkplug B</div>
+                        <div class="arch-block hl3" style="width:100%; min-width:unset; border-radius:4px; padding:12px 16px; text-align:left;">
+                            <div class="blk-name">Livello 2 — SCADA / HMI</div>
+                            <div class="blk-sub">Ignition 8.x · Workstation operatori · Dashboard · Gestione allarmi ISA-18.2</div>
+                        </div>
+                        <div style="text-align:center; font-family:var(--mono); font-size:.7rem; color:var(--accent); padding:2px 0;">↕ Modbus TCP / PROFINET / OPC-UA</div>
+                        <div class="arch-block hl" style="width:100%; min-width:unset; border-radius:4px; padding:12px 16px;">
+                            <div class="blk-name" style="margin-bottom:8px; text-align:left;">Livello 1 — PLC di sezione (5 nodi)</div>
+                            <div style="display:flex; flex-wrap:wrap; gap:4px; justify-content:center;">
+                                <div style="background:var(--surface); border:1px solid var(--border); padding:5px 10px; border-radius:3px; font-family:var(--mono); font-size:.62rem; color:var(--text); text-align:center;"><div style="font-weight:600;">Captazione</div><div style="color:var(--muted);">S7-1500</div></div>
+                                <div style="background:var(--surface); border:1px solid var(--border); padding:5px 10px; border-radius:3px; font-family:var(--mono); font-size:.62rem; color:var(--text); text-align:center;"><div style="font-weight:600;">Coagulazione</div><div style="color:var(--muted);">S7-1200</div></div>
+                                <div style="background:var(--surface); border:1px solid var(--border); padding:5px 10px; border-radius:3px; font-family:var(--mono); font-size:.62rem; color:var(--text); text-align:center;"><div style="font-weight:600;">Filtrazione</div><div style="color:var(--muted);">S7-1200</div></div>
+                                <div style="background:var(--surface); border:1px solid var(--border); padding:5px 10px; border-radius:3px; font-family:var(--mono); font-size:.62rem; color:var(--text); text-align:center;"><div style="font-weight:600;">Disinfezione</div><div style="color:var(--muted);">S7-1500</div></div>
+                                <div style="background:var(--surface); border:1px solid var(--border); padding:5px 10px; border-radius:3px; font-family:var(--mono); font-size:.62rem; color:var(--text); text-align:center;"><div style="font-weight:600;">Distribuzione</div><div style="color:var(--muted);">S7-1200</div></div>
+                            </div>
+                        </div>
+                        <div style="text-align:center; font-family:var(--mono); font-size:.7rem; color:var(--accent); padding:2px 0;">↕ 4-20 mA · HART · PROFINET IO</div>
+                        <div class="arch-block hl2" style="width:100%; min-width:unset; border-radius:4px; padding:12px 16px; text-align:left;">
+                            <div class="blk-name">Livello 0 — Campo</div>
+                            <div class="blk-sub">Sensori · Attuatori · Pompe · Valvole on-off e modulanti · Dosatori</div>
+                        </div>
+                    </div>
+                    <div class="arch-note">// Rete OT fisicamente separata dalla rete IT aziendale tramite DMZ con firewall industriale Fortinet</div>
+                </div>
+
+                <h3 id="software">2.2 Stack Software</h3>
+                <div class="layer-stack">
+                    <div class="layer l4">
+                        <div class="layer-num">L4</div>
+                        <div class="layer-name">Historian / MES</div>
+                        <div class="layer-desc">Storico dati di processo, KPI di produzione, report qualità, integrazione ERP</div>
+                        <div class="layer-tech">SQL Server · InfluxDB</div>
+                    </div>
+                    <div class="layer l3">
+                        <div class="layer-num">L3</div>
+                        <div class="layer-name">SCADA / HMI</div>
+                        <div class="layer-desc">Supervisione real-time, gestione allarmi ISA-18.2, trending, accesso remoto VPN</div>
+                        <div class="layer-tech">Ignition 8.x</div>
+                    </div>
+                    <div class="layer l2">
+                        <div class="layer-num">L2</div>
+                        <div class="layer-name">OPC-UA Gateway</div>
+                        <div class="layer-desc">Namespace unificato, sicurezza a certificati X.509, bridge verso cloud analytics</div>
+                        <div class="layer-tech">OPC-UA · MQTT</div>
+                    </div>
+                    <div class="layer l1">
+                        <div class="layer-num">L1</div>
+                        <div class="layer-name">Programmi PLC</div>
+                        <div class="layer-desc">Ladder per logiche di sicurezza, Structured Text per PID e sequenze processo</div>
+                        <div class="layer-tech">IEC 61131-3 · TIA Portal</div>
+                    </div>
+                    <div class="layer l0">
+                        <div class="layer-num">L0</div>
+                        <div class="layer-name">I/O di Campo</div>
+                        <div class="layer-desc">Moduli AI/DI/DO/AO, integrazione HART, smart transmitter con diagnostica integrata</div>
+                        <div class="layer-tech">PROFINET · HART 7</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ 3. PLC ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="plc"></span>
+                <h2><span class="sec-num">03</span> Programmazione PLC — IEC 61131-3</h2>
+                <p>
+                    Il software PLC è strutturato in modo modulare: ogni componente fisico (pompa, valvola, dosatore, filtro) corrisponde a un <strong style="color:var(--text)">Function Block (FB)</strong> riutilizzabile con interfaccia standardizzata. Le logiche di sicurezza e interblocco sono in Ladder Diagram (LD); i loop di controllo, le sequenze e i calcoli analitici sono in Structured Text (ST).
+                </p>
+                <p>Il loop di controllo del cloro residuo — il più critico — è implementato in ST con PID anti-windup a clamping condizionale:</p>
+                <div class="code-block"><pre><span class="c">// PID Dosaggio Cl₂ — Structured Text (IEC 61131-3)</span>
+<span class="c">// Campionamento: Ts = 500 ms (limite analizzatore amperometrico)</span>
+
+error := Cl2_setpoint - Cl2_residuo_misurato;
+
+<span class="c">// Anti-windup: clamping condizionale</span>
+<span class="c">// Integra solo se la pompa non è satura O se l'errore riduce il windup</span>
+<span class="k">IF NOT</span> (pump_saturated <span class="k">AND</span> error * integral > <span class="v">0</span>) <span class="k">THEN</span>
+    integral := integral + Ki * error * Ts;
+<span class="k">END_IF;</span>
+
+output := Kp * error + integral - Kd * (error - prev_error) / Ts;
+output := LIMIT(pump_min, output, pump_max);
+pump_speed_ref := output;
+prev_error     := error;</pre></div>
+                <div class="callout callout-info">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <p>La struttura <em>fail-safe</em> impone che in caso di perdita della comunicazione con lo SCADA, ogni PLC continui ad eseguire il suo programma locale con i parametri di riferimento nominali. Il sistema SCADA ha diritto di scrittura sui setpoint, ma non è in the control loop critico.</p>
+                </div>
+            </div>
+
+            <!-- ══ 4. HMI ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="hmi"></span>
+                <h2><span class="sec-num">04</span> Interfaccia HMI — Ignition 8.x</h2>
+                <p>
+                    La piattaforma scelta è <strong style="color:var(--text)">Ignition 8.x</strong> (Inductive Automation) per la sua architettura web-based, scalabilità illimitata dei tag e piena conformità ISA. Le schermate sono organizzate in una gerarchia navigabile con drill-down contestuale.
+                </p>
+                <div class="hmi-screen">
+                    <div class="hmi-row">
+                        <div class="hmi-cell">
+                            <div class="hmi-label">PORTATA INGRESSO</div>
+                            <div class="hmi-value">142.3 m³/h</div>
+                        </div>
+                        <div class="hmi-cell">
+                            <div class="hmi-label">CLORO RESIDUO</div>
+                            <div class="hmi-value warn">0.18 mg/L ⚠</div>
+                        </div>
+                        <div class="hmi-cell">
+                            <div class="hmi-label">TORBIDITÀ USCITA</div>
+                            <div class="hmi-value">0.42 NTU</div>
+                        </div>
+                        <div class="hmi-cell">
+                            <div class="hmi-label">pH DISTRIBUZIONE</div>
+                            <div class="hmi-value">7.31</div>
+                        </div>
+                    </div>
+                    <div class="hmi-row">
+                        <div class="hmi-cell">
+                            <div class="hmi-label">POMPA P-01</div>
+                            <div class="hmi-status"><span class="hmi-dot on"></span><span style="color:var(--green);font-size:.78rem">IN MARCIA</span></div>
+                        </div>
+                        <div class="hmi-cell">
+                            <div class="hmi-label">POMPA P-02</div>
+                            <div class="hmi-status"><span class="hmi-dot on"></span><span style="color:var(--green);font-size:.78rem">IN MARCIA</span></div>
+                        </div>
+                        <div class="hmi-cell">
+                            <div class="hmi-label">DOSATORE Cl₂</div>
+                            <div class="hmi-status"><span class="hmi-dot err"></span><span style="color:var(--accent2);font-size:.78rem">ALLARME</span></div>
+                        </div>
+                        <div class="hmi-cell">
+                            <div class="hmi-label">FILTRO F-03</div>
+                            <div class="hmi-status"><span class="hmi-dot off"></span><span style="color:var(--muted);font-size:.78rem">BACKWASH</span></div>
+                        </div>
+                    </div>
+                </div>
+                <p>Le schermate sviluppate coprono:</p>
+                <ul>
+                    <li><strong>Overview P&ID:</strong> vista animata dell'intero impianto con stato valvole, pompe e flusso acqua</li>
+                    <li><strong>Stazione di pompaggio:</strong> portate, pressioni, ore di marcia, velocità inverter, curva pompa vs. punto di lavoro</li>
+                    <li><strong>Sezione chimica:</strong> trend dosaggi, livelli serbatoi reagenti, calcolo consumo specifico g/m³</li>
+                    <li><strong>Qualità acqua:</strong> trend storico parametri analitici, bande di conformità normativa, report automatici</li>
+                    <li><strong>Filtri:</strong> ciclo filtrazione/backwash, contropressione, perdita di carico, previsione pulizia</li>
+                    <li><strong>Energy dashboard:</strong> consumo per sezione, costo specifico €/m³, efficienza pompe (curva η)</li>
+                </ul>
+            </div>
+
+            <!-- ══ 5. ALLARMI ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="allarmi"></span>
+                <h2><span class="sec-num">05</span> Gestione Allarmi — ISA-18.2</h2>
+                <p>
+                    Il sistema di allarmi è progettato secondo la norma <strong style="color:var(--text)">ISA-18.2</strong>. Ogni allarme è documentato in un <em>Alarm Rationalization Record</em> che ne definisce causa, effetto, priorità, soglia e azione attesa dell'operatore. L'obiettivo è evitare l'<em>alarm flooding</em> che compromette la sicurezza dell'impianto.
+                </p>
+                <div class="callout callout-orange">
+                    <i class="fa-solid fa-bell"></i>
+                    <p>Target ISA-18.2: &lt; 1 allarme/operatore/10 min in condizioni normali; &lt; 10 allarmi/operatore/10 min in condizioni disturbate. Al di sopra di questi limiti si parla di <em>alarm flood</em>, che può portare l'operatore a ignorare allarmi critici.</p>
+                </div>
+                <table class="cmp-table">
+                    <thead><tr><th>Tag</th><th>Descrizione</th><th>Soglia</th><th>Priorità</th><th>Azione automatica</th></tr></thead>
+                    <tbody>
+                        <tr><td>AI-301</td><td>Cloro residuo basso</td><td>&lt; 0.15 mg/L</td><td><span class="sev-crit">CRITICAL</span></td><td>Aumento dosaggio + notifica</td></tr>
+                        <tr><td>AI-302</td><td>Torbidità uscita alta</td><td>&gt; 1.0 NTU</td><td><span class="sev-crit">CRITICAL</span></td><td>Bypass + backwash forzato</td></tr>
+                        <tr><td>PI-101</td><td>Pressione pompa bassa</td><td>&lt; 1.5 bar</td><td><span class="sev-warn">WARNING</span></td><td>Avvio pompa di riserva</td></tr>
+                        <tr><td>LI-501</td><td>Serbatoio Cl₂ basso</td><td>&lt; 15 %</td><td><span class="sev-warn">WARNING</span></td><td>Ordine rifornimento automatico</td></tr>
+                        <tr><td>AI-101</td><td>pH fuori range</td><td>&lt; 6.5 o &gt; 8.5</td><td><span class="sev-crit">CRITICAL</span></td><td>Stop distribuzione + correzione pH</td></tr>
+                        <tr><td>DI-200</td><td>Guasto comunicazione PLC</td><td>Timeout &gt; 5 s</td><td><span class="sev-info">INFO</span></td><td>Fallback a controllo locale</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ══ 6. PROTOCOLLI ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="protocolli"></span>
+                <h2><span class="sec-num">06</span> Protocolli di Comunicazione</h2>
+                <div class="proto-grid">
+                    <div class="proto-card">
+                        <div class="proto-name">OPC-UA</div>
+                        <div class="proto-use">Comunicazione PLC→SCADA. Standard industriale con sicurezza a certificati X.509. Namespace unificato con semantic model.</div>
+                    </div>
+                    <div class="proto-card">
+                        <div class="proto-name">PROFINET IO</div>
+                        <div class="proto-use">Rete di campo tra PLC Siemens e moduli ET 200SP. Cycle time &lt; 1 ms, diagnostica device integrata.</div>
+                    </div>
+                    <div class="proto-card">
+                        <div class="proto-name">HART 7</div>
+                        <div class="proto-use">Comunicazione con smart transmitter. Diagnostica remota e parametrizzazione senza interrompere il segnale 4-20 mA.</div>
+                    </div>
+                    <div class="proto-card">
+                        <div class="proto-name">Modbus TCP</div>
+                        <div class="proto-use">Comunicazione legacy con analizzatori di qualità acqua e inverter pompe di vecchia generazione.</div>
+                    </div>
+                    <div class="proto-card">
+                        <div class="proto-name">MQTT Sparkplug B</div>
+                        <div class="proto-use">Pubblicazione dati verso cloud analytics (Azure IoT Hub) per manutenzione predittiva e benchmarking multi-impianto.</div>
+                    </div>
+                    <div class="proto-card">
+                        <div class="proto-name">VPN IPsec</div>
+                        <div class="proto-use">Accesso remoto sicuro per manutenzione. Autenticazione 2FA, accesso limitato a zone specifiche della rete OT.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ 7. SECURITY ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="security"></span>
+                <h2><span class="sec-num">07</span> Cybersecurity — IEC 62443</h2>
+                <p>
+                    Gli impianti idrici sono infrastrutture critiche ai sensi della Direttiva NIS2. Il progetto implementa i principi della norma <strong style="color:var(--text)">IEC 62443</strong> per la sicurezza dei sistemi di controllo industriale, con un target di <strong style="color:var(--text)">Security Level SL-2</strong>: protezione da attaccanti con risorse medie e motivazione elevata.
+                </p>
+                <ul>
+                    <li><strong>Segmentazione di rete:</strong> rete OT fisicamente separata dalla rete IT tramite DMZ con firewall industriale. Nessun accesso diretto da internet alla rete di campo.</li>
+                    <li><strong>Defense in depth:</strong> whitelist applicativa sui PLC, patch management programmato, rilevamento anomalie con Claroty/Nozomi.</li>
+                    <li><strong>Gestione accessi RBAC:</strong> quattro ruoli (operatore, ingegnere di processo, manutentore, amministratore) con log immutabile di tutte le azioni.</li>
+                    <li><strong>Backup e ripristino:</strong> backup automatico di programmi PLC e configurazioni SCADA. RTO &lt; 4 ore in caso di incidente.</li>
+                </ul>
+                <div class="callout callout-purple">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <p>Il <em>Security Level</em> SL-2 (IEC 62443-3-3) è il livello minimo raccomandato per infrastrutture idriche critiche. Il rispetto di questo livello è diventato un requisito cogente in molti paesi europei dopo le estensioni della Direttiva NIS2 al settore idrico.</p>
+                </div>
+            </div>
+
+            <!-- ══ 8. RISULTATI ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="risultati"></span>
+                <h2><span class="sec-num">08</span> Risultati e KPI di Progetto</h2>
+                <table class="cmp-table">
+                    <thead><tr><th>KPI</th><th>Target</th><th>Risultato</th><th>Note</th></tr></thead>
+                    <tbody>
+                        <tr><td>Disponibilità sistema SCADA</td><td>&gt; 99.5 %</td><td class="td-g">99.7 %</td><td>Hot standby server</td></tr>
+                        <tr><td>Allarmi / operatore / 10 min</td><td>&lt; 1 (normale)</td><td class="td-g">0.6</td><td>ISA-18.2 compliant</td></tr>
+                        <tr><td>Qualità acqua distribuita</td><td>100 % conforme</td><td class="td-g">100 %</td><td>D.Lgs. 31/2001</td></tr>
+                        <tr><td>Latenza loop di controllo</td><td>&lt; 100 ms</td><td class="td-g">~35 ms</td><td>OPC-UA ottimizzato</td></tr>
+                        <tr><td>Riduzione consumi chimici</td><td>&gt; 10 %</td><td class="td-g">14 %</td><td>PID adattivo Cl₂</td></tr>
+                        <tr><td>Riduzione consumo energetico</td><td>&gt; 8 %</td><td class="td-g">11 %</td><td>Inverter + scheduling pompe</td></tr>
+                        <tr><td>MTTR (rilevato → riparato)</td><td>&lt; 4 ore</td><td class="td-g">2.1 ore</td><td>Diagnostica HART</td></tr>
+                    </tbody>
+                </table>
+                <div class="callout callout-green">
+                    <i class="fa-solid fa-trophy"></i>
+                    <p>L'integrazione SCADA con diagnostica HART e controllo adattivo ha ridotto simultaneamente i costi operativi (−14% chimici, −11% energia) e il rischio di non conformità normativa. Il ROI stimato è di 18–24 mesi su un impianto reale di medie dimensioni.</p>
+                </div>
+            </div>
+
+            <!-- ══ 9. DOWNLOAD ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="download"></span>
+                <h2><span class="sec-num">09</span> Download — File di Progetto</h2>
+                <p>
+                    Il progetto è sviluppato in collaborazione con <strong style="color:var(--text)">Samuele Galbiati</strong>. I file sorgente comprendono i programmi PLC in TIA Portal, la configurazione Ignition SCADA e la documentazione tecnica completa. I file sono disponibili nel repository GitHub del progetto.
+                </p>
+                <div class="download-grid">
+                    <div class="download-card">
+                        <div class="download-icon"><i class="fa-solid fa-microchip"></i></div>
+                        <div class="download-name">Programmi PLC</div>
+                        <div class="download-desc">Codice sorgente TIA Portal V17 per tutti e 5 i PLC Siemens. Include Function Block, logiche Ladder e loop PID in Structured Text.</div>
+                        <a href="https://github.com/ingmatteocavalleri/SE4A_MatteoCavalleri_SamueleGalbiati" target="_blank" class="download-btn">
+                            <i class="fa-brands fa-github"></i> GitHub Repository
+                        </a>
+                        <div class="download-note">// TIA Portal V17 · IEC 61131-3</div>
+                    </div>
+                    <div class="download-card">
+                        <div class="download-icon"><i class="fa-solid fa-display"></i></div>
+                        <div class="download-name">Configurazione Ignition</div>
+                        <div class="download-desc">Export del progetto Ignition SCADA: schermate HMI, tag database, regole di allarme ISA-18.2 e report automatici.</div>
+                        <a href="https://github.com/ingmatteocavalleri/SE4A_MatteoCavalleri_SamueleGalbiati" target="_blank" class="download-btn">
+                            <i class="fa-brands fa-github"></i> GitHub Repository
+                        </a>
+                        <div class="download-note">// Ignition 8.x · .gwbk format</div>
+                    </div>
+                    <div class="download-card">
+                        <div class="download-icon"><i class="fa-solid fa-file-pdf"></i></div>
+                        <div class="download-name">Documentazione Tecnica</div>
+                        <div class="download-desc">Report di progetto completo: architettura, P&ID, alarm rationalization record, piano di cybersecurity IEC 62443 e risultati KPI.</div>
+                        <a href="https://github.com/ingmatteocavalleri/SE4A_MatteoCavalleri_SamueleGalbiati" target="_blank" class="download-btn">
+                            <i class="fa-brands fa-github"></i> GitHub Repository
+                        </a>
+                        <div class="download-note">// PDF · P&ID · Alarm register</div>
+                    </div>
+                    <div class="download-card">
+                        <div class="download-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div class="download-name">Security Assessment</div>
+                        <div class="download-desc">Documento di analisi del rischio IEC 62443, threat model, matrice RBAC e piano di risposta agli incidenti.</div>
+                        <a href="#" class="download-btn disabled">
+                            <i class="fa-solid fa-clock"></i> Coming soon
+                        </a>
+                        <div class="download-note">// IEC 62443-3-2 · NIS2</div>
+                    </div>
+                </div>
+            </div>
+
+        </article>
+    </div><!-- /doc-layout -->
+
+</div><!-- /page-wrapper -->
+
+<footer>
+    <p>© 2026 Matteo Cavalleri, Samuele Galbiati — Software Engineering for Automation</p>
+    <p>Politecnico di Milano · dockhub.net</p>
+</footer>
+
+<script>
+    // TOC attivo durante lo scroll
+    const sections = document.querySelectorAll('.doc-section');
+    const links    = document.querySelectorAll('.toc-list a');
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (!e.isIntersecting) return;
+            links.forEach(l => l.classList.remove('active'));
+            const anchor = e.target.querySelector('.section-anchor');
+            if (anchor) {
+                const lnk = document.querySelector(`.toc-list a[href="#${anchor.id}"]`);
+                if (lnk) lnk.classList.add('active');
+            }
+        });
+    }, { rootMargin: '-12% 0px -68% 0px' });
+    sections.forEach(s => io.observe(s));
+
+    // Animazioni ingresso
+    const io2 = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (!e.isIntersecting) return;
+            e.target.style.opacity = '1';
+            e.target.style.transform = 'translateY(0)';
+            io2.unobserve(e.target);
+        });
+    }, { threshold: 0.04 });
+    document.querySelectorAll(
+        '.doc-section,.algo-box,.callout,.specs-bar,.layer,.proto-card,.download-card,.hmi-screen,.cmp-table,.code-block'
+    ).forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(10px)';
+        el.style.transition = 'opacity .48s ease, transform .48s ease';
+        io2.observe(el);
+    });
+</script>
+</body>
+</html>
