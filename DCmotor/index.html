@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tramway "Carelli 1928" — DC Motor Control | Matteo Cavalleri</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>MathJax = { tex: { inlineMath:[['\\(','\\)']], displayMath:[['$$','$$']] } };</script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="top-nav">
+    <a href="https://www.dockhub.net" class="nav-logo">mc.eng</a>
+    <a href="https://www.dockhub.net" class="nav-back">
+        <i class="fa-solid fa-arrow-left"></i> Home
+    </a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE WRAPPER — single centering container.
+     Both header and doc-layout share this element's
+     max-width and horizontal padding, so they always align.
+════════════════════════════════════════════════════════ -->
+<div class="page-wrapper">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div class="page-header-meta">
+            <span class="meta-tag tag-dc">Separately Excited DC Motor</span>
+            <span class="meta-tag tag-ctrl">Cascade Speed Control</span>
+            <span class="meta-tag tag-atm">ATM Milano</span>
+            <span class="meta-tag tag-polimi">PoliMi — 10 CFU</span>
+        </div>
+        <h1>Tramway <em>"Carelli 1928"</em><br>Speed Control of a DC Drive</h1>
+        <p class="subtitle">
+            Design and simulation of a cascade speed controller for the ATM Milano historic tramway. Four separately excited DC motors, 600 V DC supply, three nested PI loops with field-weakening and anti-windup back-calculation, simulated over a 10 km urban route with slope variations.
+        </p>
+        <div class="course-bar">
+            <div class="course-cell">
+                <div class="cc-label">Course</div>
+                <div class="cc-val">Dynamics of Electrical Machines and Drives — 10 CFU</div>
+            </div>
+            <div class="course-cell">
+                <div class="cc-label">Programme</div>
+                <div class="cc-val">MSc Automation and Control Engineering</div>
+            </div>
+            <div class="course-cell">
+                <div class="cc-label">Professor</div>
+                <div class="cc-val">Francesco Castelli Dezza</div>
+            </div>
+            <div class="course-cell">
+                <div class="cc-label">Student / ID</div>
+                <div class="cc-val">Matteo Cavalleri · 10768765</div>
+            </div>
+        </div>
+        <div class="specs-bar">
+            <div class="spec-cell">
+                <div class="spec-val">600<span class="unit"> V</span></div>
+                <div class="spec-key">DC Supply</div>
+            </div>
+            <div class="spec-cell">
+                <div class="spec-val">4×21<span class="unit"> kW</span></div>
+                <div class="spec-key">Total Power</div>
+            </div>
+            <div class="spec-cell">
+                <div class="spec-val">42<span class="unit"> km/h</span></div>
+                <div class="spec-key">Max Speed</div>
+            </div>
+            <div class="spec-cell">
+                <div class="spec-val">10<span class="unit"> km</span></div>
+                <div class="spec-key">Track Length</div>
+            </div>
+            <div class="spec-cell">
+                <div class="spec-val">3<span class="unit"> PI</span></div>
+                <div class="spec-key">Control Loops</div>
+            </div>
+            <div class="spec-cell">
+                <div class="spec-val">970<span class="unit"> rpm</span></div>
+                <div class="spec-key">Rated Speed</div>
+            </div>
+        </div>
+    </div><!-- /page-header -->
+
+    <!-- DOC LAYOUT — shares wrapper, so always aligned with header -->
+    <div class="doc-layout">
+
+        <!-- TOC -->
+        <nav class="doc-toc" aria-label="Table of contents">
+            <div class="toc-label">Contents</div>
+            <ul class="toc-list">
+                <li><a href="#abstract">1. Abstract</a></li>
+                <li><a href="#identification">2. System Identification</a></li>
+                <li class="toc-sub"><a href="#motor-params">→ Motor parameters</a></li>
+                <li class="toc-sub"><a href="#mech-params">→ Vehicle parameters</a></li>
+                <li class="toc-sub"><a href="#kinematics">→ Kinematic profile</a></li>
+                <li><a href="#modelling">3. System Modelling</a></li>
+                <li class="toc-sub"><a href="#electrical">→ Electrical model</a></li>
+                <li class="toc-sub"><a href="#mechanical">→ Mechanical model</a></li>
+                <li class="toc-sub"><a href="#tfs">→ Transfer functions</a></li>
+                <li><a href="#control">4. Control Design</a></li>
+                <li class="toc-sub"><a href="#pi">→ PI tuning</a></li>
+                <li class="toc-sub"><a href="#antiwindup">→ Anti-windup</a></li>
+                <li class="toc-sub"><a href="#fw">→ Field weakening</a></li>
+                <li><a href="#results">5. Results</a></li>
+                <li><a href="#conclusions">6. Conclusions</a></li>
+                <li><a href="#matlab">7. MATLAB Code</a></li>
+            </ul>
+        </nav>
+
+        <!-- MAIN CONTENT -->
+        <article class="doc-content">
+
+            <!-- ══ 1 ABSTRACT ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="abstract"></span>
+                <h2><span class="sec-num">01</span> Abstract</h2>
+                <p>
+                    The ATM Milano tramway fleet includes the historic <strong style="color:var(--text)">"Carelli 1928"</strong> vehicles — Series 1500 cars that have been in continuous urban service for nearly a century. Each tram is propelled by <strong style="color:var(--text)">four separately excited DC motors</strong>, each rated at 21 kW, fed from a 600 V DC overhead line.
+                </p>
+                <p>
+                    Despite their age, the electromechanical architecture of these drives presents a rich control problem: the decoupling of flux and torque requires coordinated management of the excitation and armature circuits, and the variable speed profile over a 10 km route — including uphill and downhill gradients — demands robust disturbance rejection combined with strict actuator constraint handling.
+                </p>
+                <p>This project develops and validates a complete cascade control solution, covering:</p>
+                <ul>
+                    <li>Parameter identification and KVL-based consistency verification of the machine constant</li>
+                    <li>Derivation of the armature, excitation and mechanical transfer functions</li>
+                    <li>Pole-zero cancellation tuning of three nested PI regulators</li>
+                    <li>Dynamic field-weakening strategy for above-rated-speed operation</li>
+                    <li>Anti-windup back-calculation to handle actuator saturation cleanly</li>
+                    <li>Full Simulink simulation over the prescribed 10 km kinematic profile</li>
+                </ul>
+                <div class="callout callout-purple">
+                    <i class="fa-solid fa-train-tram"></i>
+                    <p>The Carelli trams still operate on ATM lines 1 and 9 in Milan. Their four DC motors with separate excitation allow independent control of torque and flux — a concept that predates modern vector control by half a century, yet maps directly onto contemporary cascade PI architectures.</p>
+                </div>
+            </div>
+
+            <!-- ══ 2 IDENTIFICATION ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="identification"></span>
+                <h2><span class="sec-num">02</span> System Identification</h2>
+
+                <h3 id="motor-params">2.1 Motor Parameters</h3>
+                <p>
+                    The motors are characterised by the datasheet parameters below. A critical step in model identification concerns the machine constant. Although the datasheet provides a torque constant \(K_t = 1.06\,\text{Nm/A}\), applying Kirchhoff's Voltage Law to the armature circuit at rated conditions reveals that this value must be interpreted as the <strong style="color:var(--text)">total machine constant</strong> \(K_s\), i.e. it already incorporates the rated excitation current \(I_e = 5\,\text{A}\):
+                </p>
+                <div class="algo-box">
+                    <div class="algo-label">KVL Consistency — Armature at Rated Point</div>
+                    <p>$$ E_n \big|_{\text{KVL}} = V_{DC} - R_a I_{tot} = 600 - 0.39 \times 156 = 539.16\,\text{V} $$</p>
+                    <p>$$ E_n \big|_{K_s} = K_s \cdot I_e \cdot \Omega_n = 1.06 \times 5 \times 101.6 = 538.5\,\text{V} \approx 539\,\text{V} \;\checkmark $$</p>
+                    <p>$$ T_n \big|_{\text{motor}} = K_s \cdot I_e \cdot I_{tot} = 1.06 \times 5 \times 156 = 826.8\,\text{Nm} $$</p>
+                    <p>$$ T_n \big|_{\text{power}} = \frac{4 P_r}{\Omega_n} = \frac{84\,000}{101.6} = 827.2\,\text{Nm} \;\checkmark $$</p>
+                    <p class="note">Both checks confirm \(K_s = K_t = 1.06\,\text{Nm/A}^2\). Any other interpretation produces a voltage mismatch that would make rated performance physically impossible within the 600 V supply constraint.</p>
+                </div>
+
+                <div class="param-grid">
+                    <div class="param-item"><div class="param-name">Excitation voltage V<sub>er</sub></div><div class="param-val">60 V</div></div>
+                    <div class="param-item"><div class="param-name">Excitation current I<sub>er</sub></div><div class="param-val">5 A</div></div>
+                    <div class="param-item"><div class="param-name">Excitation resistance R<sub>e</sub></div><div class="param-val">12 Ω</div></div>
+                    <div class="param-item"><div class="param-name">Excitation time const. τ<sub>e</sub></div><div class="param-val">0.1 s</div></div>
+                    <div class="param-item"><div class="param-name">DC line voltage V<sub>DC</sub></div><div class="param-val">600 V</div></div>
+                    <div class="param-item"><div class="param-name">Rated power / motor P<sub>r</sub></div><div class="param-val">21 kW</div></div>
+                    <div class="param-item"><div class="param-name">Max vehicle speed v<sub>max</sub></div><div class="param-val">42 km/h</div></div>
+                    <div class="param-item"><div class="param-name">Rated motor speed Ω<sub>r</sub></div><div class="param-val">970 rpm · 101.6 rad/s</div></div>
+                    <div class="param-item"><div class="param-name">Total rated current I<sub>tot</sub></div><div class="param-val">156 A</div></div>
+                    <div class="param-item"><div class="param-name">Machine constant K<sub>s</sub> = K<sub>t</sub></div><div class="param-val">1.06 Nm/A²</div></div>
+                    <div class="param-item"><div class="param-name">Armature resistance R<sub>a</sub></div><div class="param-val">0.39 Ω</div></div>
+                    <div class="param-item"><div class="param-name">Armature time const. τ<sub>a</sub></div><div class="param-val">10 ms</div></div>
+                </div>
+
+                <h3 id="mech-params">2.2 Vehicle Parameters</h3>
+                <div class="param-grid">
+                    <div class="param-item"><div class="param-name">Empty vehicle mass m<sub>T</sub></div><div class="param-val">15,000 kg</div></div>
+                    <div class="param-item"><div class="param-name">Max passengers n<sub>p</sub></div><div class="param-val">130</div></div>
+                    <div class="param-item"><div class="param-name">Avg passenger mass m<sub>pass</sub></div><div class="param-val">80 kg</div></div>
+                    <div class="param-item"><div class="param-name">Total mass M = m<sub>T</sub> + 130×80</div><div class="param-val">25,400 kg</div></div>
+                    <div class="param-item"><div class="param-name">Wheel diameter d</div><div class="param-val">680 mm</div></div>
+                    <div class="param-item dim"><div class="param-name">Gearbox ratio ρ (motor → wheel)</div><div class="param-val">13/74 ≈ 0.1757</div></div>
+                    <div class="param-item"><div class="param-name">Viscous friction β</div><div class="param-val">0.81 Nms</div></div>
+                    <div class="param-item dim"><div class="param-name">Equiv. inertia J = M(ρd/2)²</div><div class="param-val">≈ 9.10 kg·m²</div></div>
+                </div>
+
+                <h3 id="kinematics">2.3 Kinematic Profile — 10 km Urban Track</h3>
+                <p>
+                    The longitudinal speed profile is defined by the following seven segments. Speed transitions are rate-limited to \(a_{max} = 1.0\,\text{m/s}^2\) for passenger comfort. Slope variations are modelled as measurable torque disturbances acting on the mechanical plant.
+                </p>
+                <table class="cmp-table">
+                    <thead>
+                        <tr><th>Segment [km]</th><th>Slope</th><th>Speed</th><th>v [m/s]</th><th>Regime</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>0 – 1</td><td>0 %</td><td>\(v_r / 2\)</td><td>5.83</td><td>Low speed — urban entry</td></tr>
+                        <tr><td>1 – 3</td><td>0 %</td><td>\(v_r\)</td><td>11.67</td><td>Rated speed — flat</td></tr>
+                        <tr><td>3 – 4</td><td class="td-w">+5 %</td><td>\(v_r\)</td><td>11.67</td><td>Uphill — extra load disturbance</td></tr>
+                        <tr><td>4 – 6</td><td>0 %</td><td class="td-hl">\(v_{max}\)</td><td class="td-hl">11.67*</td><td>Max speed — field weakening active</td></tr>
+                        <tr><td>6 – 8</td><td>0 %</td><td>\(v_r\)</td><td>11.67</td><td>Back to rated — flat</td></tr>
+                        <tr><td>8 – 9</td><td class="td-w">−5 %</td><td>\(v_r\)</td><td>11.67</td><td>Downhill — reduced traction demand</td></tr>
+                        <tr><td>9 – 10</td><td>0 %</td><td>\(v_r / 2\)</td><td>5.83</td><td>Low speed — urban exit</td></tr>
+                    </tbody>
+                </table>
+                <p style="font-size:.82rem; color:var(--muted)">* v<sub>max</sub> = 42 km/h = 11.67 m/s = v<sub>r</sub> in this case. The field-weakening region is activated when the motor shaft speed exceeds the base speed ω<sub>base</sub>.</p>
+            </div>
+
+            <!-- ══ 3 MODELLING ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="modelling"></span>
+                <h2><span class="sec-num">03</span> Modelling of the Physical System</h2>
+
+                <h3 id="electrical">3.1 Electrical Model — Decoupling Strategy</h3>
+                <p>
+                    The separately excited DC motor has two independent electrical circuits: the <strong style="color:var(--text)">armature circuit</strong>, which carries the traction current and generates electromagnetic torque, and the <strong style="color:var(--text)">excitation (field) circuit</strong>, which establishes the air-gap flux. The two are coupled through the back-EMF \(e = K_s I_e \omega\), which acts as a feedback from the mechanical state into the armature voltage equation.
+                </p>
+                <p>
+                    The control architecture is therefore built on three nested loops, ordered from fastest to slowest: excitation current → armature current → angular speed. To enable independent tuning of each loop, a <strong style="color:var(--text)">feedforward back-EMF compensation</strong> \(\hat{e} = K_s \hat{I}_e \hat{\omega}\) is injected at the armature voltage reference, decoupling the electrical dynamics from the mechanical ones.
+                </p>
+
+                <div class="arch-box">
+                    <div class="arch-label">// CASCADE CONTROL ARCHITECTURE — SE DC MOTOR</div>
+                    <div class="arch-row">
+                        <div class="arch-block hl3"><div class="blk-name">ω*</div><div class="blk-sub">Speed ref</div></div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-block hl3"><div class="blk-name">Reg Ω</div><div class="blk-sub">Speed PI</div></div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-block hl"><div class="blk-name">1/(K<sub>s</sub>I<sub>e</sub>)</div><div class="blk-sub">i<sub>a</sub> ref</div></div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-block hl"><div class="blk-name">Reg I<sub>a</sub></div><div class="blk-sub">Current PI</div></div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-block"><div class="blk-name">G<sub>A</sub>(s)</div><div class="blk-sub">Armature</div></div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-block hl2"><div class="blk-name">G<sub>M</sub>(s)</div><div class="blk-sub">Mechanical</div></div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-block hl2"><div class="blk-name">ω</div><div class="blk-sub">Speed out</div></div>
+                    </div>
+                    <div class="arch-row" style="margin-top:8px; justify-content:flex-end; gap:0">
+                        <div class="arch-block hl3" style="min-width:90px"><div class="blk-name">Reg I<sub>e</sub></div><div class="blk-sub">Excit. PI</div></div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-block"><div class="blk-name">G<sub>E</sub>(s)</div><div class="blk-sub">Excitation</div></div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-block"><div class="blk-name">I<sub>e</sub></div><div class="blk-sub">Field current</div></div>
+                        <div class="arch-arrow" style="color:var(--muted)">⟶</div>
+                        <div class="arch-block" style="min-width:90px"><div class="blk-name">ê = K<sub>s</sub>I<sub>e</sub>ω</div><div class="blk-sub">Back-EMF FF</div></div>
+                    </div>
+                    <div class="arch-note">// Feedforward ê subtracted from v* before G<sub>A</sub>(s), decoupling the two electrical loops</div>
+                </div>
+
+                <h3 id="mechanical">3.2 Mechanical Model</h3>
+                <p>
+                    The tram is modelled as a single equivalent wheel of diameter \(d\) and total loaded mass \(M\), rolling on a slope angle \(\gamma\) under no-slip conditions. Resolving forces along the longitudinal axis and moments about the wheel-rail contact point yields the two governing equations:
+                </p>
+                <div class="algo-box">
+                    <div class="algo-label">Equations of Motion</div>
+                    <p>$$ \sum F_x:\quad f - Mg\sin\gamma = M\ddot{x} \;\Rightarrow\; f = Mg\sin\gamma + M\ddot{x} $$</p>
+                    <p>$$ \sum M_P:\quad m_e - \beta\omega - Mg\frac{d}{2}\sin\gamma\cdot\rho = J\dot{\omega} $$</p>
+                    <p class="note">The gravity-slope term \(Mg\,(d/2)\sin\gamma\cdot\rho\) is treated as a measurable disturbance torque on the motor shaft. With \(\rho = 13/74\) and \(d = 0.68\,\text{m}\), a 5 % grade produces a disturbance torque of approximately 118 Nm — about 14 % of rated torque \(T_n \approx 827\,\text{Nm}\).</p>
+                </div>
+
+                <h3 id="tfs">3.3 Transfer Functions</h3>
+                <p>All three plant transfer functions are asymptotically stable first-order systems, allowing straightforward pole-zero cancellation PI design:</p>
+                <div class="algo-box">
+                    <div class="algo-label">Plant Transfer Functions</div>
+                    <p>$$ G_A(s) = \frac{1}{R_a + sL_a} \qquad L_a = R_a\cdot\tau_a = 0.39 \times 0.01 = 3.9\,\text{mH} $$</p>
+                    <p>$$ G_E(s) = \frac{1}{R_e + sL_e} \qquad L_e = R_e\cdot\tau_e = 12 \times 0.1 = 1.2\,\text{H} $$</p>
+                    <p>$$ G_M(s) = \frac{1}{\beta + sJ} \qquad J = M\!\left(\rho\frac{d}{2}\right)^{\!2} = 25400\times(0.1757\times0.34)^2 \approx 9.10\,\text{kg·m}^2 $$</p>
+                </div>
+
+                <table class="cmp-table">
+                    <thead><tr><th>Parameter</th><th>Symbol</th><th>Value</th></tr></thead>
+                    <tbody>
+                        <tr><td>Armature inductance</td><td>L<sub>a</sub></td><td class="td-hl">3.9 mH</td></tr>
+                        <tr><td>Excitation inductance</td><td>L<sub>e</sub></td><td class="td-hl">1.2 H</td></tr>
+                        <tr><td>Nominal back-EMF</td><td>E<sub>n</sub></td><td class="td-hl">≈ 539 V</td></tr>
+                        <tr><td>Equivalent inertia</td><td>J</td><td class="td-hl">≈ 9.10 kg·m²</td></tr>
+                        <tr><td>Mechanical time constant</td><td>τ<sub>M</sub> = J/β</td><td class="td-hl">≈ 11.2 s</td></tr>
+                        <tr><td>Base speed (FW onset)</td><td>ω<sub>base</sub> = E<sub>n</sub>/(K<sub>s</sub>I<sub>e</sub>)</td><td class="td-hl">≈ 101.6 rad/s</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ══ 4 CONTROL ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="control"></span>
+                <h2><span class="sec-num">04</span> Control Design</h2>
+
+                <p>
+                    The cascade architecture requires three PI controllers, ordered by increasing time constant. A PID structure is deliberately avoided: the derivative action would amplify measurement noise and introduce overshoot — unacceptable for a public transport drive. Each PI is designed via <strong style="color:var(--text)">pole-zero cancellation</strong>, placing the controller zero at the plant pole \(-R/L\) and selecting the gain to achieve the target crossover frequency with 90° phase margin.
+                </p>
+
+                <h3 id="pi">4.1 PI Controller Tuning</h3>
+                <div class="callout callout-info">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <p>Design rule: for a first-order plant \(G(s) = 1/(R+sL)\), the PI gains that achieve crossover frequency \(\omega_c\) with 90° phase margin are \(K_p = \omega_c L\) and \(K_i = \omega_c R\). This zero-cancellation condition is necessary; without it, the resulting phase margin would be less than 90° and the transient would show overshoot.</p>
+                </div>
+
+                <table class="cmp-table">
+                    <thead>
+                        <tr><th>Loop</th><th>ω<sub>c</sub> [rad/s]</th><th>Phase Margin</th><th>K<sub>p</sub></th><th>K<sub>i</sub></th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Excitation current I<sub>e</sub></td><td class="td-hl">40</td><td>90°</td><td class="td-g">48</td><td class="td-g">480</td></tr>
+                        <tr><td>Armature current I<sub>a</sub></td><td class="td-hl">20</td><td>90°</td><td class="td-g">0.078</td><td class="td-g">7.8</td></tr>
+                        <tr><td>Angular speed ω</td><td class="td-hl">2</td><td>90°</td><td class="td-g">181.2</td><td class="td-g">1.62</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="callout callout-warn">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <p>Loop bandwidth separation is mandatory: each inner loop must settle at least 5–10 times faster than its outer loop. The chosen values (40 ≫ 20 ≫ 2 rad/s) respect this condition. Violating the separation would cause inter-loop coupling and destabilise the cascade.</p>
+                </div>
+
+                <h3 id="antiwindup">4.2 Actuator Saturation & Anti-windup</h3>
+                <p>
+                    Every loop output is bounded by physical actuator limits. During saturation, an unconstrained PI integrator continues accumulating the control error, so when the system exits saturation it responds with a large, delayed overshoot — the classic <em>integrator windup</em> problem. The chosen remedy is the <strong style="color:var(--text)">back-calculation</strong> anti-windup scheme, which feeds back the saturation difference to discharge the integrator at a rate governed by \(K_b = 1/\tau\):
+                </p>
+                <div class="algo-box">
+                    <div class="algo-label">Back-calculation Anti-windup</div>
+                    <p>$$ \dot{x}_I(t) = K_i\,e(t) + K_b\!\left[u_{sat}(t) - u(t)\right] $$</p>
+                    <p>$$ u(t) = K_p\,e(t) + x_I(t) \;,\quad u_{sat}(t) = \text{sat}_{[u_{min},\,u_{max}]}\!\left[u(t)\right] $$</p>
+                    <p class="note">When the output saturates, the feedback term \(K_b[u_{sat}-u]\) actively reduces the integrator state, preventing further windup. Back-calculation is preferred in industrial drives for its simplicity, smooth recovery transient and robustness to model uncertainty.</p>
+                </div>
+
+                <table class="cmp-table">
+                    <thead><tr><th>Loop</th><th>τ</th><th>K<sub>b</sub> = 1/τ</th><th>Saturation limits</th></tr></thead>
+                    <tbody>
+                        <tr><td>Excitation current</td><td>0.1 s</td><td class="td-hl">10</td><td>[0 V, 60 V]</td></tr>
+                        <tr><td>Armature current</td><td>0.01 s</td><td class="td-hl">100</td><td>[−600 V, +600 V]</td></tr>
+                        <tr><td>Speed (torque out)</td><td>≈ 11.2 s</td><td class="td-hl">0.0089</td><td>[−827 Nm, +827 Nm]</td></tr>
+                    </tbody>
+                </table>
+
+                <h3 id="fw">4.3 Field-weakening Strategy</h3>
+                <p>
+                    At rated speed the back-EMF already occupies most of the 600 V supply. To operate above the rated speed (segments km 4–6), the excitation current must be dynamically reduced to keep the back-EMF below the voltage limit, entering the <strong style="color:var(--text)">constant-power (field-weakening) region</strong>:
+                </p>
+                <div class="algo-box">
+                    <div class="algo-label">Field-weakening Law</div>
+                    <p>$$ I_{e,ref} = \begin{cases} I_{e,rated} & \text{if } \omega \leq \omega_{base} \\[6pt] \dfrac{E_n}{K_s\,\omega} & \text{if } \omega > \omega_{base} \end{cases} $$</p>
+                    <p>$$ \omega_{base} = \frac{E_n}{K_s I_e} = \frac{539}{1.06 \times 5} \approx 101.6\,\text{rad/s} \;(= \Omega_r \;\checkmark) $$</p>
+                    <p class="note">The \(1/\omega\) law is implemented in Simulink as a lookup table driven by the measured motor speed. The excitation PI then tracks the reduced reference, reducing \(I_e\) smoothly without transient spikes.</p>
+                </div>
+            </div>
+
+            <!-- ══ 5 RESULTS ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="results"></span>
+                <h2><span class="sec-num">05</span> Simulation Results</h2>
+                <p>The complete Simulink model — comprising the cascade PI controllers, back-EMF decoupling, field-weakening logic, anti-windup back-calculation and the kinematic profile generator — is simulated over the full 10 km track. Three key signals are examined.</p>
+
+                <div class="result-card">
+                    <div class="result-label">5.1 — Speed Control</div>
+                    <p>The speed profile tracks the reference accurately across all seven segments. Acceleration phases show a clean linear ramp (rate-limiter active), confirming that the PI correctly saturates the torque command while the anti-windup prevents overshoot on exit. <strong style="color:var(--text)">Zero steady-state error</strong> and <strong style="color:var(--text)">zero overshoot</strong> at every speed step validate the 90° phase-margin design. Slope disturbances (km 3–4 uphill, km 8–9 downhill) are rejected by the integral action without visible speed deviation.</p>
+                </div>
+
+                <div class="result-card">
+                    <div class="result-label">5.2 — Armature Current</div>
+                    <p>During acceleration, the current PI saturates \(i_a\) to the rated value \(I_{tot} = 156\,\text{A}\), maximising traction force while protecting the motor windings from overheating. The back-calculation anti-windup ensures a smooth, spike-free transition when the current limit is released as the tram reaches the target speed. Negative current values during deceleration phases confirm correct regenerative-assist operation on the downhill segment.</p>
+                </div>
+
+                <div class="result-card">
+                    <div class="result-label">5.3 — Excitation Current</div>
+                    <p>The excitation current holds steadily at \(I_e = 5\,\text{A}\) throughout the constant-flux region. At the onset of the km 4–6 maximum-speed segment, the field-weakening controller correctly reduces \(I_e\) following the \(1/\omega\) law, keeping the back-EMF below the 600 V supply limit. The excitation PI tracks the reference without oscillation, confirming adequate bandwidth separation from the armature and speed loops.</p>
+                </div>
+
+                <table class="cmp-table">
+                    <thead><tr><th>Performance Index</th><th>Result</th><th>Requirement / Cause</th></tr></thead>
+                    <tbody>
+                        <tr><td>Steady-state speed error</td><td class="td-g">≈ 0</td><td>PI integral action</td></tr>
+                        <tr><td>Speed overshoot</td><td class="td-g">0 %</td><td>PM = 90° by design</td></tr>
+                        <tr><td>Max armature current</td><td class="td-hl">156 A</td><td>Saturation block active</td></tr>
+                        <tr><td>Anti-windup transient</td><td class="td-g">No spikes</td><td>Back-calculation</td></tr>
+                        <tr><td>Field weakening</td><td class="td-hl">Active km 4–6</td><td>\(1/\omega\) law</td></tr>
+                        <tr><td>Slope disturbance rejection</td><td class="td-g">Full recovery</td><td>Integral action</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ══ 6 CONCLUSIONS ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="conclusions"></span>
+                <h2><span class="sec-num">06</span> Conclusions</h2>
+                <p>
+                    The cascade PI architecture proves capable of controlling the Carelli 1928 tram drive across its full operating envelope — including rated-speed traction, above-rated field-weakening and slope disturbances — while respecting every electrical and mechanical constraint.
+                </p>
+                <p>
+                    Three design decisions proved essential for this result. First, interpreting \(K_t\) as the total machine constant \(K_s\) was the only physically consistent choice, as demonstrated by the dual KVL/power-balance verification. Second, strict bandwidth separation (40 / 20 / 2 rad/s) was necessary for independent loop stability. Third, back-calculation anti-windup was required to prevent integrator windup during the frequent current-saturation events typical of urban traction cycles.
+                </p>
+                <p>
+                    The study also highlights a broader engineering lesson: sophisticated control performance can be achieved with simple PI structures, provided that the plant is correctly modelled, the actuator constraints are explicitly handled, and the loops are designed with a clear hierarchy of time scales.
+                </p>
+                <div class="callout callout-purple">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <p>This project was submitted for the course <em>Dynamics of Electrical Machines and Drives</em> (10 CFU) of the MSc in Automation and Control Engineering, Politecnico di Milano, under the supervision of Prof. Francesco Castelli Dezza.</p>
+                </div>
+            </div>
+
+            <!-- ══ 7 MATLAB ══ -->
+            <div class="doc-section">
+                <span class="section-anchor" id="matlab"></span>
+                <h2><span class="sec-num">07</span> MATLAB Code — Key Excerpts</h2>
+                <p>The full script performs parameter identification, KVL consistency checks, PI gain computation and anti-windup setup. The workspace variables are then loaded directly into the Simulink model.</p>
+
+                <h3>Parameter identification</h3>
+                <div class="code-block"><pre><span class="c">%% Motor parameters</span>
+Ra = <span class="v">0.39</span>;  ta = <span class="v">10e-3</span>;  La = ta * Ra;    <span class="c">% La = 3.9 mH</span>
+Re = <span class="v">12</span>;    te = <span class="v">0.1</span>;   Le = te * Re;    <span class="c">% Le = 1.2 H</span>
+Ks = <span class="v">1.06</span>;  Ie = <span class="v">5</span>;    ome = <span class="v">970</span>*<span class="v">2</span>*pi/<span class="v">60</span>; <span class="c">% 101.6 rad/s</span>
+
+<span class="c">%% KVL consistency check</span>
+En_motor = Ks * Ie * ome;     <span class="c">% 538.5 V  ← from machine constant</span>
+En_KVL   = <span class="v">600</span> - Ra * <span class="v">156</span>;  <span class="c">% 539.2 V  ← from KVL  → match ✓</span>
+Tn_motor = Ks * Ie * <span class="v">156</span>;    <span class="c">% 826.8 Nm ← motor equation</span>
+Tn_mech  = <span class="v">4</span> * <span class="v">21e3</span> / ome;  <span class="c">% 827.2 Nm ← power balance → match ✓</span>
+
+<span class="c">%% Mechanical parameters</span>
+mt = <span class="v">15e3</span>; mp = <span class="v">80</span>; np = <span class="v">130</span>;
+M  = mt + mp * np;             <span class="c">% 25 400 kg</span>
+d  = <span class="v">680e-3</span>; rho = <span class="v">13</span>/<span class="v">74</span>; beta = <span class="v">0.81</span>;
+J  = M * (rho * d/<span class="v">2</span>)^<span class="v">2</span>;    <span class="c">% ≈ 9.10 kg·m²</span></pre></div>
+
+                <h3>PI design — pole-zero cancellation</h3>
+                <div class="code-block"><pre><span class="c">%% Target bandwidths [rad/s]</span>
+wi = <span class="v">20</span>; we = <span class="v">40</span>; wm = <span class="v">2</span>;
+
+<span class="c">%% PI gains: Kp = omega*L,  Ki = omega*R</span>
+KpA = wi*La; KiA = wi*Ra;  <span class="c">% Armature:   Kp=0.078, Ki=7.8</span>
+KpE = we*Le; KiE = we*Re;  <span class="c">% Excitation: Kp=48,    Ki=480</span>
+KpM = wm*J;  KiM = wm*beta;<span class="c">% Speed:      Kp=181.2, Ki=1.62</span></pre></div>
+
+                <h3>Anti-windup back-calculation</h3>
+                <div class="code-block"><pre><span class="c">%% Kb = 1/tau for each loop</span>
+Kb_a = <span class="v">1</span>/ta;          <span class="c">% = 100      (armature,   tau = 10 ms)</span>
+Kb_e = <span class="v">1</span>/te;          <span class="c">% = 10       (excitation, tau = 0.1 s)</span>
+Kb_m = <span class="v">1</span>/(J/beta);    <span class="c">% ≈ 0.0089   (speed,      tau ≈ 11.2 s)</span>
+
+<span class="c">%% Saturation limits</span>
+Te_max = Ks * Ie * <span class="v">156</span>; <span class="c">% ±826.8 Nm  (speed PI output)</span>
+Va_max = <span class="v">600</span>;           <span class="c">% ±600 V     (armature voltage)</span></pre></div>
+
+                <h3>Field-weakening</h3>
+                <div class="code-block"><pre><span class="c">%% Base speed and FW computation</span>
+En       = Ks * Ie * ome;         <span class="c">% nominal back-EMF ≈ 539 V</span>
+ome_base = En / (Ks * Ie);        <span class="c">% ≈ 101.6 rad/s  (= omega_rated ✓)</span>
+ome_max  = v_max_ms/(rho*d/<span class="v">2</span>);   <span class="c">% max shaft speed</span>
+
+<span class="c">%% Simulink lookup: ie_ref = Ie        if omega <= ome_base</span>
+<span class="c">%%                           En/(Ks*omega) if omega >  ome_base</span></pre></div>
+            </div>
+
+        </article>
+    </div><!-- /doc-layout -->
+
+</div><!-- /page-wrapper -->
+
+<footer>
+    <p>© 2026 Matteo Cavalleri · Politecnico di Milano · ID 10768765</p>
+    <p>dockhub.net/MachineControlSystem</p>
+</footer>
+
+<script>
+    // Active TOC highlighting
+    const sections = document.querySelectorAll('.doc-section');
+    const links    = document.querySelectorAll('.toc-list a');
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (!e.isIntersecting) return;
+            links.forEach(l => l.classList.remove('active'));
+            const anchor = e.target.querySelector('.section-anchor');
+            if (anchor) {
+                const lnk = document.querySelector(`.toc-list a[href="#${anchor.id}"]`);
+                if (lnk) lnk.classList.add('active');
+            }
+        });
+    }, { rootMargin: '-12% 0px -68% 0px' });
+    sections.forEach(s => io.observe(s));
+
+    // Entrance animations
+    const io2 = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (!e.isIntersecting) return;
+            e.target.style.opacity = '1';
+            e.target.style.transform = 'translateY(0)';
+            io2.unobserve(e.target);
+        });
+    }, { threshold: 0.04 });
+    document.querySelectorAll(
+        '.doc-section,.algo-box,.callout,.specs-bar,.param-grid,.result-card,.code-block,.cmp-table,.arch-box'
+    ).forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(10px)';
+        el.style.transition = 'opacity .48s ease, transform .48s ease';
+        io2.observe(el);
+    });
+</script>
+</body>
+</html>
