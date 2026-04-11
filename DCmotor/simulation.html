@@ -237,7 +237,6 @@
       color: var(--text)
     }
 
-    /* Canvas: display block, width fills container. Height set by JS attribute. */
     canvas {
       display: block;
       width: 100%
@@ -546,18 +545,28 @@
     }
 
     // ═══════════════════════════════════════
-    // CANVAS
+    // CANVAS SETUP (100% Bulletproof Fallbacks)
     // ═══════════════════════════════════════
     const DPR = window.devicePixelRatio || 1;
     const CV = {};
 
     function setupCanvas(id, H) {
       const c = document.getElementById(id);
-      const W = c.offsetWidth;
-      if (!W) return false;
+      if (!c) return false;
+
+      let W = c.offsetWidth;
+      // Fallback: se l'ambiente non ha ancora applicato i layout CSS
+      if (W === 0 && c.parentElement) {
+        const style = window.getComputedStyle(c.parentElement);
+        W = c.parentElement.clientWidth - parseFloat(style.paddingLeft || 0) - parseFloat(style.paddingRight || 0);
+      }
+      if (W === 0) W = 600; // Estremo fallback
+
       c.width = Math.round(W * DPR);
       c.height = Math.round(H * DPR);
       c.style.height = H + 'px';
+      c.style.width = '100%';
+
       const ctx = c.getContext('2d');
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
       CV[id] = { ctx, W, H };
@@ -670,20 +679,24 @@
       document.getElementById('sv-sl').textContent = ex.slope;
       document.getElementById('sv-t').textContent = Math.round(t);
       document.getElementById('track-km').textContent = (x / 1e3).toFixed(2) + ' / 10.00 km';
+
       const b = document.getElementById('regionBadge');
       if (fw) { b.textContent = 'Field Weakening'; b.style.cssText = 'background:rgba(227,179,65,.1);color:#e3b341;border:1px solid rgba(227,179,65,.3);font-family:var(--mono);font-size:.7rem;padding:5px 12px;border-radius:2px'; }
       else { b.textContent = 'Constant Flux'; b.style.cssText = 'background:rgba(63,185,80,.1);color:#3fb950;border:1px solid rgba(63,185,80,.25);font-family:var(--mono);font-size:.7rem;padding:5px 12px;border-radius:2px'; }
+
       document.getElementById('sc-ia').style.background = satIa ? 'rgba(255,107,53,.06)' : '';
       document.getElementById('sc-ie').style.background = fw ? 'rgba(227,179,65,.06)' : '';
       document.getElementById('pv-v').textContent = v_veh.toFixed(2) + ' m/s';
       document.getElementById('pv-ia').textContent = ia.toFixed(1) + ' A';
       document.getElementById('pv-ie').textContent = ie.toFixed(2) + ' A';
       document.getElementById('pv-te').textContent = Math.round(ex.Te) + ' Nm';
+
       drawTrack();
       drawPlot('cSpeed', h_v, h_vref, 0, 14, '#00d4ff', 'rgba(255,255,255,.3)');
       drawPlot('cIa', h_ia, null, -170, 170, '#ff6b35', null, Imax);
       drawPlot('cIe', h_ie, null, 0, 5.5, '#e3b341');
       drawPlot('cTe', h_te, null, -900, 900, '#3fb950', null, Te_max);
+
       if (finished) {
         running = false; rafId = null;
         const bp = document.getElementById('btnPlay');
@@ -695,7 +708,7 @@
     }
 
     // ═══════════════════════════════════════
-    // BUTTONS
+    // BUTTONS & RESIZE
     // ═══════════════════════════════════════
     function uiReset() {
       running = false; cancelAnimationFrame(rafId); rafId = null;
@@ -726,28 +739,48 @@
         bp.textContent = '▶ Riprendi'; bp.style.background = 'var(--accent)'; bp.style.color = '#080c10';
       }
     });
-    document.getElementById('btnStop').addEventListener('click', uiReset);
-    window.addEventListener('resize', () => {
-      setupAll(); drawTrack();
+
+    function handleResize() {
+      setupAll();
+      drawTrack();
       if (h_v.length > 1) {
         drawPlot('cSpeed', h_v, h_vref, 0, 14, '#00d4ff', 'rgba(255,255,255,.3)');
         drawPlot('cIa', h_ia, null, -170, 170, '#ff6b35', null, Imax);
         drawPlot('cIe', h_ie, null, 0, 5.5, '#e3b341');
         drawPlot('cTe', h_te, null, -900, 900, '#3fb950', null, Te_max);
-      } else { ['cSpeed', 'cIa', 'cIe', 'cTe'].forEach(id => clearPlot(id)); }
-    });
+      } else {
+        ['cSpeed', 'cIa', 'cIe', 'cTe'].forEach(id => clearPlot(id));
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
 
     // ═══════════════════════════════════════
-    // INIT - SOLUZIONE DEL BUG
-    // Si attende il caricamento completo del DOM e del CSS (window 'load') 
-    // per garantire che i Canvas abbiano un offsetWidth > 0 prima di procedere.
+    // INIT - Soluzione universale per ogni ambiente
     // ═══════════════════════════════════════
-    resetSim();
-    window.addEventListener('load', () => {
+    function initSim() {
       setupAll();
       drawTrack();
       ['cSpeed', 'cIa', 'cIe', 'cTe'].forEach(id => clearPlot(id));
-    });
+    }
+
+    resetSim();
+
+    // Se il documento è già pronto (es. CodePen/Live Server), avvia subito con un timeout per sicurezza
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(initSim, 50);
+    } else {
+      // Altrimenti aspetta gli eventi standard
+      window.addEventListener('DOMContentLoaded', () => setTimeout(initSim, 50));
+      window.addEventListener('load', initSim);
+    }
+
+    // Ultima rete di sicurezza: osserva il body per ricalcolare i Canvas se il CSS viene iniettato in ritardo
+    if (window.ResizeObserver) {
+      new ResizeObserver(() => {
+        if (!running && h_v.length <= 1) handleResize();
+      }).observe(document.body);
+    }
   </script>
 </body>
 
