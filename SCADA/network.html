@@ -136,8 +136,10 @@ const NODES=[
    info:{t:'Historian / MES — Level 4',b:'Server storico dati di processo. InfluxDB per time-series (~400 tag a 1 Hz), SQL Server per database relazionale. Genera report qualità, KPI operativi e dati billing. Backup giornaliero su NAS ridondato.'}},
   {id:'eng_ws',    label:'Engineering WS',    sub:'TIA Portal · Ignition',x:500,y:255,w:160,h:56,zone:'it',
    info:{t:'Engineering Workstation — IT',b:'Postazione per programmazione PLC (Siemens TIA Portal V17) e configurazione SCADA (Ignition 8.x). Accesso alla rete OT solo tramite jump server con registrazione video della sessione.'}},
-  {id:'erp',       label:'ERP System',         sub:'SAP · Billing',        x:850,y:255,w:140,h:56,zone:'it',
-   info:{t:'ERP — Level 4',b:'Integrazione con sistema gestionale aziendale. Riceve dati di produzione (m³ trattati, consumi chimici, energia) dal Historian per fatturazione e compliance normativa D.Lgs. 31/2001.'}},
+  {id:'erp',       label:'ERP / MES',         sub:'Phase 2 — Out of Scope',x:850,y:255,w:140,h:56,zone:'it',
+   info:{t:'ERP / MES — Fuori Scope (Fase 1)',b:'Integrazione con sistema gestionale e MES non sviluppata nella fase iniziale. I batch di produzione saranno simulati. Prevista nella Fase 2 tramite REST API su SAP. Compliance D.Lgs. 31/2001 via Historian.'}},
+  {id:'roles',     label:'RBAC — Ruoli',       sub:'Op · Maint · Mgr · Eng', x:1070,y:255,w:155,h:56,zone:'it',
+   info:{t:'Role-Based Access Control — 4 Ruoli',b:'Operatore: monitoraggio + setpoint limitati + ticket. Manutenzione: parametri manutenzione + cambio componenti. Plant Manager: accesso totale + scheduling batch. Ingegneria: reset allarmi + autorizzazioni complete.'}}  ,
 
   // ── OT ──
   {id:'scada_p',  label:'SCADA Primary',     sub:'Ignition 8.x',         x:200,y:415,w:150,h:56,zone:'ot',
@@ -181,8 +183,9 @@ const CONNS=[
   // DMZ ↔ IT
   {a:'fw',        b:'historian',lbl:'OPC-UA',    color:'#00d4ff',             dash:[]},
   {a:'fw',        b:'eng_ws',   lbl:'RDP / TIA', color:'rgba(0,212,255,.5)',  dash:[4,3]},
-  {a:'fw',        b:'erp',      lbl:'REST API',  color:'rgba(0,212,255,.35)', dash:[4,3]},
-  {a:'mqtt_gw',   b:'erp',      lbl:'',          color:'rgba(0,212,255,.25)', dash:[4,3]},
+  {a:'fw',        b:'erp',      lbl:'Phase 2',  color:'rgba(139,148,158,.25)', dash:[6,5]},
+  {a:'mqtt_gw',   b:'erp',      lbl:'',          color:'rgba(139,148,158,.15)', dash:[6,5]},
+  {a:'eng_ws',    b:'roles',    lbl:'RBAC',      color:'rgba(163,113,247,.45)', dash:[3,3]},
   // DMZ ↔ OT
   {a:'fw',        b:'scada_p',  lbl:'OPC-UA',    color:'#00d4ff',             dash:[]},
   {a:'vpn_gw',    b:'scada_p',  lbl:'IPsec',     color:'rgba(163,113,247,.5)',dash:[5,3]},
@@ -301,12 +304,14 @@ NODES.forEach(n=>{
   const zd=Z[n.zone];
   const g=el('g',{cursor:'pointer',class:'node-g'});
 
-  // Get fill/stroke per zone
+  // Get fill/stroke per zone — override for out-of-scope nodes
+  const isOOS = n.id === 'erp';
   const NFILL={internet:'rgba(255,107,53,.15)',dmz:'rgba(163,113,247,.15)',
     it:'rgba(0,212,255,.1)',ot:'rgba(63,185,80,.1)',field:'rgba(227,179,65,.1)'};
   const NSTROKE={internet:'rgba(255,107,53,.6)',dmz:'rgba(163,113,247,.5)',
     it:'rgba(0,212,255,.45)',ot:'rgba(63,185,80,.45)',field:'rgba(227,179,65,.5)'};
   const NTXT={internet:'#ff6b35',dmz:'#a371f7',it:'#00d4ff',ot:'#3fb950',field:'#e3b341'};
+  if(isOOS){NFILL.it='rgba(139,148,158,.07)';NSTROKE.it='rgba(139,148,158,.3)';NTXT.it='#8b949e';}
 
   const rx_=n.x-n.w/2, ry_=n.y-n.h/2;
   const rect=el('rect',{x:rx_,y:ry_,width:n.w,height:n.h,rx:5,

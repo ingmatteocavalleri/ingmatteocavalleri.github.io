@@ -118,6 +118,32 @@ input[type=range]{accent-color:var(--accent);width:80px}
   .sensor-grid{grid-template-columns:repeat(2,1fr)}
   .plots-col{grid-template-columns:1fr}
 }
+
+/* RECIPE / ROLE SELECT */
+select.ctrl-sel{font-family:var(--mono);font-size:.75rem;font-weight:600;padding:6px 10px;
+  border-radius:3px;border:1px solid var(--border);background:var(--surface2);color:var(--text);
+  cursor:pointer;outline:none;transition:border-color .2s}
+select.ctrl-sel:focus,select.ctrl-sel:hover{border-color:var(--accent)}
+select.recipe-sel{border-color:rgba(163,113,247,.4);color:var(--purple)}
+select.role-sel{border-color:rgba(63,185,80,.35);color:var(--green)}
+
+/* OEE STRIP */
+.oee-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+.oee-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px;text-align:center}
+.oee-label{font-family:var(--mono);font-size:.58rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.oee-val{font-family:var(--display);font-size:1.15rem;font-weight:800}
+
+/* TICKET LOG */
+.ticket-panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px;max-height:220px;overflow-y:auto}
+.ticket-item{font-family:var(--mono);font-size:.65rem;padding:6px 8px;border-radius:3px;margin-bottom:5px;
+  background:var(--surface2);border:1px solid var(--border);line-height:1.5}
+.ticket-item.open{border-color:rgba(255,107,53,.4);background:rgba(255,107,53,.05)}
+.ticket-item.closed{border-color:rgba(63,185,80,.3);opacity:.65}
+.ticket-ts{color:var(--muted);font-size:.6rem}
+.ticket-tag{display:inline-block;padding:1px 6px;border-radius:2px;font-size:.6rem;font-weight:600;margin-right:4px}
+.ticket-tag.open{background:rgba(255,107,53,.2);color:var(--accent2)}
+.ticket-tag.closed{background:rgba(63,185,80,.2);color:var(--green)}
+.no-tickets{font-family:var(--mono);font-size:.65rem;color:var(--muted);text-align:center;padding:16px 0}
 </style>
 </head>
 <body>
@@ -134,6 +160,21 @@ input[type=range]{accent-color:var(--accent);width:80px}
   <div class="ctrl-bar">
     <button class="btn btn-run"  id="btnRun">▶ Start</button>
     <button class="btn btn-stop" id="btnStop" disabled>⏹ Stop</button>
+    <div class="divider"></div>
+    <span class="ctrl-label">Recipe</span>
+    <select class="ctrl-sel recipe-sel" id="recipeSelect">
+      <option value="standard">Standard</option>
+      <option value="avanzata">Potab. Avanzata</option>
+      <option value="intensiva">Disinf. Intensiva</option>
+    </select>
+    <div class="divider"></div>
+    <span class="ctrl-label">Ruolo</span>
+    <select class="ctrl-sel role-sel" id="roleSelect">
+      <option value="manager">Plant Manager</option>
+      <option value="operator">Operatore</option>
+      <option value="maintenance">Manutenzione</option>
+      <option value="engineering">Ingegneria</option>
+    </select>
     <div class="divider"></div>
     <button class="btn btn-dist"  id="btnDist">⚡ Disturbo Cl₂</button>
     <button class="btn btn-alarm" id="btnPumpFail">⛔ Guasto Pompa</button>
@@ -164,6 +205,26 @@ input[type=range]{accent-color:var(--accent);width:80px}
     <div class="sensor-card" id="sc-pump"><div class="s-label">Pompe</div><div class="s-val" id="sv-pump" style="font-size:.9rem;color:var(--green)">P01▲ P02▲</div><div class="s-range">2/2 in marcia</div></div>
     <div class="sensor-card" id="sc-dose"><div class="s-label">Dosatore Cl₂</div><div class="s-val"><span id="sv-dose">24.5</span><span class="s-unit"> L/h</span></div><div class="s-range">Max 80 L/h</div></div>
     <div class="sensor-card" id="sc-level"><div class="s-label">Serbatoio Cl₂</div><div class="s-val"><span id="sv-level">72</span><span class="s-unit"> %</span></div><div class="s-range">Allarme &lt;15%</div></div>
+  </div>
+
+  <!-- OEE KPI STRIP -->
+  <div class="oee-strip">
+    <div class="oee-card">
+      <div class="oee-label">OEE</div>
+      <div class="oee-val" id="oee-oee" style="color:var(--accent)">—</div>
+    </div>
+    <div class="oee-card">
+      <div class="oee-label">Availability</div>
+      <div class="oee-val" id="oee-avail" style="color:var(--green)">—</div>
+    </div>
+    <div class="oee-card">
+      <div class="oee-label">Performance</div>
+      <div class="oee-val" id="oee-perf" style="color:var(--yellow)">—</div>
+    </div>
+    <div class="oee-card">
+      <div class="oee-label">Quality</div>
+      <div class="oee-val" id="oee-qual" style="color:var(--purple)">—</div>
+    </div>
   </div>
 
   <!-- DESKTOP LAYOUT: left column + right sidebar -->
@@ -238,6 +299,14 @@ input[type=range]{accent-color:var(--accent);width:80px}
         <div class="pid-row"><span class="pid-k">Ki · ∫e dt</span><span class="pid-v" id="pid-i" style="color:var(--yellow)">0.000</span></div>
         <div class="pid-row"><span class="pid-k">Output pompa</span><span class="pid-v" id="pid-out" style="color:var(--accent)">0.0 L/h</span></div>
         <div class="pid-row"><span class="pid-k">Anti-windup</span><span class="pid-v" id="pid-aw" style="color:var(--purple)">OFF</span></div>
+        <div class="pid-row"><span class="pid-k">Recipe attiva</span><span class="pid-v" id="pid-recipe" style="color:var(--purple)">Standard</span></div>
+        <div class="pid-row"><span class="pid-k">Ruolo</span><span class="pid-v" id="pid-role" style="color:var(--green)">Plant Manager</span></div>
+      </div>
+
+      <!-- TICKET LOG -->
+      <div class="pid-panel ticket-panel" id="ticketPanel">
+        <div class="panel-lbl" style="font-family:var(--mono);font-size:.6rem;color:var(--accent2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">// Maintenance Tickets</div>
+        <div id="ticketList"><div class="no-tickets">Nessun ticket aperto</div></div>
       </div>
     </div>
   </div>
@@ -249,6 +318,29 @@ input[type=range]{accent-color:var(--accent);width:80px}
 // ════════════════════════════════════════
 const Ts=0.5, Kp=2.8, Ki=0.12, Kb=10;
 const DOSE_MAX=80, DOSE_MIN=0, TAU_CL2=180;
+
+// ── RECIPES (Strategy Pattern) ──────────────────
+const RECIPES={
+  standard:  {name:'Standard',          sp:0.35, cl2Warn:0.15, cl2Crit:0.10, cl2High:0.60, phMin:6.5, phMax:8.5},
+  avanzata:  {name:'Potab. Avanzata',   sp:0.45, cl2Warn:0.20, cl2Crit:0.15, cl2High:0.65, phMin:6.8, phMax:8.2},
+  intensiva: {name:'Disinf. Intensiva', sp:0.60, cl2Warn:0.30, cl2Crit:0.25, cl2High:0.75, phMin:7.0, phMax:8.0},
+};
+let activeRecipe=RECIPES.standard;
+
+// ── ROLES (RBAC) ─────────────────────────────────
+const ROLES={
+  manager:     {name:'Plant Manager',   canFail:true,  canDist:true,  canSP:true,  canFlow:true },
+  operator:    {name:'Operatore',       canFail:false, canDist:false, canSP:true,  canFlow:false},
+  maintenance: {name:'Manutenzione',    canFail:true,  canDist:false, canSP:false, canFlow:false},
+  engineering: {name:'Ingegneria',      canFail:true,  canDist:true,  canSP:true,  canFlow:true },
+};
+let activeRole=ROLES.manager;
+
+// ── OEE state ─────────────────────────────────────
+let oee_up=0, oee_total=0, oee_ok_samples=0, oee_samples=0;
+
+// ── Ticket system ─────────────────────────────────
+let tickets=[]; let ticketId=1; let lastPumpOk=true;
 
 let cl2=0.35, cl2_int=0;
 let dose=24.5, dose_unsat=24.5;
@@ -304,15 +396,19 @@ function simStep(dt_real){
 }
 
 function updateDisplay(){
-  const cl2_warn=cl2<0.15, cl2_low=cl2<0.10;
+  // ── Alarm thresholds from active Recipe (Strategy pattern) ──
+  const R=activeRecipe;
+  const cl2_warn=cl2<R.cl2Warn, cl2_low=cl2<R.cl2Crit, cl2_high=cl2>R.cl2High;
   const turb_warn=turb>0.8, turb_crit=turb>1.0;
   const press_warn=press<1.8, press_crit=press<1.5;
-  const ph_warn=ph<6.3||ph>8.7;
+  const ph_warn=ph<R.phMin||ph>R.phMax;
   const lev_warn=level<20;
   const p_fail=!pump2_ok;
+  const flow=parseFloat(document.getElementById('flowSlider').value);
 
+  // ── Sensor cards ──
   const SC=(id,cls)=>document.getElementById(id).className='sensor-card'+(cls?' '+cls:'');
-  document.getElementById('sv-flow').textContent=parseFloat(document.getElementById('flowSlider').value).toFixed(0);
+  document.getElementById('sv-flow').textContent=flow.toFixed(0);
   document.getElementById('sv-cl2').textContent=cl2.toFixed(3);
   document.getElementById('sv-ph').textContent=ph.toFixed(2);
   document.getElementById('sv-turb').textContent=turb.toFixed(3);
@@ -321,7 +417,7 @@ function updateDisplay(){
   document.getElementById('sv-level').textContent=level.toFixed(0);
   document.getElementById('sv-pump').textContent=pump2_ok?'P01▲ P02▲':'P01▲ P02✕';
   document.getElementById('sv-pump').style.color=pump2_ok?'var(--green)':'var(--accent2)';
-  SC('sc-cl2',cl2_warn?(cl2_low?'crit':'warn'):'');
+  SC('sc-cl2',(cl2_warn||cl2_high)?(cl2_low?'crit':'warn'):'');
   SC('sc-turb',turb_crit?'crit':(turb_warn?'warn':''));
   SC('sc-press',press_crit?'crit':(press_warn?'warn':''));
   SC('sc-ph',ph_warn?'warn':'');
@@ -332,15 +428,34 @@ function updateDisplay(){
     document.getElementById(id).className='alarm-item '+(state==='crit'?'active-crit':state==='warn'?'active-warn':'ok');
     const v=document.getElementById(vid); v.textContent=val; v.style.color=col||'var(--green)';
   }
-  setAlarm('al-cl2','alv-cl2',cl2_low?'crit':(cl2_warn?'warn':'ok'),cl2_warn?'⚠ '+cl2.toFixed(3):'OK',cl2_warn?'var(--accent2)':null);
+  setAlarm('al-cl2','alv-cl2',cl2_low?'crit':((cl2_warn||cl2_high)?'warn':'ok'),(cl2_warn||cl2_high)?'⚠ '+cl2.toFixed(3):'OK',(cl2_warn||cl2_high)?'var(--accent2)':null);
   setAlarm('al-turb','alv-turb',turb_crit?'crit':(turb_warn?'warn':'ok'),turb_warn?'⚠ '+turb.toFixed(2):'OK',turb_warn?'var(--accent2)':null);
   setAlarm('al-press','alv-press',press_crit?'crit':(press_warn?'warn':'ok'),press_warn?'⚠ '+press.toFixed(1):'OK',press_warn?'var(--yellow)':null);
-  setAlarm('al-ph','alv-ph',ph_warn?'warn':'ok',ph_warn?'⚠ '+ph.toFixed(1):'OK',ph_warn?'var(--yellow)':null);
+  setAlarm('al-ph','alv-ph',ph_warn?'warn':'ok',ph_warn?'⚠ '+ph.toFixed(2):'OK',ph_warn?'var(--yellow)':null);
   setAlarm('al-level','alv-level',lev_warn?'warn':'ok',lev_warn?'⚠ '+level.toFixed(0)+'%':'OK',lev_warn?'var(--yellow)':null);
   setAlarm('al-pump','alv-pump',p_fail?'crit':'ok',p_fail?'⚠ FAULT':'OK',p_fail?'var(--accent2)':null);
 
   document.getElementById('pv-cl2').textContent=cl2.toFixed(3)+' mg/L';
   document.getElementById('pv-dose').textContent=dose.toFixed(1)+' L/h';
+
+  // ── OEE (Observer: aggiornato ad ogni tick di display) ──
+  if(running){
+    oee_total++; if(pump2_ok) oee_up++;
+    oee_samples++; if(!cl2_warn&&!cl2_high) oee_ok_samples++;
+    const avail=oee_total>0?oee_up/oee_total:1;
+    const perf=clamp(flow/142,0,1);
+    const qual=oee_samples>0?oee_ok_samples/oee_samples:1;
+    const oee=avail*perf*qual;
+    const pct=v=>(v*100).toFixed(1)+'%';
+    const oeeCol=v=>v>=0.85?'var(--green)':v>=0.65?'var(--yellow)':'var(--accent2)';
+    document.getElementById('oee-oee').textContent=pct(oee);    document.getElementById('oee-oee').style.color=oeeCol(oee);
+    document.getElementById('oee-avail').textContent=pct(avail); document.getElementById('oee-avail').style.color=oeeCol(avail);
+    document.getElementById('oee-perf').textContent=pct(perf);   document.getElementById('oee-perf').style.color=oeeCol(perf);
+    document.getElementById('oee-qual').textContent=pct(qual);   document.getElementById('oee-qual').style.color=oeeCol(qual);
+  }
+
+  // ── Ticket system: rileva transizioni stato pompa ──
+  checkTickets();
 }
 
 // ════════════════════════════════════════
@@ -424,7 +539,7 @@ function drawProcessFlow(){
   STAGES.forEach((s,i)=>{
     const sx=cx(i)-Math.round(bw/2), sy=cy;
     const active=!(i===0&&!pump2_ok);
-    const isDisin=i===4, alCl2=isDisin&&cl2<0.15;
+    const isDisin=i===4, alCl2=isDisin&&cl2<activeRecipe.cl2Warn;
     ctx.fillStyle=alCl2?'rgba(255,107,53,.1)':'rgba(22,27,34,.92)';
     ctx.strokeStyle=alCl2?'rgba(255,107,53,.7)':(active?s.color+'55':'rgba(255,107,53,.35)');
     ctx.lineWidth=alCl2?2:1.5;
@@ -509,9 +624,61 @@ function frame(now){
   simStep(dt);
   updateDisplay();
   drawProcessFlow();
-  drawPlot('pc-cl2',h_cl2,h_sp,0,1,'#00d4ff','rgba(255,255,255,.25)',0.15);
+  drawPlot('pc-cl2',h_cl2,h_sp,0,1,'#00d4ff','rgba(255,255,255,.25)',activeRecipe.cl2Warn);
   drawPlot('pc-dose',h_dose,null,0,90,'#3fb950',null,DOSE_MAX);
   rafId=requestAnimationFrame(frame);
+}
+
+// ════════════════════════════════════════
+// TICKET SYSTEM
+// ════════════════════════════════════════
+function checkTickets(){
+  if(lastPumpOk&&!pump2_ok){
+    const ts=new Date().toLocaleTimeString('it-IT');
+    tickets.unshift({id:ticketId++,desc:'Guasto Pompa P-02 — Intervento richiesto',ts,status:'open',tag:'DI-200',assignee:'Manutenzione'});
+    renderTickets();
+  }
+  if(!lastPumpOk&&pump2_ok){
+    tickets=tickets.map(t=>(t.tag==='DI-200'&&t.status==='open')?{...t,status:'closed',closedTs:new Date().toLocaleTimeString('it-IT')}:t);
+    renderTickets();
+  }
+  lastPumpOk=pump2_ok;
+}
+
+function renderTickets(){
+  const list=document.getElementById('ticketList');
+  if(tickets.length===0){list.innerHTML='<div class="no-tickets">Nessun ticket aperto</div>';return;}
+  list.innerHTML=tickets.map(t=>`
+    <div class="ticket-item ${t.status}">
+      <span class="ticket-tag ${t.status}">${t.status==='open'?'OPEN':'CLOSED'}</span>
+      <span style="color:var(--text);font-size:.67rem">#TKT-${String(t.id).padStart(3,'0')} ${t.desc}</span><br>
+      <span class="ticket-ts">${t.ts} · ${t.tag} · ${t.assignee}${t.closedTs?' → '+t.closedTs:''}</span>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════
+// RECIPE (Strategy pattern) & ROLE (RBAC)
+// ════════════════════════════════════════
+function applyRecipe(){
+  const r=activeRecipe;
+  const sl=document.getElementById('spSlider');
+  sl.value=r.sp;
+  document.getElementById('spVal').textContent=r.sp.toFixed(2);
+  document.getElementById('pid-recipe').textContent=r.name;
+  cl2_int=0; // reset integrator on recipe change
+}
+
+function applyRole(){
+  const r=activeRole;
+  const dis=el=>{ el.disabled=true;  el.style.opacity='.35'; el.style.cursor='not-allowed'; };
+  const ena=el=>{ el.disabled=false; el.style.opacity='1';   el.style.cursor='pointer'; };
+  r.canDist  ? ena(document.getElementById('btnDist'))      : dis(document.getElementById('btnDist'));
+  r.canFail  ? ena(document.getElementById('btnPumpFail'))  : dis(document.getElementById('btnPumpFail'));
+  const sp=document.getElementById('spSlider');
+  r.canSP    ? (sp.disabled=false, sp.style.opacity='1')   : (sp.disabled=true, sp.style.opacity='.35');
+  const fl=document.getElementById('flowSlider');
+  r.canFlow  ? (fl.disabled=false, fl.style.opacity='1')   : (fl.disabled=true, fl.style.opacity='.35');
+  document.getElementById('pid-role').textContent=r.name;
 }
 
 // ════════════════════════════════════════
@@ -530,22 +697,20 @@ function setRunning(r){
 }
 
 function fullReset(){
-  // Stop loop
   running=false; cancelAnimationFrame(rafId); rafId=null; lastRealT=null;
-  // Reset process state
-  cl2=0.35; cl2_int=0; dose=24.5; dose_unsat=24.5;
+  cl2=activeRecipe.sp; cl2_int=0; dose=24.5; dose_unsat=24.5;
   ph=7.2; turb=0.42; press=3.2; level=72;
-  pump2_ok=true; dist_active=false; dist_gain=1;
-  // Reset history
+  pump2_ok=true; dist_active=false; dist_gain=1; lastPumpOk=true;
+  oee_up=0; oee_total=0; oee_ok_samples=0; oee_samples=0;
+  tickets=[]; ticketId=1; renderTickets();
+  ['oee-oee','oee-avail','oee-perf','oee-qual'].forEach(id=>{document.getElementById(id).textContent='—';});
   h_cl2.length=0; h_sp.length=0; h_dose.length=0;
-  for(let i=0;i<HLEN;i++){h_cl2.push(0.35);h_sp.push(0.35);h_dose.push(24.5);}
-  // Reset UI
+  for(let i=0;i<HLEN;i++){h_cl2.push(activeRecipe.sp);h_sp.push(activeRecipe.sp);h_dose.push(24.5);}
   const br=document.getElementById('btnRun'), bs=document.getElementById('btnStop');
   br.textContent='▶ Start'; br.style.background='var(--accent)'; br.style.color='var(--bg)';
   bs.disabled=true;
-  updateDisplay();
-  drawProcessFlow();
-  drawPlot('pc-cl2',h_cl2,h_sp,0,1,'#00d4ff','rgba(255,255,255,.25)',0.15);
+  updateDisplay(); drawProcessFlow();
+  drawPlot('pc-cl2',h_cl2,h_sp,0,1,'#00d4ff','rgba(255,255,255,.25)',activeRecipe.cl2Warn);
   drawPlot('pc-dose',h_dose,null,0,90,'#3fb950',null,DOSE_MAX);
 }
 
@@ -554,8 +719,8 @@ document.getElementById('btnStop').addEventListener('click',fullReset);
 document.getElementById('btnDist').addEventListener('click',()=>{
   dist_active=true; dist_gain=4; setTimeout(()=>{dist_gain=1;dist_active=false;},15000);
 });
-document.getElementById('btnPumpFail').addEventListener('click',()=>pump2_ok=false);
-document.getElementById('btnNorm').addEventListener('click',()=>{dist_active=false;dist_gain=1;pump2_ok=true;});
+document.getElementById('btnPumpFail').addEventListener('click',()=>{ pump2_ok=false; });
+document.getElementById('btnNorm').addEventListener('click',()=>{ dist_active=false; dist_gain=1; pump2_ok=true; });
 document.getElementById('spSlider').addEventListener('input',e=>{
   document.getElementById('spVal').textContent=parseFloat(e.target.value).toFixed(2);
 });
@@ -563,14 +728,38 @@ document.getElementById('flowSlider').addEventListener('input',e=>{
   document.getElementById('flowVal').textContent=e.target.value;
 });
 
-// Init — draw static state after layout
-updateDisplay();
+// ── Recipe selector ──
+document.getElementById('recipeSelect').addEventListener('change',e=>{
+  activeRecipe=RECIPES[e.target.value];
+  applyRecipe();
+});
+
+// ── Role selector ──
+document.getElementById('roleSelect').addEventListener('change',e=>{
+  activeRole=ROLES[e.target.value];
+  applyRole();
+});
+
+// ── Init ──
+applyRole(); applyRecipe(); updateDisplay(); renderTickets();
 if(document.readyState==='complete'){
-  setTimeout(()=>{drawProcessFlow();drawPlot('pc-cl2',h_cl2,h_sp,0,1,'#00d4ff','rgba(255,255,255,.25)',0.15);drawPlot('pc-dose',h_dose,null,0,90,'#3fb950',null,DOSE_MAX);},60);
+  setTimeout(()=>{
+    drawProcessFlow();
+    drawPlot('pc-cl2',h_cl2,h_sp,0,1,'#00d4ff','rgba(255,255,255,.25)',activeRecipe.cl2Warn);
+    drawPlot('pc-dose',h_dose,null,0,90,'#3fb950',null,DOSE_MAX);
+  },60);
 } else {
-  window.addEventListener('load',()=>{setTimeout(()=>{drawProcessFlow();drawPlot('pc-cl2',h_cl2,h_sp,0,1,'#00d4ff','rgba(255,255,255,.25)',0.15);drawPlot('pc-dose',h_dose,null,0,90,'#3fb950',null,DOSE_MAX);},60);});
+  window.addEventListener('load',()=>{setTimeout(()=>{
+    drawProcessFlow();
+    drawPlot('pc-cl2',h_cl2,h_sp,0,1,'#00d4ff','rgba(255,255,255,.25)',activeRecipe.cl2Warn);
+    drawPlot('pc-dose',h_dose,null,0,90,'#3fb950',null,DOSE_MAX);
+  },60);});
 }
-window.addEventListener('resize',()=>{drawProcessFlow();drawPlot('pc-cl2',h_cl2,h_sp,0,1,'#00d4ff','rgba(255,255,255,.25)',0.15);drawPlot('pc-dose',h_dose,null,0,90,'#3fb950',null,DOSE_MAX);});
+window.addEventListener('resize',()=>{
+  drawProcessFlow();
+  drawPlot('pc-cl2',h_cl2,h_sp,0,1,'#00d4ff','rgba(255,255,255,.25)',activeRecipe.cl2Warn);
+  drawPlot('pc-dose',h_dose,null,0,90,'#3fb950',null,DOSE_MAX);
+});
 </script>
 </body>
 </html>
