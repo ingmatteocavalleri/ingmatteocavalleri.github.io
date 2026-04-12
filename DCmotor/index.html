@@ -17,8 +17,8 @@
 
 <!-- NAV -->
 <nav class="top-nav">
-    <a href="https://www.dockhub.net" class="nav-logo">mc<span>.eng</span></a>
-    <a href="https://www.dockhub.net" class="nav-back">
+    <a href="../" class="nav-logo">mc.eng</a>
+    <a href="../" class="nav-back">
         <i class="fa-solid fa-arrow-left"></i> Home
     </a>
 </nav>
@@ -36,6 +36,7 @@
             <span class="meta-tag tag-dc">Separately Excited DC Motor</span>
             <span class="meta-tag tag-ctrl">Cascade Speed Control</span>
             <span class="meta-tag tag-atm">ATM Milano</span>
+            <span class="meta-tag tag-polimi">PoliMi — 10 CFU</span>
         </div>
         <h1>Tramway <em>"Carelli 1928"</em><br>Speed Control of a DC Drive</h1>
         <p class="subtitle">
@@ -350,24 +351,23 @@
             <div class="doc-section">
                 <span class="section-anchor" id="results"></span>
                 <h2><span class="sec-num">05</span> Simulation Results</h2>
-                <p>The complete Simulink model — comprising the cascade PI controllers, back-EMF decoupling, field-weakening logic, anti-windup back-calculation and the kinematic profile generator — is simulated over the full 10 km track. Three key signals are examined.</p>
-
-                <div class="result-card">
-                    <div class="result-label">5.1 — Speed Control</div>
-                    <p>The speed profile tracks the reference accurately across all seven segments. Acceleration phases show a clean linear ramp (rate-limiter active), confirming that the PI correctly saturates the torque command while the anti-windup prevents overshoot on exit. <strong style="color:var(--text)">Zero steady-state error</strong> and <strong style="color:var(--text)">zero overshoot</strong> at every speed step validate the 90° phase-margin design. Slope disturbances (km 3–4 uphill, km 8–9 downhill) are rejected by the integral action without visible speed deviation.</p>
+                <p>
+                    The complete Simulink model is simulated over the full 10 km track. All three control loops perform within specification: zero overshoot and zero steady-state error on the speed reference, armature current clamped at 156 A during acceleration with smooth anti-windup release, and excitation current correctly reduced to ≈ 2.6 A in the field-weakening region (km 4–6).
+                </p>
+                <div class="callout callout-info" style="align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
+                    <div style="display:flex;gap:14px;align-items:flex-start">
+                        <i class="fa-solid fa-chart-line" style="margin-top:2px;flex-shrink:0"></i>
+                        <div>
+                            <p style="color:var(--text);font-weight:500;margin-bottom:4px">Risultati completi nella pagina dedicata</p>
+                            <p style="margin:0">I grafici Simulink originali — velocità v(t), corrente di armatura i_a(t), corrente di eccitazione i_e(t) — con osservazioni dettagliate e schemi di controllo sono disponibili nella pagina dei risultati.</p>
+                        </div>
+                    </div>
+                    <a href="./simulation.html" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.75rem;font-weight:600;background:var(--accent);color:var(--bg);padding:8px 18px;border-radius:3px;text-decoration:none;white-space:nowrap;flex-shrink:0">
+                        → Apri Risultati
+                    </a>
                 </div>
 
-                <div class="result-card">
-                    <div class="result-label">5.2 — Armature Current</div>
-                    <p>During acceleration, the current PI saturates \(i_a\) to the rated value \(I_{tot} = 156\,\text{A}\), maximising traction force while protecting the motor windings from overheating. The back-calculation anti-windup ensures a smooth, spike-free transition when the current limit is released as the tram reaches the target speed. Negative current values during deceleration phases confirm correct regenerative-assist operation on the downhill segment.</p>
-                </div>
-
-                <div class="result-card">
-                    <div class="result-label">5.3 — Excitation Current</div>
-                    <p>The excitation current holds steadily at \(I_e = 5\,\text{A}\) throughout the constant-flux region. At the onset of the km 4–6 maximum-speed segment, the field-weakening controller correctly reduces \(I_e\) following the \(1/\omega\) law, keeping the back-EMF below the 600 V supply limit. The excitation PI tracks the reference without oscillation, confirming adequate bandwidth separation from the armature and speed loops.</p>
-                </div>
-
-                <table class="cmp-table">
+                <table class="cmp-table" style="margin-top:20px">
                     <thead><tr><th>Performance Index</th><th>Result</th><th>Requirement / Cause</th></tr></thead>
                     <tbody>
                         <tr><td>Steady-state speed error</td><td class="td-g">≈ 0</td><td>PI integral action</td></tr>
@@ -461,13 +461,13 @@ ome_max  = v_max_ms/(rho*d/<span class="v">2</span>);   <span class="c">% max sh
                 </p>
                 <div class="download-grid">
                     <div class="download-card">
-                        <div class="download-icon"><i class="fa-solid fa-play-circle"></i></div>
-                        <div class="download-name">Simulazione Interattiva</div>
-                        <div class="download-desc">Simulazione real-time del controllo in cascata: 3 loop PI con i parametri del report.</div>
+                        <div class="download-icon"><i class="fa-solid fa-chart-line"></i></div>
+                        <div class="download-name">Risultati della Simulazione</div>
+                        <div class="download-desc">Grafici Simulink originali del report: velocità v(t), corrente di armatura i_a(t) e corrente di eccitazione i_e(t), con osservazioni e schemi di controllo commentati.</div>
                         <a href="./simulation.html" class="download-btn">
-                            <i class="fa-solid fa-arrow-right"></i> Apri Simulazione
+                            <i class="fa-solid fa-arrow-right"></i> Apri Risultati
                         </a>
-                        <div class="download-note">// Runs in browser · No install required</div>
+                        <div class="download-note">// Grafici Simulink · Carelli 1928 · PoliMi 2026</div>
                     </div>
                     <div class="download-card">
                         <div class="download-icon"><i class="fa-solid fa-code"></i></div>
@@ -502,23 +502,23 @@ ome_max  = v_max_ms/(rho*d/<span class="v">2</span>);   <span class="c">% max sh
         </article>
     </div><!-- /doc-layout -->
 
-    <!-- SIMULATION BANNER -->
+    <!-- RESULTS BANNER -->
     <div style="margin:0 0 56px;padding:20px 24px;background:var(--surface);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
         <div>
-            <div style="font-family:var(--mono);font-size:.65rem;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">// Interactive Simulation</div>
-            <div style="font-family:var(--display);font-size:1.05rem;font-weight:700;margin-bottom:5px">Cascade PI Simulation — Carelli 1928</div>
-            <div style="color:var(--muted);font-size:.85rem">Simulazione JavaScript real-time con i parametri esatti del report: 3 loop PI, field weakening, anti-windup, profilo 10 km.</div>
+            <div style="font-family:var(--mono);font-size:.65rem;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">// Risultati della Simulazione</div>
+            <div style="font-family:var(--display);font-size:1.05rem;font-weight:700;margin-bottom:5px">Grafici Simulink — Carelli 1928</div>
+            <div style="color:var(--muted);font-size:.85rem">Velocità v(t), corrente di armatura i_a(t), corrente di eccitazione i_e(t) e schemi di controllo estratti dal report originale.</div>
         </div>
         <a href="./simulation.html" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.78rem;font-weight:600;background:var(--accent);color:var(--bg);padding:10px 22px;border-radius:3px;text-decoration:none;white-space:nowrap;flex-shrink:0">
-            ▶ Apri Simulazione
+            → Apri Risultati
         </a>
     </div>
 
 </div><!-- /page-wrapper -->
 
 <footer>
-    <p>© 2026 Matteo Cavalleri · Politecnico di Milano</p>
-    <p>dockhub.net/DCmotor</p>
+    <p>© 2026 Matteo Cavalleri · Politecnico di Milano · ID 10768765</p>
+    <p>dockhub.net / DCmotor</p>
 </footer>
 
 <script>
