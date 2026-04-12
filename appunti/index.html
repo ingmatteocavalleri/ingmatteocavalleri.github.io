@@ -11,741 +11,1190 @@
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
-    <a href="../" class="nav-logo">mc<span>.eng</span></a>
-    <a href="../" class="nav-back"><i class="fa-solid fa-arrow-left"></i> Home</a>
+  <a href="../" class="nav-logo">mc<span>.eng</span></a>
+  <a href="../" class="nav-back"><i class="fa-solid fa-arrow-left"></i> Home</a>
 </nav>
 
-<!-- PAGE HEADER -->
 <header class="page-header">
-    <div class="header-inner">
-        <div class="header-tag">// Politecnico di Milano · MSc Automation &amp; Control Engineering</div>
-        <h1>Appunti<span class="accent">.</span></h1>
-        <p>Raccolta organizzata di appunti, formulari e sintesi per i corsi del Politecnico di Milano.</p>
-    </div>
+  <div class="header-inner">
+    <div class="header-tag">// Politecnico di Milano &middot; MSc Automation &amp; Control Engineering</div>
+    <h1>Appunti<span class="accent">.</span></h1>
+    <p>Note di testo e PDF organizzati per corso. I PDF sono letti direttamente dalla repository GitHub.</p>
+  </div>
 </header>
 
-<!-- MAIN LAYOUT -->
 <div class="app-layout">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="search-wrap">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input type="text" id="searchInput" class="search-input" placeholder="Cerca...">
+      <button class="search-clear" id="searchClear" style="display:none">&times;</button>
+    </div>
 
-        <!-- Search -->
-        <div class="search-wrap">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="searchInput" class="search-input" placeholder="Cerca negli appunti...">
-            <button class="search-clear" id="searchClear" title="Cancella">×</button>
+    <div class="tab-row">
+      <button class="tab-btn active" data-tab="notes"><i class="fa-solid fa-pen-to-square"></i> Appunti</button>
+      <button class="tab-btn" data-tab="pdf"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+    </div>
+
+    <button class="btn-new" id="btnNew">
+      <i class="fa-solid fa-plus"></i> <span id="btnNewLabel">Nuovo appunto</span>
+    </button>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Corsi</div>
+      <div class="course-list" id="courseList"></div>
+    </div>
+
+    <div class="sidebar-section" id="tagsSection" style="display:none">
+      <div class="sidebar-label">Tag</div>
+      <div class="tag-cloud" id="tagCloud"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Gestione appunti</div>
+      <button class="btn-ghost" id="btnAddCourse"><i class="fa-solid fa-plus"></i> Aggiungi corso</button>
+      <button class="btn-ghost" id="btnExport"><i class="fa-solid fa-download"></i> Esporta JSON</button>
+      <button class="btn-ghost" id="btnImport"><i class="fa-solid fa-upload"></i> Importa JSON</button>
+      <input type="file" id="importFile" accept=".json" style="display:none">
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Repository GitHub</div>
+      <button class="btn-ghost" id="btnGhSettings"><i class="fa-solid fa-gear"></i> Configura GitHub</button>
+      <div class="gh-status" id="ghStatus"></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="notes-area">
+
+    <!-- NOTES PANEL -->
+    <div id="panelNotes">
+      <div class="notes-toolbar">
+        <div class="toolbar-left">
+          <span class="notes-count" id="notesCount">0 appunti</span>
+          <span class="filter-active" id="filterActive"></span>
         </div>
-
-        <!-- New note button -->
-        <button class="btn-new" id="btnNew">
-            <i class="fa-solid fa-plus"></i> Nuovo appunto
-        </button>
-
-        <!-- Courses filter -->
-        <div class="sidebar-section">
-            <div class="sidebar-label">Corsi</div>
-            <div class="course-list" id="courseList">
-                <button class="course-btn active" data-course="all">
-                    <i class="fa-solid fa-layer-group"></i>
-                    <span>Tutti</span>
-                    <span class="course-count" id="count-all">0</span>
-                </button>
-            </div>
+        <div class="toolbar-right">
+          <button class="view-btn active" id="viewGrid"><i class="fa-solid fa-grip"></i></button>
+          <button class="view-btn" id="viewList"><i class="fa-solid fa-list"></i></button>
+          <select class="sort-sel" id="sortSel">
+            <option value="updated">Ultima modifica</option>
+            <option value="created">Data creazione</option>
+            <option value="title">Titolo A&#x2192;Z</option>
+            <option value="course">Corso</option>
+          </select>
         </div>
+      </div>
+      <div class="notes-grid" id="notesGrid"></div>
+      <div class="empty-state" id="emptyNotes" style="display:none">
+        <div class="empty-icon"><i class="fa-solid fa-book-open"></i></div>
+        <h3>Nessun appunto</h3>
+        <p id="emptyNotesMsg">Crea il tuo primo appunto.</p>
+        <button class="btn-new-inline" id="btnNewInline"><i class="fa-solid fa-plus"></i> Crea appunto</button>
+      </div>
+    </div>
 
-        <!-- Tags filter -->
-        <div class="sidebar-section" id="tagsSection" style="display:none">
-            <div class="sidebar-label">Tag</div>
-            <div class="tag-cloud" id="tagCloud"></div>
+    <!-- PDF PANEL -->
+    <div id="panelPdf" style="display:none">
+      <div class="notes-toolbar">
+        <div class="toolbar-left">
+          <span class="notes-count" id="pdfCount">0 file</span>
+          <span id="pdfReloadStatus" style="font-family:var(--mono);font-size:.7rem;color:var(--muted)"></span>
         </div>
-
-        <!-- Manage courses -->
-        <div class="sidebar-section">
-            <div class="sidebar-label">Gestione</div>
-            <button class="btn-ghost" id="btnAddCourse">
-                <i class="fa-solid fa-plus"></i> Aggiungi corso
-            </button>
-            <button class="btn-ghost" id="btnExport">
-                <i class="fa-solid fa-download"></i> Esporta JSON
-            </button>
-            <button class="btn-ghost" id="btnImport">
-                <i class="fa-solid fa-upload"></i> Importa JSON
-            </button>
-            <input type="file" id="importFile" accept=".json" style="display:none">
+        <div class="toolbar-right">
+          <button class="btn-ghost-sm" id="btnRefreshPdf" title="Ricarica da GitHub">
+            <i class="fa-solid fa-rotate"></i> Aggiorna
+          </button>
+          <button class="btn-upload" id="btnUploadPdf">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Carica PDF
+          </button>
+          <input type="file" id="pdfFileInput" accept=".pdf" multiple style="display:none">
         </div>
+      </div>
 
-    </aside>
-
-    <!-- NOTES AREA -->
-    <main class="notes-area" id="notesArea">
-
-        <!-- Toolbar -->
-        <div class="notes-toolbar">
-            <div class="toolbar-left">
-                <span class="notes-count" id="notesCount">0 appunti</span>
-                <span class="filter-active" id="filterActive" style="display:none"></span>
-            </div>
-            <div class="toolbar-right">
-                <button class="view-btn active" id="viewGrid" title="Griglia"><i class="fa-solid fa-grip"></i></button>
-                <button class="view-btn" id="viewList" title="Lista"><i class="fa-solid fa-list"></i></button>
-                <select class="sort-sel" id="sortSel">
-                    <option value="updated">Ultima modifica</option>
-                    <option value="created">Data creazione</option>
-                    <option value="title">Titolo A→Z</option>
-                    <option value="course">Corso</option>
-                </select>
-            </div>
+      <!-- GitHub not configured -->
+      <div id="pdfNeedConfig" style="display:none">
+        <div class="info-box info-box-warn">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <div>
+            <strong>Repository GitHub non configurata.</strong><br>
+            Configura il tuo repo per caricare e leggere i PDF direttamente da GitHub Pages.
+          </div>
+          <button class="btn-save" id="btnConfigFromWarn">Configura</button>
         </div>
+      </div>
 
-        <!-- Notes grid -->
-        <div class="notes-grid" id="notesGrid">
-            <!-- populated by JS -->
+      <!-- Drop zone -->
+      <div class="drop-zone" id="dropZone">
+        <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+        <div class="drop-title">Trascina i PDF qui</div>
+        <div class="drop-sub">oppure usa il pulsante "Carica PDF"</div>
+        <div class="drop-sub" style="margin-top:6px;color:var(--muted);font-size:.68rem">
+          I file vengono committati nella cartella <code style="background:var(--surface2);padding:1px 5px;border-radius:2px">appunti/pdf/</code> del tuo repository
         </div>
+      </div>
 
-        <!-- Empty state -->
-        <div class="empty-state" id="emptyState" style="display:none">
-            <div class="empty-icon"><i class="fa-solid fa-book-open"></i></div>
-            <h3>Nessun appunto</h3>
-            <p id="emptyMsg">Crea il tuo primo appunto con il pulsante "Nuovo appunto".</p>
-            <button class="btn-new-inline" id="btnNewInline">
-                <i class="fa-solid fa-plus"></i> Crea appunto
-            </button>
-        </div>
+      <!-- PDF groups -->
+      <div id="pdfGroupsContainer"></div>
 
-    </main>
+      <div class="empty-state" id="emptyPdf" style="display:none">
+        <div class="empty-icon"><i class="fa-solid fa-file-pdf"></i></div>
+        <h3>Nessun PDF trovato</h3>
+        <p>Carica i tuoi PDF oppure aggiungili manualmente alla cartella <code>appunti/pdf/</code> nel repository.</p>
+      </div>
+    </div>
+
+  </main>
 </div>
 
-<!-- ═══ MODAL: NOTE EDITOR ═══ -->
+<!-- ======= MODAL EDITOR ======= -->
 <div class="modal-overlay" id="editorModal" style="display:none">
-    <div class="modal editor-modal">
-        <div class="modal-header">
-            <div class="modal-title" id="editorTitle">Nuovo appunto</div>
-            <div class="modal-actions">
-                <button class="btn-save" id="btnSave"><i class="fa-solid fa-floppy-disk"></i> Salva</button>
-                <button class="modal-close" id="editorClose">×</button>
-            </div>
-        </div>
-
-        <div class="editor-body">
-            <div class="editor-meta">
-                <input type="text" id="noteTitle" class="note-title-input" placeholder="Titolo dell'appunto...">
-
-                <div class="meta-row">
-                    <div class="meta-field">
-                        <label class="meta-label">Corso</label>
-                        <select id="noteCourse" class="meta-select">
-                            <option value="">— Seleziona corso —</option>
-                        </select>
-                    </div>
-                    <div class="meta-field">
-                        <label class="meta-label">Tag (separati da virgola)</label>
-                        <input type="text" id="noteTags" class="meta-input" placeholder="es: formula, esame, laboratorio">
-                    </div>
-                    <div class="meta-field">
-                        <label class="meta-label">Colore</label>
-                        <div class="color-picker" id="colorPicker">
-                            <div class="color-dot active" data-color="default" style="background:var(--surface2);border:2px solid var(--accent)"></div>
-                            <div class="color-dot" data-color="blue"    style="background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.4)"></div>
-                            <div class="color-dot" data-color="green"   style="background:rgba(63,185,80,.12);border:1px solid rgba(63,185,80,.35)"></div>
-                            <div class="color-dot" data-color="yellow"  style="background:rgba(227,179,65,.12);border:1px solid rgba(227,179,65,.4)"></div>
-                            <div class="color-dot" data-color="red"     style="background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.4)"></div>
-                            <div class="color-dot" data-color="purple"  style="background:rgba(163,113,247,.12);border:1px solid rgba(163,113,247,.4)"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Formatting toolbar -->
-            <div class="format-bar">
-                <button class="fmt-btn" data-cmd="bold" title="Grassetto"><i class="fa-solid fa-bold"></i></button>
-                <button class="fmt-btn" data-cmd="italic" title="Corsivo"><i class="fa-solid fa-italic"></i></button>
-                <button class="fmt-btn" data-cmd="underline" title="Sottolineato"><i class="fa-solid fa-underline"></i></button>
-                <div class="fmt-sep"></div>
-                <button class="fmt-btn" data-cmd="insertUnorderedList" title="Lista"><i class="fa-solid fa-list-ul"></i></button>
-                <button class="fmt-btn" data-cmd="insertOrderedList" title="Lista numerata"><i class="fa-solid fa-list-ol"></i></button>
-                <div class="fmt-sep"></div>
-                <button class="fmt-btn" data-insert="formula" title="Formula"><i class="fa-solid fa-square-root-variable"></i></button>
-                <button class="fmt-btn" data-insert="code" title="Codice inline"><i class="fa-solid fa-code"></i></button>
-                <button class="fmt-btn" data-insert="hr" title="Separatore"><i class="fa-solid fa-minus"></i></button>
-                <div class="fmt-sep"></div>
-                <button class="fmt-btn" data-cmd="h2" title="Titolo sezione"><b>H</b></button>
-                <button class="fmt-btn" data-cmd="h3" title="Sottotitolo"><b style="font-size:.7rem">H</b></button>
-            </div>
-
-            <div class="note-editor" id="noteContent" contenteditable="true"
-                 spellcheck="false"
-                 data-placeholder="Scrivi qui il tuo appunto...
-&#10;
-Puoi usare la toolbar per formattare il testo, aggiungere formule, elenchi e sezioni."></div>
-        </div>
+  <div class="modal editor-modal">
+    <div class="modal-header">
+      <div class="modal-title" id="editorTitle">Nuovo appunto</div>
+      <div class="modal-actions">
+        <button class="btn-save" id="btnSave"><i class="fa-solid fa-floppy-disk"></i> Salva</button>
+        <button class="modal-close" id="editorClose">&times;</button>
+      </div>
     </div>
+    <div class="editor-body">
+      <div class="editor-meta">
+        <input type="text" id="noteTitle" class="note-title-input" placeholder="Titolo appunto...">
+        <div class="meta-row">
+          <div class="meta-field">
+            <label class="meta-label">Corso</label>
+            <select id="noteCourse" class="meta-select"></select>
+          </div>
+          <div class="meta-field">
+            <label class="meta-label">Tag (virgola separati)</label>
+            <input type="text" id="noteTags" class="meta-input" placeholder="es: formula, esame, lab">
+          </div>
+          <div class="meta-field">
+            <label class="meta-label">Colore</label>
+            <div class="color-picker" id="colorPicker">
+              <div class="color-dot active" data-color="default"></div>
+              <div class="color-dot" data-color="blue"></div>
+              <div class="color-dot" data-color="green"></div>
+              <div class="color-dot" data-color="yellow"></div>
+              <div class="color-dot" data-color="red"></div>
+              <div class="color-dot" data-color="purple"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="format-bar">
+        <button class="fmt-btn" data-cmd="bold"><i class="fa-solid fa-bold"></i></button>
+        <button class="fmt-btn" data-cmd="italic"><i class="fa-solid fa-italic"></i></button>
+        <button class="fmt-btn" data-cmd="underline"><i class="fa-solid fa-underline"></i></button>
+        <div class="fmt-sep"></div>
+        <button class="fmt-btn" data-cmd="insertUnorderedList"><i class="fa-solid fa-list-ul"></i></button>
+        <button class="fmt-btn" data-cmd="insertOrderedList"><i class="fa-solid fa-list-ol"></i></button>
+        <div class="fmt-sep"></div>
+        <button class="fmt-btn" data-insert="formula"><i class="fa-solid fa-square-root-variable"></i></button>
+        <button class="fmt-btn" data-insert="code"><i class="fa-solid fa-code"></i></button>
+        <button class="fmt-btn" data-insert="hr"><i class="fa-solid fa-minus"></i></button>
+        <div class="fmt-sep"></div>
+        <button class="fmt-btn" data-cmd="h2"><b>H2</b></button>
+        <button class="fmt-btn" data-cmd="h3"><b style="font-size:.7rem">H3</b></button>
+      </div>
+      <div class="note-editor" id="noteContent" contenteditable="true"
+           spellcheck="false" data-placeholder="Scrivi qui il tuo appunto..."></div>
+    </div>
+  </div>
 </div>
 
-<!-- ═══ MODAL: ADD COURSE ═══ -->
-<div class="modal-overlay" id="courseModal" style="display:none">
-    <div class="modal small-modal">
-        <div class="modal-header">
-            <div class="modal-title">Aggiungi corso</div>
-            <button class="modal-close" id="courseClose">×</button>
-        </div>
-        <div style="padding:24px">
-            <div class="form-field">
-                <label class="meta-label">Nome del corso</label>
-                <input type="text" id="courseNameInput" class="meta-input" placeholder="es: Sistemi di Controllo">
-            </div>
-            <div class="form-field">
-                <label class="meta-label">Abbreviazione</label>
-                <input type="text" id="courseAbbrInput" class="meta-input" placeholder="es: SC" maxlength="6">
-            </div>
-            <div class="form-field">
-                <label class="meta-label">Anno accademico</label>
-                <input type="text" id="courseYearInput" class="meta-input" placeholder="es: 2025-26">
-            </div>
-            <div class="form-field">
-                <label class="meta-label">Colore</label>
-                <div class="color-picker" id="courseColorPicker">
-                    <div class="color-dot active" data-color="blue"   style="background:rgba(0,212,255,.15);border:2px solid rgba(0,212,255,.6)"></div>
-                    <div class="color-dot" data-color="green"  style="background:rgba(63,185,80,.12);border:1px solid rgba(63,185,80,.35)"></div>
-                    <div class="color-dot" data-color="yellow" style="background:rgba(227,179,65,.12);border:1px solid rgba(227,179,65,.4)"></div>
-                    <div class="color-dot" data-color="red"    style="background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.4)"></div>
-                    <div class="color-dot" data-color="purple" style="background:rgba(163,113,247,.12);border:1px solid rgba(163,113,247,.4)"></div>
-                </div>
-            </div>
-            <div style="display:flex;gap:10px;margin-top:24px">
-                <button class="btn-save" id="btnSaveCourse" style="flex:1">Aggiungi</button>
-                <button class="btn-ghost" id="btnCancelCourse" style="flex:1;justify-content:center">Annulla</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ═══ MODAL: VIEW NOTE ═══ -->
+<!-- ======= MODAL VIEW NOTE ======= -->
 <div class="modal-overlay" id="viewModal" style="display:none">
-    <div class="modal view-modal">
-        <div class="modal-header">
-            <div>
-                <div class="modal-title" id="viewTitle"></div>
-                <div class="view-meta" id="viewMeta"></div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-ghost-sm" id="btnEdit"><i class="fa-solid fa-pen"></i> Modifica</button>
-                <button class="btn-ghost-sm danger" id="btnDelete"><i class="fa-solid fa-trash"></i></button>
-                <button class="modal-close" id="viewClose">×</button>
-            </div>
-        </div>
-        <div class="view-body" id="viewBody"></div>
+  <div class="modal view-modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="viewTitle"></div>
+        <div class="view-meta" id="viewMeta"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost-sm" id="btnEdit"><i class="fa-solid fa-pen"></i> Modifica</button>
+        <button class="btn-ghost-sm danger" id="btnDeleteNote"><i class="fa-solid fa-trash"></i></button>
+        <button class="modal-close" id="viewClose">&times;</button>
+      </div>
     </div>
+    <div class="view-body" id="viewBody"></div>
+  </div>
 </div>
 
-<!-- FOOTER -->
+<!-- ======= MODAL ADD COURSE ======= -->
+<div class="modal-overlay" id="courseModal" style="display:none">
+  <div class="modal small-modal">
+    <div class="modal-header">
+      <div class="modal-title">Aggiungi corso</div>
+      <button class="modal-close" id="courseClose">&times;</button>
+    </div>
+    <div style="padding:22px;display:flex;flex-direction:column;gap:11px">
+      <div class="form-field">
+        <label class="meta-label">Nome del corso</label>
+        <input type="text" id="courseNameInput" class="meta-input" placeholder="es: Sistemi di Controllo">
+      </div>
+      <div class="form-field">
+        <label class="meta-label">Abbreviazione (max 6 caratteri)</label>
+        <input type="text" id="courseAbbrInput" class="meta-input" placeholder="es: SC" maxlength="6">
+      </div>
+      <div class="form-field">
+        <label class="meta-label">Anno accademico</label>
+        <input type="text" id="courseYearInput" class="meta-input" placeholder="es: 2025-26">
+      </div>
+      <div class="form-field">
+        <label class="meta-label">Colore</label>
+        <div class="color-picker" id="courseColorPicker">
+          <div class="color-dot active" data-color="blue"></div>
+          <div class="color-dot" data-color="green"></div>
+          <div class="color-dot" data-color="yellow"></div>
+          <div class="color-dot" data-color="red"></div>
+          <div class="color-dot" data-color="purple"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button class="btn-save" id="btnSaveCourse" style="flex:1">Aggiungi</button>
+        <button class="btn-ghost" id="btnCancelCourse" style="flex:1;justify-content:center">Annulla</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= MODAL GITHUB SETTINGS ======= -->
+<div class="modal-overlay" id="ghModal" style="display:none">
+  <div class="modal small-modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title"><i class="fa-brands fa-github"></i> Configura GitHub</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-top:3px">Necessario per leggere e caricare i PDF dal repository</div>
+      </div>
+      <button class="modal-close" id="ghClose">&times;</button>
+    </div>
+    <div style="padding:22px;display:flex;flex-direction:column;gap:13px">
+
+      <div class="info-box">
+        <i class="fa-solid fa-circle-info"></i>
+        <div style="font-size:.8rem;line-height:1.55">
+          I PDF vengono letti da <code>appunti/pdf/</code> del tuo repo e serviti da GitHub Pages.
+          Il PAT serve solo per <strong>caricare</strong> nuovi file — per leggere non &egrave; necessario.
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label class="meta-label">Username GitHub</label>
+        <input type="text" id="ghOwner" class="meta-input" placeholder="es: ingmatteocavalleri">
+      </div>
+      <div class="form-field">
+        <label class="meta-label">Nome repository</label>
+        <input type="text" id="ghRepo" class="meta-input" placeholder="es: dockhub.net">
+      </div>
+      <div class="form-field">
+        <label class="meta-label">Branch</label>
+        <input type="text" id="ghBranch" class="meta-input" value="main" placeholder="main">
+      </div>
+      <div class="form-field">
+        <label class="meta-label">Cartella PDF nel repo</label>
+        <input type="text" id="ghPdfPath" class="meta-input" value="appunti/pdf" placeholder="appunti/pdf">
+      </div>
+      <div class="form-field">
+        <label class="meta-label">
+          Personal Access Token
+          <a href="https://github.com/settings/tokens/new?scopes=repo&description=Appunti+PoliMi" target="_blank"
+             style="color:var(--accent);text-decoration:none;margin-left:8px;font-size:.6rem">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Genera PAT
+          </a>
+        </label>
+        <div style="position:relative">
+          <input type="password" id="ghPat" class="meta-input" placeholder="ghp_... (solo per upload)" style="padding-right:36px">
+          <button id="togglePat" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+        <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted)">
+          Scope necessario: <code>repo</code> (o <code>public_repo</code> per repo pubblici).
+          Salvato solo in localStorage del tuo browser.
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button class="btn-save" id="btnSaveGh" style="flex:1"><i class="fa-solid fa-floppy-disk"></i> Salva</button>
+        <button class="btn-ghost-sm" id="btnTestGh" style="flex:1;justify-content:center"><i class="fa-solid fa-plug"></i> Testa connessione</button>
+      </div>
+      <div id="ghTestResult" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= MODAL PDF VIEWER ======= -->
+<div class="modal-overlay" id="pdfModal" style="display:none">
+  <div class="modal pdf-modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="pdfModalTitle"></div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted)" id="pdfModalMeta"></div>
+      </div>
+      <div class="modal-actions">
+        <a class="btn-save" id="btnPdfDownload" target="_blank" download>
+          <i class="fa-solid fa-download"></i> Scarica
+        </a>
+        <a class="btn-ghost-sm" id="btnPdfGithub" target="_blank">
+          <i class="fa-brands fa-github"></i> GitHub
+        </a>
+        <button class="btn-ghost-sm danger" id="btnPdfDelete"><i class="fa-solid fa-trash"></i> Elimina</button>
+        <button class="modal-close" id="pdfClose">&times;</button>
+      </div>
+    </div>
+    <div class="pdf-viewer-wrap">
+      <iframe id="pdfViewer" class="pdf-viewer" allow="fullscreen"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- ======= UPLOAD PROGRESS ======= -->
+<div class="upload-progress" id="uploadProgress" style="display:none">
+  <div class="up-inner">
+    <div class="up-header">
+      <span id="upTitle">Caricamento...</span>
+      <button id="upClose" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem">&times;</button>
+    </div>
+    <div id="upList"></div>
+  </div>
+</div>
+
 <footer>
-    <p>© 2026 Matteo Cavalleri · Politecnico di Milano</p>
-    <p>dockhub.net / appunti</p>
+  <p>&copy; 2026 Matteo Cavalleri &middot; Politecnico di Milano</p>
+  <p>dockhub.net / appunti</p>
 </footer>
 
 <script>
 'use strict';
-// ═══════════════════════════════════════════════════════
-// DATA LAYER — localStorage
-// ═══════════════════════════════════════════════════════
-const LS_NOTES   = 'polimi_notes_v2';
-const LS_COURSES = 'polimi_courses_v2';
 
-const COLOR_MAP = {
-    default: { bg:'rgba(22,27,34,.0)', border:'var(--border)', accent:'var(--muted)' },
-    blue:    { bg:'rgba(0,212,255,.06)', border:'rgba(0,212,255,.3)', accent:'#00d4ff' },
-    green:   { bg:'rgba(63,185,80,.06)', border:'rgba(63,185,80,.3)', accent:'#3fb950' },
-    yellow:  { bg:'rgba(227,179,65,.06)', border:'rgba(227,179,65,.35)', accent:'#e3b341' },
-    red:     { bg:'rgba(255,107,53,.06)', border:'rgba(255,107,53,.3)', accent:'#ff6b35' },
-    purple:  { bg:'rgba(163,113,247,.06)', border:'rgba(163,113,247,.3)', accent:'#a371f7' },
+// =========================================================
+// CONFIG & CONSTANTS
+// =========================================================
+const LS_NOTES   = 'polimi_notes_v3';
+const LS_COURSES = 'polimi_courses_v3';
+const LS_GH      = 'polimi_gh_config';
+
+const COLOR_STYLES = {
+  default:{ bg:'rgba(22,27,34,0)',       border:'var(--border)',            accent:'#8b949e' },
+  blue:   { bg:'rgba(0,212,255,.05)',    border:'rgba(0,212,255,.28)',      accent:'#00d4ff' },
+  green:  { bg:'rgba(63,185,80,.05)',    border:'rgba(63,185,80,.28)',      accent:'#3fb950' },
+  yellow: { bg:'rgba(227,179,65,.05)',   border:'rgba(227,179,65,.32)',     accent:'#e3b341' },
+  red:    { bg:'rgba(255,107,53,.05)',   border:'rgba(255,107,53,.28)',     accent:'#ff6b35' },
+  purple: { bg:'rgba(163,113,247,.05)', border:'rgba(163,113,247,.28)',    accent:'#a371f7' },
+};
+const DOT_CSS = {
+  default:'background:#161b22;border:2px solid #8b949e',
+  blue:   'background:rgba(0,212,255,.2);border:1px solid rgba(0,212,255,.5)',
+  green:  'background:rgba(63,185,80,.2);border:1px solid rgba(63,185,80,.5)',
+  yellow: 'background:rgba(227,179,65,.2);border:1px solid rgba(227,179,65,.5)',
+  red:    'background:rgba(255,107,53,.2);border:1px solid rgba(255,107,53,.5)',
+  purple: 'background:rgba(163,113,247,.2);border:1px solid rgba(163,113,247,.5)',
+};
+const CC = {
+  blue:  {bg:'rgba(0,212,255,.1)',   t:'#00d4ff',b:'rgba(0,212,255,.3)'},
+  green: {bg:'rgba(63,185,80,.1)',   t:'#3fb950',b:'rgba(63,185,80,.3)'},
+  yellow:{bg:'rgba(227,179,65,.1)',  t:'#e3b341',b:'rgba(227,179,65,.3)'},
+  red:   {bg:'rgba(255,107,53,.1)',  t:'#ff6b35',b:'rgba(255,107,53,.3)'},
+  purple:{bg:'rgba(163,113,247,.1)',t:'#a371f7',b:'rgba(163,113,247,.3)'},
 };
 
-const COURSE_COLOR_MAP = {
-    blue:  { bg:'rgba(0,212,255,.1)', text:'#00d4ff',   border:'rgba(0,212,255,.3)' },
-    green: { bg:'rgba(63,185,80,.1)',  text:'#3fb950',   border:'rgba(63,185,80,.3)' },
-    yellow:{ bg:'rgba(227,179,65,.1)', text:'#e3b341',   border:'rgba(227,179,65,.3)' },
-    red:   { bg:'rgba(255,107,53,.1)', text:'#ff6b35',   border:'rgba(255,107,53,.3)' },
-    purple:{ bg:'rgba(163,113,247,.1)',text:'#a371f7',   border:'rgba(163,113,247,.3)' },
-};
-
-// Default courses
-const DEFAULT_COURSES = [
-    { id:'c1', name:'Dynamics of Electrical Machines',   abbr:'DEMD',  year:'2025-26', color:'blue'   },
-    { id:'c2', name:'Software Engineering for Automation',abbr:'SE4A',  year:'2025-26', color:'green'  },
-    { id:'c3', name:'Automation and Control Systems',     abbr:'ACS',   year:'2025-26', color:'yellow' },
-    { id:'c4', name:'Industrial Robotics',                abbr:'IR',    year:'2025-26', color:'red'    },
-    { id:'c5', name:'Energy Management Systems',          abbr:'EMS',   year:'2025-26', color:'purple' },
+// =========================================================
+// SAMPLE NOTES (loaded on first run)
+// =========================================================
+const SAMPLE_NOTES = [
+  {id:'sn1',courseId:'c_demd',color:'blue',tags:['formulario','corrente','motore'],
+   title:'Motore DC \u2014 Equazioni fondamentali',
+   content:'<h2>Equazioni del motore DC a eccitazione separata</h2><h3>Circuito di armatura</h3><ul><li>Tensione: <code>Va = Ra\u00b7Ia + La\u00b7dIa/dt + e</code></li><li>Back-EMF: <code>e = Ks\u00b7Ie\u00b7\u03c9</code></li><li>Coppia: <code>Te = Ks\u00b7Ie\u00b7Ia</code></li></ul><h3>Circuito di eccitazione</h3><ul><li><code>Ve = Re\u00b7Ie + Le\u00b7dIe/dt</code></li><li>Ie_rated=5A, Re=12\u03a9, Le=1.2H</li></ul><h3>Modello meccanico</h3><p><code>J\u00b7d\u03c9/dt = Te \u2212 \u03b2\u00b7\u03c9 \u2212 T_load</code></p><ul><li>J\u22489.10 kg\u00b7m\u00b2, \u03b2=0.81 Nms, M=25400 kg</li></ul><hr><h3>Verifica KVL</h3><p><code>En=Ks\u00b7Ie\u00b7\u03c9n=1.06\u00b75\u00b7101.6\u2248539V</code></p><p><code>En_KVL=Vdc\u2212Ra\u00b7Ia=600\u22120.39\u00b7156\u2248539V \u2713</code></p>',
+   createdAt:'2026-01-10T09:00:00.000Z',updatedAt:'2026-01-15T14:30:00.000Z'},
+  {id:'sn2',courseId:'c_demd',color:'yellow',tags:['PI','sintesi','polo-zero'],
+   title:'Sintesi regolatori PI \u2014 Polo-zero cancellation',
+   content:'<h2>PI per cancellazione polo-zero (PM=90\u00b0)</h2><h3>Armatura (BW=20 rad/s)</h3><ul><li><code>Kp_a=\u03c9i\u00b7La=20\u00b73.9e-3=0.078</code></li><li><code>Ki_a=\u03c9i\u00b7Ra=20\u00b70.39=7.8</code></li></ul><h3>Eccitazione (BW=40 rad/s)</h3><ul><li><code>Kp_e=40\u00b71.2=48, Ki_e=40\u00b712=480</code></li></ul><h3>Velocit\u00e0 (BW=2 rad/s)</h3><ul><li><code>Kp_\u03c9=2\u00b79.10=181.2, Ki_\u03c9=2\u00b70.81=1.62</code></li></ul><h3>Anti-windup back-calculation</h3><ul><li>Kb_a=100, Kb_e=10, Kb_\u03c9\u22480.0089</li></ul>',
+   createdAt:'2026-01-12T10:00:00.000Z',updatedAt:'2026-01-18T16:00:00.000Z'},
+  {id:'sn3',courseId:'c_se4a',color:'blue',tags:['ISA-95','SCADA','architettura'],
+   title:'Architettura ISA-95 \u2014 Piramide di automazione',
+   content:'<h2>Livelli ISA-95</h2><ul><li><strong>L4 \u2014 ERP:</strong> KPI, billing, pianificazione</li><li><strong>L3 \u2014 SCADA:</strong> supervisione, allarmi ISA-18.2, HMI Ignition 8.x</li><li><strong>L1 \u2014 PLC:</strong> Siemens S7-1500/1200, IEC 61131-3</li><li><strong>L0 \u2014 Campo:</strong> sensori, pompe, valvole</li></ul><h3>Protocolli</h3><ul><li>L3\u2194L1: OPC-UA (porta 4840)</li><li>L1\u2194L0: PROFINET IO, Modbus TCP, HART 7</li></ul>',
+   createdAt:'2026-02-01T10:00:00.000Z',updatedAt:'2026-02-05T14:00:00.000Z'},
+  {id:'sn4',courseId:'c_acs',color:'yellow',tags:['Bode','stabilit\u00e0','PM'],
+   title:'Margini di stabilit\u00e0 \u2014 Bode',
+   content:'<h2>Margini di stabilit\u00e0</h2><h3>Margine di fase (PM)</h3><p><code>PM=180\u00b0+arg{L(j\u03c9_c)}</code></p><ul><li>PM&gt;0 \u2192 stabile; PM=90\u00b0 \u2192 nessun overshoot</li></ul><h3>Margine di guadagno (GM)</h3><p><code>GM=-|L(j\u03c9_\u03c0)|_dB</code></p><h3>Criterio di Nyquist</h3><p>Stabile se il diagramma non encircla \u22121 per un numero di volte pari ai poli instabili di L(s).</p>',
+   createdAt:'2026-02-15T10:00:00.000Z',updatedAt:'2026-02-18T15:00:00.000Z'},
+  {id:'sn5',courseId:'c_ir',color:'red',tags:['DH','cinematica','Jacobiano'],
+   title:'Cinematica diretta \u2014 Denavit-Hartenberg',
+   content:'<h2>Convenzione DH</h2><p>Ogni giunto: (a, \u03b1, d, \u03b8)</p><ul><li><strong>a_i:</strong> distanza lungo x_i tra z_{i-1} e z_i</li><li><strong>\u03b1_i:</strong> angolo intorno x_i tra z_{i-1} e z_i</li><li><strong>d_i:</strong> distanza lungo z_{i-1} tra x_{i-1} e x_i</li><li><strong>\u03b8_i:</strong> angolo intorno z_{i-1} tra x_{i-1} e x_i</li></ul><h3>Matrice omogenea</h3><p><code>T=Rz(\u03b8)\u00b7Tz(d)\u00b7Tx(a)\u00b7Rx(\u03b1)</code></p><h3>Cinematica inversa</h3><p><code>q\u0307=J\u2020(q)\u00b7\u1e8b</code> \u2014 pseudoinversa del Jacobiano</p>',
+   createdAt:'2026-03-01T10:00:00.000Z',updatedAt:'2026-03-03T14:00:00.000Z'},
+  {id:'sn6',courseId:'c_ems',color:'purple',tags:['MPC','energia','ottimizzazione'],
+   title:'MPC per Energy Management',
+   content:'<h2>Model Predictive Control</h2><p><code>min \u03a3[x\'Qx+u\'Ru]+x_N\'Px_N</code></p><p>s.t. <code>x_{k+1}=Ax_k+Bu_k</code>, vincoli su u e x</p><h3>Vantaggi vs PID</h3><ul><li>Gestione esplicita dei vincoli</li><li>Ottimizzazione multi-variabile</li><li>Incorporazione previsioni (meteo, domanda)</li></ul>',
+   createdAt:'2026-03-10T10:00:00.000Z',updatedAt:'2026-03-12T11:00:00.000Z'},
 ];
 
-function loadCourses() {
-    const raw = localStorage.getItem(LS_COURSES);
-    return raw ? JSON.parse(raw) : DEFAULT_COURSES;
+const DEFAULT_COURSES = [
+  {id:'c_demd',name:'Dynamics of Electrical Machines and Drives',abbr:'DEMD',year:'2025-26',color:'blue'},
+  {id:'c_se4a',name:'Software Engineering for Automation',abbr:'SE4A',year:'2025-26',color:'green'},
+  {id:'c_acs', name:'Automation and Control Systems',abbr:'ACS',year:'2025-26',color:'yellow'},
+  {id:'c_ir',  name:'Industrial Robotics',abbr:'IR',year:'2025-26',color:'red'},
+  {id:'c_ems', name:'Energy Management Systems',abbr:'EMS',year:'2025-26',color:'purple'},
+];
+
+// =========================================================
+// STATE
+// =========================================================
+let notes=[], courses=[], ghConfig={};
+let pdfs=[];          // metadata list: {name,path,size,courseId,sha,uploadedAt,rawUrl,pageUrl}
+let pdfsLoaded=false; // whether we've fetched from GitHub at least once
+
+let activeTab='notes', filterCourse='all', filterTag=null, searchQuery='';
+let sortMode='updated', viewMode='grid';
+let editingId=null, selColor='default', selCourseColor='blue';
+let curPdf=null; // currently open PDF metadata
+
+// =========================================================
+// LOCALSTORAGE
+// =========================================================
+function loadNotes(){
+  const r=localStorage.getItem(LS_NOTES);
+  if(r) return JSON.parse(r);
+  localStorage.setItem(LS_NOTES,JSON.stringify(SAMPLE_NOTES));
+  return [...SAMPLE_NOTES];
 }
-function saveCourses(courses) { localStorage.setItem(LS_COURSES, JSON.stringify(courses)); }
-
-function loadNotes() {
-    const raw = localStorage.getItem(LS_NOTES);
-    return raw ? JSON.parse(raw) : [];
+function saveNotes(){localStorage.setItem(LS_NOTES,JSON.stringify(notes));}
+function loadCourses(){
+  const r=localStorage.getItem(LS_COURSES);
+  if(r) return JSON.parse(r);
+  localStorage.setItem(LS_COURSES,JSON.stringify(DEFAULT_COURSES));
+  return [...DEFAULT_COURSES];
 }
-function saveNotes(notes) { localStorage.setItem(LS_NOTES, JSON.stringify(notes)); }
-
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-function now() { return new Date().toISOString(); }
-function fmtDate(iso) {
-    const d = new Date(iso);
-    return d.toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}) +
-           ' ' + d.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+function saveCourses(){localStorage.setItem(LS_COURSES,JSON.stringify(courses));}
+function loadGhConfig(){
+  const r=localStorage.getItem(LS_GH);
+  return r ? JSON.parse(r) : {owner:'',repo:'',branch:'main',pdfPath:'appunti/pdf',pat:''};
 }
-function excerpt(html, len=180) {
-    const tmp = document.createElement('div');
-    tmp.innerHTML = html;
-    const text = tmp.textContent || '';
-    return text.length > len ? text.slice(0,len).trimEnd()+'…' : text;
-}
+function saveGhConfig(){localStorage.setItem(LS_GH,JSON.stringify(ghConfig));}
 
-// ═══════════════════════════════════════════════════════
-// APP STATE
-// ═══════════════════════════════════════════════════════
-let notes   = loadNotes();
-let courses = loadCourses();
-let filterCourse = 'all';
-let filterTag    = null;
-let searchQuery  = '';
-let sortMode     = 'updated';
-let viewMode     = 'grid';
-let editingId    = null;
-let selectedColor = 'default';
-let selectedCourseColor = 'blue';
+// =========================================================
+// HELPERS
+// =========================================================
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function now(){return new Date().toISOString();}
+function fmtDate(iso){return new Date(iso).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'});}
+function fmtSize(b){if(!b)return '?';return b<1024?b+'B':b<1048576?(b/1024).toFixed(1)+'KB':(b/1048576).toFixed(1)+'MB';}
+function excerpt(h,l=160){const d=document.createElement('div');d.innerHTML=h;const s=d.textContent||'';return s.length>l?s.slice(0,l).trimEnd()+'\u2026':s;}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function courseColor(cid){const c=courses.find(x=>x.id===cid);return c?(CC[c.color]||CC.blue):CC.blue;}
 
-// ═══════════════════════════════════════════════════════
-// RENDER SIDEBAR
-// ═══════════════════════════════════════════════════════
-function renderSidebar() {
-    const courseList = document.getElementById('courseList');
-    const totalVisible = getFiltered('all', null, '').length;
-
-    let html = `<button class="course-btn${filterCourse==='all'?' active':''}" data-course="all">
-        <i class="fa-solid fa-layer-group"></i><span>Tutti</span>
-        <span class="course-count">${totalVisible}</span></button>`;
-
-    courses.forEach(c => {
-        const count = getFiltered(c.id, null, '').length;
-        const cc = COURSE_COLOR_MAP[c.color] || COURSE_COLOR_MAP.blue;
-        html += `<button class="course-btn${filterCourse===c.id?' active':''}" data-course="${c.id}" style="${filterCourse===c.id?`background:${cc.bg};border-color:${cc.border};`:''}">
-            <span class="course-abbr" style="background:${cc.bg};color:${cc.text};border:1px solid ${cc.border}">${c.abbr}</span>
-            <span>${c.name}</span>
-            <span class="course-count">${count}</span>
-        </button>`;
-    });
-
-    courseList.innerHTML = html;
-    courseList.querySelectorAll('.course-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            filterCourse = btn.dataset.course;
-            filterTag = null;
-            document.getElementById('searchInput').value = '';
-            searchQuery = '';
-            renderSidebar();
-            renderNotes();
-        });
-    });
-
-    // Tags cloud
-    const allTags = {};
-    notes.forEach(n => (n.tags||[]).forEach(t => { allTags[t] = (allTags[t]||0)+1; }));
-    const tagCloud = document.getElementById('tagCloud');
-    const tagsSection = document.getElementById('tagsSection');
-    if(Object.keys(allTags).length === 0){ tagsSection.style.display='none'; return; }
-    tagsSection.style.display='';
-    tagCloud.innerHTML = Object.entries(allTags).map(([t,c]) =>
-        `<button class="tag-chip${filterTag===t?' active':''}" data-tag="${t}">${t} <span>${c}</span></button>`
-    ).join('');
-    tagCloud.querySelectorAll('.tag-chip').forEach(btn => {
-        btn.addEventListener('click', () => {
-            filterTag = filterTag === btn.dataset.tag ? null : btn.dataset.tag;
-            renderSidebar();
-            renderNotes();
-        });
-    });
+// =========================================================
+// GITHUB API
+// =========================================================
+function ghHeaders(withPat=false){
+  const h={'Accept':'application/vnd.github.v3+json'};
+  if(withPat && ghConfig.pat) h['Authorization']='token '+ghConfig.pat;
+  return h;
 }
 
-function renderCourseSelect() {
-    const sel = document.getElementById('noteCourse');
-    sel.innerHTML = '<option value="">— Seleziona corso —</option>' +
-        courses.map(c => `<option value="${c.id}">${c.name} (${c.abbr})</option>`).join('');
+function ghConfigured(){return !!(ghConfig.owner && ghConfig.repo);}
+
+// Build the raw URL for a file (readable without auth for public repos)
+function rawUrl(filePath){
+  return `https://raw.githubusercontent.com/${ghConfig.owner}/${ghConfig.repo}/${ghConfig.branch||'main'}/${filePath}`;
 }
 
-// ═══════════════════════════════════════════════════════
-// FILTER + SORT
-// ═══════════════════════════════════════════════════════
-function getFiltered(course=filterCourse, tag=filterTag, q=searchQuery) {
-    return notes.filter(n => {
-        if(course !== 'all' && n.courseId !== course) return false;
-        if(tag && !(n.tags||[]).includes(tag)) return false;
-        if(q) {
-            const text = (n.title + ' ' + n.content + ' ' + (n.tags||[]).join(' ')).toLowerCase();
-            if(!text.includes(q.toLowerCase())) return false;
-        }
-        return true;
-    });
+// Build the GitHub Pages URL
+function pagesUrl(filePath){
+  const base = ghConfig.repo==='dockhub.net' || ghConfig.repo===`${ghConfig.owner}.github.io`
+    ? `https://${ghConfig.owner}.github.io`
+    : `https://${ghConfig.owner}.github.io/${ghConfig.repo}`;
+  return `${base}/${filePath}`;
 }
 
-function getSorted(arr) {
-    return [...arr].sort((a,b) => {
-        if(sortMode==='title')   return a.title.localeCompare(b.title);
-        if(sortMode==='course')  return (a.courseId||'').localeCompare(b.courseId||'');
-        if(sortMode==='created') return new Date(b.createdAt) - new Date(a.createdAt);
-        return new Date(b.updatedAt) - new Date(a.updatedAt);
-    });
+// List files in the PDF folder via GitHub Contents API
+async function ghListPdfFolder(){
+  const path=ghConfig.pdfPath||'appunti/pdf';
+  const url=`https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${path}`;
+  const r=await fetch(url,{headers:ghHeaders(true)});
+  if(r.status===404) return []; // folder doesn't exist yet
+  if(!r.ok) throw new Error(`GitHub API error ${r.status}: ${await r.text()}`);
+  const items=await r.json();
+  return items.filter(i=>i.type==='file'&&i.name.toLowerCase().endsWith('.pdf'));
 }
 
-// ═══════════════════════════════════════════════════════
-// RENDER NOTES
-// ═══════════════════════════════════════════════════════
-function renderNotes() {
-    const filtered = getSorted(getFiltered());
-    const grid = document.getElementById('notesGrid');
-    const empty = document.getElementById('emptyState');
-    const countEl = document.getElementById('notesCount');
-    const filterActiveEl = document.getElementById('filterActive');
+// Upload a file via GitHub Contents API (needs PAT)
+async function ghPutFile(filePath, base64Content, message, sha=null){
+  const url=`https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${filePath}`;
+  const body={message, content:base64Content, branch:ghConfig.branch||'main'};
+  if(sha) body.sha=sha;
+  const r=await fetch(url,{method:'PUT',headers:{...ghHeaders(true),'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){const t=await r.text();throw new Error(`GitHub upload error ${r.status}: ${t}`);}
+  return r.json();
+}
 
-    countEl.textContent = filtered.length + (filtered.length===1?' appunto':' appunti');
+// Delete a file via GitHub Contents API (needs PAT + SHA)
+async function ghDeleteFile(filePath, sha, message){
+  const url=`https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${filePath}`;
+  const r=await fetch(url,{method:'DELETE',headers:{...ghHeaders(true),'Content-Type':'application/json'},body:JSON.stringify({message,sha,branch:ghConfig.branch||'main'})});
+  if(!r.ok) throw new Error(`GitHub delete error ${r.status}`);
+}
 
-    // Filter breadcrumb
-    if(filterCourse!=='all' || filterTag || searchQuery) {
-        const parts = [];
-        if(filterCourse!=='all') {
-            const c = courses.find(x=>x.id===filterCourse);
-            if(c) parts.push(c.abbr);
-        }
-        if(filterTag) parts.push('#'+filterTag);
-        if(searchQuery) parts.push('"'+searchQuery+'"');
-        filterActiveEl.style.display='';
-        filterActiveEl.textContent = '· '+parts.join(' · ');
-    } else {
-        filterActiveEl.style.display='none';
+// =========================================================
+// PDF METADATA — built from GitHub API response
+// =========================================================
+function ghItemToMeta(item){
+  const filePath=item.path;
+  // Try to find courseId from name prefix: "DEMD_filename.pdf"
+  const parts=item.name.split('_');
+  const abbr=parts[0].toUpperCase();
+  const c=courses.find(x=>x.abbr===abbr);
+  return {
+    name:     item.name,
+    path:     filePath,
+    size:     item.size,
+    sha:      item.sha,
+    courseId: c?.id || '',
+    rawUrl:   item.download_url || rawUrl(filePath),
+    pageUrl:  pagesUrl(filePath),
+    uploadedAt: now(), // GitHub API doesn't return upload date in contents API
+  };
+}
+
+// =========================================================
+// LOAD PDFs FROM GITHUB
+// =========================================================
+async function loadPdfsFromGitHub(showStatus=true){
+  if(!ghConfigured()){pdfs=[];renderPdfs();return;}
+  if(showStatus) setPdfStatus('Caricamento da GitHub...',false);
+  try{
+    const items=await ghListPdfFolder();
+    pdfs=items.map(ghItemToMeta);
+    pdfsLoaded=true;
+    setPdfStatus(`${pdfs.length} file &middot; aggiornato ${new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}`,false);
+  }catch(e){
+    setPdfStatus('Errore: '+e.message,true);
+    console.error(e);
+  }
+  renderSidebar();
+  renderPdfs();
+}
+
+function setPdfStatus(msg,isError){
+  const el=document.getElementById('pdfReloadStatus');
+  el.innerHTML=msg;
+  el.style.color=isError?'var(--accent2)':'var(--muted)';
+}
+
+// =========================================================
+// UPLOAD PDFs
+// =========================================================
+async function uploadPdfs(files){
+  if(!ghConfigured()){openGhModal();return;}
+  if(!ghConfig.pat){
+    alert('Configura il Personal Access Token GitHub per caricare file.\nPer leggere i PDF non serve il PAT, ma per caricarli s\u00ec.');
+    openGhModal();return;
+  }
+  showUploadProgress(files.length);
+  const folder=ghConfig.pdfPath||'appunti/pdf';
+  let ok=0;
+  for(let i=0;i<files.length;i++){
+    const file=files[i];
+    updateUploadItem(i,file.name,'upload','Caricamento...');
+    if(!file.type.includes('pdf')){updateUploadItem(i,file.name,'error','Non \u00e8 un PDF');continue;}
+    if(file.size>50*1048576){updateUploadItem(i,file.name,'error','Supera 50MB');continue;}
+    try{
+      // Read as base64
+      const b64=await fileToBase64(file);
+      const filePath=`${folder}/${file.name}`;
+      await ghPutFile(filePath,b64,`Upload PDF: ${file.name} [appunti]`);
+      ok++;
+      updateUploadItem(i,file.name,'ok','Caricato \u2713');
+    }catch(e){
+      updateUploadItem(i,file.name,'error',e.message.slice(0,60));
     }
-
-    if(filtered.length === 0) {
-        grid.style.display='none'; empty.style.display='';
-        document.getElementById('emptyMsg').textContent =
-            searchQuery ? `Nessun risultato per "${searchQuery}".` :
-            filterCourse!=='all' ? 'Nessun appunto per questo corso. Creane uno!' :
-            'Crea il tuo primo appunto con il pulsante "Nuovo appunto".';
-        return;
-    }
-
-    grid.style.display=''; empty.style.display='none';
-    grid.className = 'notes-grid ' + viewMode;
-
-    grid.innerHTML = filtered.map(n => {
-        const c  = courses.find(x=>x.id===n.courseId);
-        const cc = c ? (COURSE_COLOR_MAP[c.color]||COURSE_COLOR_MAP.blue) : null;
-        const nc = COLOR_MAP[n.color||'default'];
-        const tags = (n.tags||[]).slice(0,4);
-
-        return `<div class="note-card" data-id="${n.id}" style="background:var(--surface);border:1px solid ${nc.border};border-left:3px solid ${nc.accent}">
-            <div class="note-card-header">
-                ${c ? `<span class="note-course-badge" style="background:${cc.bg};color:${cc.text};border:1px solid ${cc.border}">${c.abbr}</span>` : ''}
-                <span class="note-date">${fmtDate(n.updatedAt)}</span>
-            </div>
-            <h3 class="note-title">${escHtml(n.title||'Senza titolo')}</h3>
-            <p class="note-excerpt">${escHtml(excerpt(n.content||''))}</p>
-            ${tags.length ? `<div class="note-tags">${tags.map(t=>`<span class="note-tag">#${escHtml(t)}</span>`).join('')}</div>` : ''}
-            <div class="note-card-footer">
-                <button class="card-btn" data-action="edit"  data-id="${n.id}"><i class="fa-solid fa-pen"></i></button>
-                <button class="card-btn danger" data-action="delete" data-id="${n.id}"><i class="fa-solid fa-trash"></i></button>
-            </div>
-        </div>`;
-    }).join('');
-
-    // Click handlers
-    grid.querySelectorAll('.note-card').forEach(card => {
-        card.addEventListener('click', e => {
-            if(e.target.closest('.card-btn')) return;
-            openView(card.dataset.id);
-        });
-    });
-    grid.querySelectorAll('[data-action="edit"]').forEach(btn => {
-        btn.addEventListener('click', e => { e.stopPropagation(); openEditor(btn.dataset.id); });
-    });
-    grid.querySelectorAll('[data-action="delete"]').forEach(btn => {
-        btn.addEventListener('click', e => { e.stopPropagation(); deleteNote(btn.dataset.id); });
-    });
+  }
+  finalizeUploadProgress(ok,files.length);
+  await loadPdfsFromGitHub(false);
 }
 
-function escHtml(s) {
-    return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ═══════════════════════════════════════════════════════
-// NOTE EDITOR
-// ═══════════════════════════════════════════════════════
-function openEditor(id=null) {
-    editingId = id;
-    const note = id ? notes.find(n=>n.id===id) : null;
-    selectedColor = note ? (note.color||'default') : 'default';
-
-    document.getElementById('editorTitle').textContent = id ? 'Modifica appunto' : 'Nuovo appunto';
-    document.getElementById('noteTitle').value   = note?.title || '';
-    document.getElementById('noteCourse').value  = note?.courseId || '';
-    document.getElementById('noteTags').value    = (note?.tags||[]).join(', ');
-    document.getElementById('noteContent').innerHTML = note?.content || '';
-
-    // Update color picker
-    document.querySelectorAll('#colorPicker .color-dot').forEach(d => {
-        d.classList.toggle('active', d.dataset.color === selectedColor);
-    });
-
-    renderCourseSelect();
-    if(note) document.getElementById('noteCourse').value = note.courseId||'';
-
-    document.getElementById('editorModal').style.display='flex';
-    document.getElementById('noteTitle').focus();
-}
-
-function saveNote() {
-    const title   = document.getElementById('noteTitle').value.trim();
-    const course  = document.getElementById('noteCourse').value;
-    const tagsRaw = document.getElementById('noteTags').value;
-    const content = document.getElementById('noteContent').innerHTML;
-    const tags    = tagsRaw.split(',').map(t=>t.trim()).filter(Boolean);
-
-    if(!title && !content) return;
-
-    if(editingId) {
-        const idx = notes.findIndex(n=>n.id===editingId);
-        if(idx>=0) notes[idx] = {...notes[idx], title:title||'Senza titolo', courseId:course, tags, content, color:selectedColor, updatedAt:now()};
-    } else {
-        notes.unshift({ id:uid(), title:title||'Senza titolo', courseId:course, tags, content, color:selectedColor, createdAt:now(), updatedAt:now() });
-    }
-    saveNotes(notes);
-    closeEditor();
-    renderSidebar();
-    renderNotes();
-}
-
-function closeEditor() { document.getElementById('editorModal').style.display='none'; }
-
-// ═══════════════════════════════════════════════════════
-// VIEW MODE
-// ═══════════════════════════════════════════════════════
-function openView(id) {
-    const note = notes.find(n=>n.id===id);
-    if(!note) return;
-    const c  = courses.find(x=>x.id===note.courseId);
-    const cc = c ? (COURSE_COLOR_MAP[c.color]||COURSE_COLOR_MAP.blue) : null;
-
-    document.getElementById('viewTitle').textContent = note.title||'Senza titolo';
-    document.getElementById('viewMeta').innerHTML =
-        (c ? `<span style="background:${cc.bg};color:${cc.text};border:1px solid ${cc.border};border-radius:3px;padding:2px 8px;font-size:.7rem;font-family:var(--mono)">${c.name}</span> ` : '')+
-        `<span style="color:var(--muted);font-size:.72rem;font-family:var(--mono)">Aggiornato ${fmtDate(note.updatedAt)}</span>`;
-
-    document.getElementById('viewBody').innerHTML = `
-        <div class="rendered-content">${note.content||'<em style="color:var(--muted)">Nessun contenuto</em>'}</div>
-        ${(note.tags||[]).length ? `<div class="view-tags" style="margin-top:24px;display:flex;gap:6px;flex-wrap:wrap">
-            ${note.tags.map(t=>`<span class="note-tag">#${escHtml(t)}</span>`).join('')}</div>` : ''}`;
-
-    document.getElementById('btnEdit').onclick   = () => { closeView(); openEditor(id); };
-    document.getElementById('btnDelete').onclick = () => { closeView(); deleteNote(id); };
-    document.getElementById('viewModal').style.display='flex';
-}
-function closeView() { document.getElementById('viewModal').style.display='none'; }
-
-// ═══════════════════════════════════════════════════════
-// DELETE
-// ═══════════════════════════════════════════════════════
-function deleteNote(id) {
-    if(!confirm('Eliminare questo appunto? L\'operazione non può essere annullata.')) return;
-    notes = notes.filter(n=>n.id!==id);
-    saveNotes(notes);
-    renderSidebar();
-    renderNotes();
-}
-
-// ═══════════════════════════════════════════════════════
-// COURSE MANAGEMENT
-// ═══════════════════════════════════════════════════════
-function openCourseModal() {
-    document.getElementById('courseNameInput').value = '';
-    document.getElementById('courseAbbrInput').value = '';
-    document.getElementById('courseYearInput').value = '2025-26';
-    selectedCourseColor = 'blue';
-    document.querySelectorAll('#courseColorPicker .color-dot').forEach(d => {
-        d.classList.toggle('active', d.dataset.color==='blue');
-    });
-    document.getElementById('courseModal').style.display='flex';
-    document.getElementById('courseNameInput').focus();
-}
-
-function saveCourse() {
-    const name = document.getElementById('courseNameInput').value.trim();
-    const abbr = document.getElementById('courseAbbrInput').value.trim().toUpperCase();
-    const year = document.getElementById('courseYearInput').value.trim();
-    if(!name||!abbr) return;
-    courses.push({ id:uid(), name, abbr, year, color:selectedCourseColor });
-    saveCourses(courses);
-    document.getElementById('courseModal').style.display='none';
-    renderSidebar();
-    renderCourseSelect();
-}
-
-// ═══════════════════════════════════════════════════════
-// EXPORT / IMPORT
-// ═══════════════════════════════════════════════════════
-function exportData() {
-    const data = { notes, courses, exported: now() };
-    const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href=url; a.download='polimi_appunti_'+new Date().toISOString().slice(0,10)+'.json';
-    a.click(); URL.revokeObjectURL(url);
-}
-
-function importData(file) {
-    const reader = new FileReader();
-    reader.onload = e => {
-        try {
-            const data = JSON.parse(e.target.result);
-            if(data.notes && Array.isArray(data.notes)) {
-                if(!confirm(`Importare ${data.notes.length} appunti e ${data.courses?.length||0} corsi? I dati esistenti saranno mantenuti.`)) return;
-                // Merge (skip duplicates by id)
-                const existIds = new Set(notes.map(n=>n.id));
-                const newNotes = data.notes.filter(n=>!existIds.has(n.id));
-                notes = [...notes, ...newNotes];
-                saveNotes(notes);
-                if(data.courses) {
-                    const existCIds = new Set(courses.map(c=>c.id));
-                    const newCourses = data.courses.filter(c=>!existCIds.has(c.id));
-                    courses = [...courses, ...newCourses];
-                    saveCourses(courses);
-                }
-                renderSidebar(); renderNotes();
-                alert(`Importati ${newNotes.length} nuovi appunti.`);
-            }
-        } catch(err) { alert('File JSON non valido.'); }
+function fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      // result is data:application/pdf;base64,xxxx
+      const b64=e.target.result.split(',')[1];
+      res(b64);
     };
-    reader.readAsText(file);
+    r.onerror=rej;
+    r.readAsDataURL(file);
+  });
 }
 
-// ═══════════════════════════════════════════════════════
-// FORMATTING TOOLBAR
-// ═══════════════════════════════════════════════════════
-function initFormatBar() {
-    document.querySelectorAll('.fmt-btn[data-cmd]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const cmd = btn.dataset.cmd;
-            if(cmd==='h2'||cmd==='h3') document.execCommand('formatBlock',false,cmd);
-            else document.execCommand(cmd);
-            document.getElementById('noteContent').focus();
-        });
-    });
-    document.querySelectorAll('.fmt-btn[data-insert]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const ed = document.getElementById('noteContent');
-            ed.focus();
-            const sel = window.getSelection();
-            if(!sel.rangeCount) return;
-            const r = sel.getRangeAt(0);
-            let node;
-            if(btn.dataset.insert==='formula') {
-                node = document.createElement('code');
-                node.className='formula'; node.textContent='formula';
-            } else if(btn.dataset.insert==='code') {
-                node = document.createElement('code');
-                node.textContent = sel.toString()||'codice';
-            } else {
-                node = document.createElement('hr');
-            }
-            r.deleteContents(); r.insertNode(node);
-            r.setStartAfter(node); r.collapse(true);
-            sel.removeAllRanges(); sel.addRange(r);
-        });
-    });
+// Upload progress UI
+function showUploadProgress(total){
+  const el=document.getElementById('uploadProgress');
+  const list=document.getElementById('upList');
+  document.getElementById('upTitle').textContent=`Caricamento su GitHub (0/${total})`;
+  list.innerHTML='';
+  el.style.display='';
+}
+function updateUploadItem(i,name,state,msg){
+  const list=document.getElementById('upList');
+  let item=list.querySelector(`[data-i="${i}"]`);
+  if(!item){item=document.createElement('div');item.dataset.i=i;item.className='up-item';list.appendChild(item);}
+  const icon=state==='upload'?'<i class="fa-solid fa-spinner fa-spin" style="color:var(--accent)"></i>'
+    :state==='ok'?'<i class="fa-solid fa-check" style="color:var(--green)"></i>'
+    :'<i class="fa-solid fa-xmark" style="color:var(--accent2)"></i>';
+  item.innerHTML=`${icon}<span class="up-name">${esc(name)}</span><span class="up-msg">${esc(msg)}</span>`;
+}
+function finalizeUploadProgress(ok,total){
+  document.getElementById('upTitle').textContent=`Completato: ${ok}/${total} file caricati`;
+  setTimeout(()=>{document.getElementById('uploadProgress').style.display='none';},3000);
 }
 
-// ═══════════════════════════════════════════════════════
+// =========================================================
+// DELETE PDF
+// =========================================================
+async function deletePdf(meta){
+  if(!ghConfig.pat){alert('Serve il PAT GitHub per eliminare file.');return;}
+  if(!confirm(`Eliminare "${meta.name}" dal repository? Questa azione non pu\u00f2 essere annullata.`))return;
+  closePdfModal();
+  setPdfStatus('Eliminazione...',false);
+  try{
+    await ghDeleteFile(meta.path,meta.sha,`Delete PDF: ${meta.name} [appunti]`);
+    setPdfStatus('File eliminato.',false);
+    await loadPdfsFromGitHub(false);
+  }catch(e){
+    setPdfStatus('Errore eliminazione: '+e.message,true);
+    alert('Errore: '+e.message);
+  }
+}
+
+// =========================================================
+// TABS
+// =========================================================
+function switchTab(tab){
+  activeTab=tab;
+  document.getElementById('panelNotes').style.display=tab==='notes'?'':'none';
+  document.getElementById('panelPdf').style.display=tab==='pdf'?'':'none';
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  document.getElementById('btnNewLabel').textContent=tab==='notes'?'Nuovo appunto':'Carica PDF';
+  document.getElementById('tagsSection').style.display=tab==='notes'?'':'none';
+  renderSidebar();
+  if(tab==='notes') renderNotes();
+  else{if(!pdfsLoaded)loadPdfsFromGitHub();else renderPdfs();}
+}
+
+// =========================================================
+// SIDEBAR
+// =========================================================
+function renderSidebar(){
+  const items=activeTab==='notes'?notes:pdfs;
+  const countFor=cid=>cid==='all'?getFiltered(items).length:getFiltered(items.filter(x=>x.courseId===cid)).length;
+
+  let html=`<button class="course-btn${filterCourse==='all'?' active':''}" data-course="all">
+    <i class="fa-solid fa-layer-group"></i><span>Tutti</span>
+    <span class="course-count">${countFor('all')}</span></button>`;
+
+  courses.forEach(c=>{
+    const col=CC[c.color]||CC.blue;
+    const a=filterCourse===c.id;
+    html+=`<button class="course-btn${a?' active':''}" data-course="${c.id}"${a?` style="background:${col.bg};border-color:${col.b}"`:''}>
+      <span class="course-abbr" style="background:${col.bg};color:${col.t};border:1px solid ${col.b}">${c.abbr}</span>
+      <span title="${esc(c.name)}">${esc(c.name)}</span>
+      <span class="course-count">${countFor(c.id)}</span></button>`;
+  });
+
+  document.getElementById('courseList').innerHTML=html;
+  document.getElementById('courseList').querySelectorAll('.course-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      filterCourse=b.dataset.course;filterTag=null;
+      searchQuery='';document.getElementById('searchInput').value='';
+      document.getElementById('searchClear').style.display='none';
+      renderSidebar();activeTab==='notes'?renderNotes():renderPdfs();
+    });
+  });
+
+  // GitHub status in sidebar
+  updateGhStatus();
+
+  // Tags (notes only)
+  const ts=document.getElementById('tagsSection');
+  if(activeTab!=='notes'){ts.style.display='none';return;}
+  const allTags={};
+  notes.forEach(n=>(n.tags||[]).forEach(t=>{allTags[t]=(allTags[t]||0)+1;}));
+  if(!Object.keys(allTags).length){ts.style.display='none';return;}
+  ts.style.display='';
+  document.getElementById('tagCloud').innerHTML=Object.entries(allTags)
+    .map(([t,c])=>`<button class="tag-chip${filterTag===t?' active':''}" data-tag="${t}">${t}<span>${c}</span></button>`).join('');
+  document.getElementById('tagCloud').querySelectorAll('.tag-chip').forEach(b=>{
+    b.addEventListener('click',()=>{filterTag=filterTag===b.dataset.tag?null:b.dataset.tag;renderSidebar();renderNotes();});
+  });
+}
+
+function updateGhStatus(){
+  const el=document.getElementById('ghStatus');
+  if(ghConfigured()){
+    el.innerHTML=`<div class="gh-badge ok"><i class="fa-brands fa-github"></i> ${esc(ghConfig.owner)}/${esc(ghConfig.repo)}</div>`;
+  } else {
+    el.innerHTML=`<div class="gh-badge warn"><i class="fa-solid fa-triangle-exclamation"></i> Non configurato</div>`;
+  }
+}
+
+// =========================================================
+// FILTER HELPER
+// =========================================================
+function getFiltered(items){
+  return (items||[]).filter(n=>{
+    if(filterCourse!=='all'&&n.courseId!==filterCourse)return false;
+    // search in name or title+content+tags
+    if(searchQuery){
+      const haystack=('name' in n&&!('title' in n))
+        ? n.name.toLowerCase()
+        : (n.title+' '+n.content+' '+(n.tags||[]).join(' ')).toLowerCase();
+      if(!haystack.includes(searchQuery.toLowerCase()))return false;
+    }
+    // tag filter (notes only)
+    if(filterTag&&!(n.tags||[]).includes(filterTag))return false;
+    return true;
+  });
+}
+
+// =========================================================
+// RENDER NOTES
+// =========================================================
+function renderNotes(){
+  let filtered=getFiltered(notes);
+  filtered=[...filtered].sort((a,b)=>{
+    if(sortMode==='title')return(a.title||'').localeCompare(b.title||'');
+    if(sortMode==='course')return(a.courseId||'').localeCompare(b.courseId||'');
+    if(sortMode==='created')return new Date(b.createdAt)-new Date(a.createdAt);
+    return new Date(b.updatedAt)-new Date(a.updatedAt);
+  });
+  const grid=document.getElementById('notesGrid'),empty=document.getElementById('emptyNotes');
+  document.getElementById('notesCount').textContent=filtered.length+(filtered.length===1?' appunto':' appunti');
+  const parts=[];
+  if(filterCourse!=='all'){const c=courses.find(x=>x.id===filterCourse);if(c)parts.push(c.abbr);}
+  if(filterTag)parts.push('#'+filterTag);
+  if(searchQuery)parts.push('"'+searchQuery+'"');
+  document.getElementById('filterActive').textContent=parts.length?'\u00b7 '+parts.join(' \u00b7 '):'';
+  if(!filtered.length){grid.style.display='none';empty.style.display='';
+    document.getElementById('emptyNotesMsg').textContent=searchQuery?`Nessun risultato per "${searchQuery}".`:'Nessun appunto per questo filtro.';return;}
+  grid.style.display='';empty.style.display='none';
+  grid.className='notes-grid '+(viewMode==='list'?'list':'grid');
+  grid.innerHTML=filtered.map(n=>{
+    const cs=COLOR_STYLES[n.color||'default'];
+    const c=courses.find(x=>x.id===n.courseId);
+    const col=c?(CC[c.color]||CC.blue):null;
+    const tags=(n.tags||[]).slice(0,4);
+    return`<div class="note-card" data-id="${n.id}" style="background:var(--surface);border:1px solid ${cs.border};border-left:3px solid ${cs.accent}">
+      <div class="note-card-header">
+        ${c?`<span class="note-course-badge" style="background:${col.bg};color:${col.t};border:1px solid ${col.b}">${c.abbr}</span>`:''}
+        <span class="note-date">${fmtDate(n.updatedAt)}</span>
+      </div>
+      <h3 class="note-title">${esc(n.title||'Senza titolo')}</h3>
+      <p class="note-excerpt">${esc(excerpt(n.content||''))}</p>
+      ${tags.length?`<div class="note-tags">${tags.map(t=>`<span class="note-tag">#${esc(t)}</span>`).join('')}</div>`:''}
+      <div class="note-card-footer">
+        <button class="card-btn" data-action="edit" data-id="${n.id}"><i class="fa-solid fa-pen"></i></button>
+        <button class="card-btn danger" data-action="delete" data-id="${n.id}"><i class="fa-solid fa-trash"></i></button>
+      </div></div>`;
+  }).join('');
+  grid.querySelectorAll('.note-card').forEach(c=>c.addEventListener('click',e=>{if(e.target.closest('.card-btn'))return;openView(c.dataset.id);}));
+  grid.querySelectorAll('[data-action="edit"]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();openEditor(b.dataset.id);}));
+  grid.querySelectorAll('[data-action="delete"]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();deleteNote(b.dataset.id);}));
+}
+
+// =========================================================
+// RENDER PDFs
+// =========================================================
+function renderPdfs(){
+  const container=document.getElementById('pdfGroupsContainer');
+  const emptyEl=document.getElementById('emptyPdf');
+  const needConfig=document.getElementById('pdfNeedConfig');
+  const dz=document.getElementById('dropZone');
+
+  if(!ghConfigured()){
+    needConfig.style.display='';dz.style.display='none';
+    container.innerHTML='';emptyEl.style.display='none';
+    document.getElementById('pdfCount').textContent='0 file';
+    return;
+  }
+  needConfig.style.display='none';
+
+  const filtered=getFiltered(pdfs);
+  document.getElementById('pdfCount').textContent=filtered.length+' file';
+
+  if(!filtered.length){
+    dz.style.display='';container.innerHTML='';emptyEl.style.display='';
+    return;
+  }
+  dz.style.display='none';emptyEl.style.display='none';
+
+  // Group by courseId
+  const groups={};
+  filtered.forEach(p=>{const k=p.courseId||'__none__';if(!groups[k])groups[k]=[];groups[k].push(p);});
+  Object.values(groups).forEach(g=>g.sort((a,b)=>a.name.localeCompare(b.name)));
+
+  container.innerHTML=Object.entries(groups).map(([cid,files])=>{
+    const c=courses.find(x=>x.id===cid);
+    const col=c?(CC[c.color]||CC.blue):{bg:'var(--surface2)',t:'var(--muted)',b:'var(--border)'};
+    const hdr=c
+      ?`<div class="pdf-group-header">
+          <span class="course-abbr-large" style="background:${col.bg};color:${col.t};border:1px solid ${col.b}">${c.abbr}</span>
+          <div>
+            <div class="pdf-group-title">${esc(c.name)}</div>
+            <div class="pdf-group-meta">${c.year} &middot; ${files.length} file &middot; ${fmtSize(files.reduce((s,p)=>s+(p.size||0),0))}</div>
+          </div>
+        </div>`
+      :`<div class="pdf-group-header"><div class="pdf-group-title">PDF senza corso assegnato</div></div>`;
+
+    const cards=files.map(p=>`
+      <div class="pdf-card" data-name="${esc(p.name)}">
+        <div class="pdf-card-icon"><i class="fa-solid fa-file-pdf"></i></div>
+        <div class="pdf-card-info">
+          <div class="pdf-card-name" title="${esc(p.name)}">${esc(p.name)}</div>
+          <div class="pdf-card-meta">${fmtSize(p.size)}</div>
+        </div>
+        <div class="pdf-card-actions">
+          <button class="card-btn" data-action="view" title="Apri"><i class="fa-solid fa-eye"></i></button>
+          <a class="card-btn" href="${esc(p.rawUrl)}" download="${esc(p.name)}" title="Scarica" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center">
+            <i class="fa-solid fa-download"></i>
+          </a>
+          <button class="card-btn danger" data-action="delete" title="Elimina"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </div>`).join('');
+
+    return`<div class="pdf-group">${hdr}<div class="pdf-list">${cards}</div></div>`;
+  }).join('');
+
+  // Bind events to rendered cards
+  container.querySelectorAll('.pdf-card').forEach(card=>{
+    const name=card.dataset.name;
+    const meta=pdfs.find(p=>p.name===name);
+    card.addEventListener('click',e=>{if(e.target.closest('.card-btn')||e.target.closest('a.card-btn'))return;openPdfModal(meta);});
+    const viewBtn=card.querySelector('[data-action="view"]');
+    if(viewBtn) viewBtn.addEventListener('click',e=>{e.stopPropagation();openPdfModal(meta);});
+    const delBtn=card.querySelector('[data-action="delete"]');
+    if(delBtn) delBtn.addEventListener('click',e=>{e.stopPropagation();deletePdf(meta);});
+  });
+}
+
+// =========================================================
+// PDF MODAL — viewer
+// =========================================================
+function openPdfModal(meta){
+  if(!meta)return;
+  curPdf=meta;
+  document.getElementById('pdfModalTitle').textContent=meta.name;
+  const c=courses.find(x=>x.id===meta.courseId);
+  document.getElementById('pdfModalMeta').textContent=(c?c.name+' \u00b7 ':'')+fmtSize(meta.size);
+
+  // Use rawUrl for the iframe (works for public repos; avoids GitHub Pages caching delay)
+  document.getElementById('pdfViewer').src=meta.rawUrl;
+
+  // Download button — direct link
+  const dlBtn=document.getElementById('btnPdfDownload');
+  dlBtn.href=meta.rawUrl;
+  dlBtn.download=meta.name;
+
+  // GitHub link
+  const ghBtn=document.getElementById('btnPdfGithub');
+  ghBtn.href=`https://github.com/${ghConfig.owner}/${ghConfig.repo}/blob/${ghConfig.branch||'main'}/${meta.path}`;
+
+  document.getElementById('pdfModal').style.display='flex';
+}
+function closePdfModal(){
+  document.getElementById('pdfModal').style.display='none';
+  document.getElementById('pdfViewer').src='';
+  curPdf=null;
+}
+
+// =========================================================
+// NOTES EDITOR
+// =========================================================
+function renderCourseSelect(){
+  document.getElementById('noteCourse').innerHTML=
+    '<option value="">-- Seleziona corso --</option>'+
+    courses.map(c=>`<option value="${c.id}">${c.name} (${c.abbr})</option>`).join('');
+}
+function openEditor(id=null){
+  editingId=id;const n=id?notes.find(x=>x.id===id):null;
+  selColor=n?.color||'default';
+  document.getElementById('editorTitle').textContent=id?'Modifica appunto':'Nuovo appunto';
+  document.getElementById('noteTitle').value=n?.title||'';
+  document.getElementById('noteTags').value=(n?.tags||[]).join(', ');
+  document.getElementById('noteContent').innerHTML=n?.content||'';
+  renderCourseSelect();if(n)document.getElementById('noteCourse').value=n.courseId||'';
+  applyDots('colorPicker',selColor);
+  document.getElementById('editorModal').style.display='flex';
+  document.getElementById('noteTitle').focus();
+}
+function saveNote(){
+  const title=document.getElementById('noteTitle').value.trim();
+  const course=document.getElementById('noteCourse').value;
+  const tags=document.getElementById('noteTags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  const content=document.getElementById('noteContent').innerHTML;
+  if(!title&&!content.trim())return;
+  if(editingId){
+    const i=notes.findIndex(x=>x.id===editingId);
+    if(i>=0)notes[i]={...notes[i],title:title||'Senza titolo',courseId:course,tags,content,color:selColor,updatedAt:now()};
+  }else{
+    notes.unshift({id:uid(),title:title||'Senza titolo',courseId:course,tags,content,color:selColor,createdAt:now(),updatedAt:now()});
+  }
+  saveNotes();closeEditor();renderSidebar();renderNotes();
+}
+function closeEditor(){document.getElementById('editorModal').style.display='none';}
+function deleteNote(id){
+  if(!confirm('Eliminare questo appunto?'))return;
+  notes=notes.filter(n=>n.id!==id);saveNotes();renderSidebar();renderNotes();
+}
+function openView(id){
+  const n=notes.find(x=>x.id===id);if(!n)return;
+  const c=courses.find(x=>x.id===n.courseId);const col=c?(CC[c.color]||CC.blue):null;
+  document.getElementById('viewTitle').textContent=n.title||'Senza titolo';
+  document.getElementById('viewMeta').innerHTML=
+    (c?`<span style="background:${col.bg};color:${col.t};border:1px solid ${col.b};border-radius:3px;padding:2px 8px;font-size:.68rem;font-family:var(--mono)">${c.name}</span> `:'')+
+    `<span style="color:var(--muted);font-size:.7rem;font-family:var(--mono)">Aggiornato ${fmtDate(n.updatedAt)}</span>`;
+  document.getElementById('viewBody').innerHTML=
+    `<div class="rendered-content">${n.content||'<em style="color:var(--muted)">Nessun contenuto</em>'}</div>`+
+    ((n.tags||[]).length?`<div class="view-tags">${n.tags.map(t=>`<span class="note-tag">#${esc(t)}</span>`).join('')}</div>`:'');
+  document.getElementById('btnEdit').onclick=()=>{closeView();openEditor(id);};
+  document.getElementById('btnDeleteNote').onclick=()=>{closeView();deleteNote(id);};
+  document.getElementById('viewModal').style.display='flex';
+}
+function closeView(){document.getElementById('viewModal').style.display='none';}
+
+// =========================================================
+// COURSE MANAGEMENT
+// =========================================================
+function openCourseModal(){
+  ['courseNameInput','courseAbbrInput'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('courseYearInput').value='2025-26';
+  selCourseColor='blue';applyDots('courseColorPicker','blue');
+  document.getElementById('courseModal').style.display='flex';
+  document.getElementById('courseNameInput').focus();
+}
+function saveCourse(){
+  const name=document.getElementById('courseNameInput').value.trim();
+  const abbr=document.getElementById('courseAbbrInput').value.trim().toUpperCase();
+  const year=document.getElementById('courseYearInput').value.trim();
+  if(!name||!abbr)return;
+  courses.push({id:uid(),name,abbr,year,color:selCourseColor});
+  saveCourses();document.getElementById('courseModal').style.display='none';
+  renderSidebar();renderCourseSelect();
+}
+
+// =========================================================
+// GITHUB SETTINGS MODAL
+// =========================================================
+function openGhModal(){
+  document.getElementById('ghOwner').value=ghConfig.owner||'';
+  document.getElementById('ghRepo').value=ghConfig.repo||'';
+  document.getElementById('ghBranch').value=ghConfig.branch||'main';
+  document.getElementById('ghPdfPath').value=ghConfig.pdfPath||'appunti/pdf';
+  document.getElementById('ghPat').value=ghConfig.pat||'';
+  document.getElementById('ghTestResult').style.display='none';
+  document.getElementById('ghModal').style.display='flex';
+}
+function saveGhModalConfig(){
+  ghConfig={
+    owner:document.getElementById('ghOwner').value.trim(),
+    repo:document.getElementById('ghRepo').value.trim(),
+    branch:document.getElementById('ghBranch').value.trim()||'main',
+    pdfPath:document.getElementById('ghPdfPath').value.trim()||'appunti/pdf',
+    pat:document.getElementById('ghPat').value.trim(),
+  };
+  saveGhConfig();
+  document.getElementById('ghModal').style.display='none';
+  updateGhStatus();
+  if(activeTab==='pdf'){pdfsLoaded=false;loadPdfsFromGitHub();}
+}
+async function testGhConnection(){
+  const owner=document.getElementById('ghOwner').value.trim();
+  const repo=document.getElementById('ghRepo').value.trim();
+  const pat=document.getElementById('ghPat').value.trim();
+  const res=document.getElementById('ghTestResult');
+  res.style.display='';
+  res.innerHTML='<div class="info-box"><i class="fa-solid fa-spinner fa-spin"></i> Test in corso...</div>';
+  try{
+    const h={'Accept':'application/vnd.github.v3+json'};
+    if(pat)h['Authorization']='token '+pat;
+    const r=await fetch(`https://api.github.com/repos/${owner}/${repo}`,{headers:h});
+    if(r.ok){
+      const d=await r.json();
+      res.innerHTML=`<div class="info-box info-box-ok"><i class="fa-solid fa-check"></i><span>Connesso &mdash; <strong>${d.full_name}</strong> (${d.private?'privato':'pubblico'})</span></div>`;
+    }else{
+      res.innerHTML=`<div class="info-box info-box-warn"><i class="fa-solid fa-xmark"></i> Errore ${r.status}: repository non trovato o PAT non valido</div>`;
+    }
+  }catch(e){
+    res.innerHTML=`<div class="info-box info-box-warn"><i class="fa-solid fa-xmark"></i> Errore: ${e.message}</div>`;
+  }
+}
+
+// =========================================================
+// EXPORT / IMPORT NOTES
+// =========================================================
+function exportNotes(){
+  const blob=new Blob([JSON.stringify({notes,courses,exported:now()},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download='polimi_appunti_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  URL.revokeObjectURL(url);
+}
+function importNotes(file){
+  const r=new FileReader();r.onload=e=>{
+    try{const d=JSON.parse(e.target.result);if(!d.notes)return alert('File non valido.');
+    if(!confirm(`Importare ${d.notes.length} appunti?`))return;
+    const ex=new Set(notes.map(n=>n.id));
+    notes=[...notes,...d.notes.filter(n=>!ex.has(n.id))];saveNotes();
+    if(d.courses){const ec=new Set(courses.map(c=>c.id));courses=[...courses,...d.courses.filter(c=>!ec.has(c.id))];saveCourses();}
+    renderSidebar();renderNotes();}catch{alert('File JSON non valido.');}
+  };r.readAsText(file);
+}
+
+// =========================================================
+// COLOR DOTS
+// =========================================================
+function applyDots(pid,activeColor){
+  document.querySelectorAll(`#${pid} .color-dot`).forEach(d=>{
+    d.style.cssText=DOT_CSS[d.dataset.color]||DOT_CSS.default;
+    if(d.dataset.color===activeColor)
+      d.style.cssText+='transform:scale(1.2);box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--accent)';
+  });
+}
+
+// =========================================================
+// FORMAT BAR
+// =========================================================
+function initFmtBar(){
+  document.querySelectorAll('.fmt-btn[data-cmd]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const c=b.dataset.cmd;
+      if(c==='h2'||c==='h3')document.execCommand('formatBlock',false,c);
+      else document.execCommand(c);
+      document.getElementById('noteContent').focus();
+    });
+  });
+  document.querySelectorAll('.fmt-btn[data-insert]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const ed=document.getElementById('noteContent');ed.focus();
+      const sel=window.getSelection();if(!sel.rangeCount)return;
+      const r=sel.getRangeAt(0);let node;
+      if(b.dataset.insert==='formula'){node=document.createElement('code');node.className='formula';node.textContent='formula';}
+      else if(b.dataset.insert==='code'){node=document.createElement('code');node.textContent=sel.toString()||'code';}
+      else node=document.createElement('hr');
+      r.deleteContents();r.insertNode(node);r.setStartAfter(node);r.collapse(true);
+      sel.removeAllRanges();sel.addRange(r);
+    });
+  });
+}
+
+// =========================================================
 // INIT
-// ═══════════════════════════════════════════════════════
+// =========================================================
 document.addEventListener('DOMContentLoaded',()=>{
-    renderSidebar();
-    renderCourseSelect();
-    renderNotes();
-    initFormatBar();
+  notes=loadNotes();courses=loadCourses();ghConfig=loadGhConfig();
+  renderSidebar();renderCourseSelect();renderNotes();initFmtBar();
 
-    // Buttons
-    document.getElementById('btnNew').addEventListener('click',()=>openEditor());
-    document.getElementById('btnNewInline').addEventListener('click',()=>openEditor());
-    document.getElementById('btnSave').addEventListener('click',saveNote);
-    document.getElementById('editorClose').addEventListener('click',closeEditor);
-    document.getElementById('viewClose').addEventListener('click',closeView);
-    document.getElementById('btnAddCourse').addEventListener('click',openCourseModal);
-    document.getElementById('courseClose').addEventListener('click',()=>document.getElementById('courseModal').style.display='none');
-    document.getElementById('btnCancelCourse').addEventListener('click',()=>document.getElementById('courseModal').style.display='none');
-    document.getElementById('btnSaveCourse').addEventListener('click',saveCourse);
-    document.getElementById('btnExport').addEventListener('click',exportData);
-    document.getElementById('btnImport').addEventListener('click',()=>document.getElementById('importFile').click());
-    document.getElementById('importFile').addEventListener('change',e=>{ if(e.target.files[0]) importData(e.target.files[0]); e.target.value=''; });
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
 
-    // Search
-    const si = document.getElementById('searchInput');
-    const sc = document.getElementById('searchClear');
-    si.addEventListener('input',()=>{
-        searchQuery=si.value;
-        sc.style.display=searchQuery?'':'none';
-        renderNotes();
+  // New button
+  document.getElementById('btnNew').addEventListener('click',()=>{
+    if(activeTab==='notes')openEditor();
+    else document.getElementById('pdfFileInput').click();
+  });
+  document.getElementById('btnNewInline').addEventListener('click',()=>openEditor());
+
+  // Note editor
+  document.getElementById('btnSave').addEventListener('click',saveNote);
+  document.getElementById('editorClose').addEventListener('click',closeEditor);
+  document.getElementById('viewClose').addEventListener('click',closeView);
+
+  // Courses
+  document.getElementById('btnAddCourse').addEventListener('click',openCourseModal);
+  document.getElementById('courseClose').addEventListener('click',()=>document.getElementById('courseModal').style.display='none');
+  document.getElementById('btnCancelCourse').addEventListener('click',()=>document.getElementById('courseModal').style.display='none');
+  document.getElementById('btnSaveCourse').addEventListener('click',saveCourse);
+
+  // GitHub settings
+  document.getElementById('btnGhSettings').addEventListener('click',openGhModal);
+  document.getElementById('btnConfigFromWarn').addEventListener('click',openGhModal);
+  document.getElementById('ghClose').addEventListener('click',()=>document.getElementById('ghModal').style.display='none');
+  document.getElementById('btnSaveGh').addEventListener('click',saveGhModalConfig);
+  document.getElementById('btnTestGh').addEventListener('click',testGhConnection);
+  document.getElementById('togglePat').addEventListener('click',()=>{
+    const inp=document.getElementById('ghPat');
+    inp.type=inp.type==='password'?'text':'password';
+  });
+
+  // PDF upload
+  document.getElementById('btnUploadPdf').addEventListener('click',()=>document.getElementById('pdfFileInput').click());
+  document.getElementById('pdfFileInput').addEventListener('change',e=>{
+    if(e.target.files.length)uploadPdfs([...e.target.files]);e.target.value='';
+  });
+  document.getElementById('btnRefreshPdf').addEventListener('click',()=>{pdfsLoaded=false;loadPdfsFromGitHub();});
+
+  // Drag & drop
+  const dz=document.getElementById('dropZone');
+  ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag-over');}));
+  ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag-over');}));
+  dz.addEventListener('drop',e=>{const f=[...e.dataTransfer.files].filter(f=>f.type.includes('pdf'));if(f.length)uploadPdfs(f);});
+  document.addEventListener('dragover',e=>e.preventDefault());
+  document.addEventListener('drop',e=>{e.preventDefault();if(e.target.closest('#dropZone'))return;const f=[...e.dataTransfer.files].filter(f=>f.type.includes('pdf'));if(f.length)uploadPdfs(f);});
+
+  // PDF modal
+  document.getElementById('pdfClose').addEventListener('click',closePdfModal);
+  document.getElementById('btnPdfDelete').addEventListener('click',()=>{if(curPdf)deletePdf(curPdf);});
+
+  // Upload progress close
+  document.getElementById('upClose').addEventListener('click',()=>document.getElementById('uploadProgress').style.display='none');
+
+  // Export / Import notes
+  document.getElementById('btnExport').addEventListener('click',exportNotes);
+  document.getElementById('btnImport').addEventListener('click',()=>document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change',e=>{if(e.target.files[0])importNotes(e.target.files[0]);e.target.value='';});
+
+  // Search
+  const si=document.getElementById('searchInput'),sc=document.getElementById('searchClear');
+  si.addEventListener('input',()=>{searchQuery=si.value;sc.style.display=searchQuery?'':'none';activeTab==='notes'?renderNotes():renderPdfs();});
+  sc.addEventListener('click',()=>{si.value='';searchQuery='';sc.style.display='none';activeTab==='notes'?renderNotes():renderPdfs();});
+
+  // Sort & view
+  document.getElementById('sortSel').addEventListener('change',e=>{sortMode=e.target.value;renderNotes();});
+  document.getElementById('viewGrid').addEventListener('click',()=>{viewMode='grid';document.getElementById('viewGrid').classList.add('active');document.getElementById('viewList').classList.remove('active');renderNotes();});
+  document.getElementById('viewList').addEventListener('click',()=>{viewMode='list';document.getElementById('viewList').classList.add('active');document.getElementById('viewGrid').classList.remove('active');renderNotes();});
+
+  // Color pickers
+  ['colorPicker','courseColorPicker'].forEach(pid=>{
+    document.querySelectorAll(`#${pid} .color-dot`).forEach(d=>{
+      d.style.cssText=DOT_CSS[d.dataset.color]||DOT_CSS.default;
+      d.addEventListener('click',()=>{
+        if(pid==='colorPicker')selColor=d.dataset.color;else selCourseColor=d.dataset.color;
+        applyDots(pid,d.dataset.color);
+      });
     });
-    sc.addEventListener('click',()=>{ si.value=''; searchQuery=''; sc.style.display='none'; renderNotes(); });
+  });
 
-    // Sort & view
-    document.getElementById('sortSel').addEventListener('change',e=>{ sortMode=e.target.value; renderNotes(); });
-    document.getElementById('viewGrid').addEventListener('click',()=>{ viewMode='grid'; document.getElementById('viewGrid').classList.add('active'); document.getElementById('viewList').classList.remove('active'); renderNotes(); });
-    document.getElementById('viewList').addEventListener('click',()=>{ viewMode='list'; document.getElementById('viewList').classList.add('active'); document.getElementById('viewGrid').classList.remove('active'); renderNotes(); });
+  // Close modals on backdrop
+  ['editorModal','viewModal','courseModal','ghModal','pdfModal'].forEach(id=>{
+    document.getElementById(id).addEventListener('click',e=>{
+      if(e.target.id===id){
+        if(id==='pdfModal')closePdfModal();
+        else document.getElementById(id).style.display='none';
+      }
+    });
+  });
 
-    // Color picker (editor)
-    document.querySelectorAll('#colorPicker .color-dot').forEach(d=>{
-        d.addEventListener('click',()=>{
-            selectedColor=d.dataset.color;
-            document.querySelectorAll('#colorPicker .color-dot').forEach(x=>x.classList.remove('active'));
-            d.classList.add('active');
-        });
-    });
-    // Color picker (course)
-    document.querySelectorAll('#courseColorPicker .color-dot').forEach(d=>{
-        d.addEventListener('click',()=>{
-            selectedCourseColor=d.dataset.color;
-            document.querySelectorAll('#courseColorPicker .color-dot').forEach(x=>x.classList.remove('active'));
-            d.classList.add('active');
-        });
-    });
-
-    // Close modals clicking overlay
-    ['editorModal','viewModal','courseModal'].forEach(id=>{
-        document.getElementById(id).addEventListener('click',e=>{
-            if(e.target.id===id) document.getElementById(id).style.display='none';
-        });
-    });
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown',e=>{
-        if(e.key==='Escape'){
-            ['editorModal','viewModal','courseModal'].forEach(id=>document.getElementById(id).style.display='none');
-        }
-        if((e.ctrlKey||e.metaKey)&&e.key==='s'&&document.getElementById('editorModal').style.display!=='none'){
-            e.preventDefault(); saveNote();
-        }
-        if((e.ctrlKey||e.metaKey)&&e.key==='n'){
-            e.preventDefault(); openEditor();
-        }
-    });
-
-    // Enter in course inputs
-    ['courseNameInput','courseAbbrInput','courseYearInput'].forEach(id=>{
-        document.getElementById(id).addEventListener('keydown',e=>{ if(e.key==='Enter') saveCourse(); });
-    });
+  // Keyboard shortcuts
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){['editorModal','viewModal','courseModal','ghModal'].forEach(id=>document.getElementById(id).style.display='none');closePdfModal();}
+    if((e.ctrlKey||e.metaKey)&&e.key==='s'&&document.getElementById('editorModal').style.display!=='none'){e.preventDefault();saveNote();}
+    if((e.ctrlKey||e.metaKey)&&e.key==='n'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();openEditor();}
+  });
+  ['courseNameInput','courseAbbrInput','courseYearInput'].forEach(id=>{
+    document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')saveCourse();});
+  });
 });
 </script>
 </body>
