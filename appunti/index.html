@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appunti PoliMi | Matteo Cavalleri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <a href="../" class="nav-logo">mc<span>.eng</span></a>
+    <a href="../" class="nav-back"><i class="fa-solid fa-arrow-left"></i> Home</a>
+</nav>
+
+<!-- PAGE HEADER -->
+<header class="page-header">
+    <div class="header-inner">
+        <div class="header-tag">// Politecnico di Milano · MSc Automation &amp; Control Engineering</div>
+        <h1>Appunti<span class="accent">.</span></h1>
+        <p>Raccolta organizzata di appunti, formulari e sintesi per i corsi del Politecnico di Milano.</p>
+    </div>
+</header>
+
+<!-- MAIN LAYOUT -->
+<div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <!-- Search -->
+        <div class="search-wrap">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="Cerca negli appunti...">
+            <button class="search-clear" id="searchClear" title="Cancella">×</button>
+        </div>
+
+        <!-- New note button -->
+        <button class="btn-new" id="btnNew">
+            <i class="fa-solid fa-plus"></i> Nuovo appunto
+        </button>
+
+        <!-- Courses filter -->
+        <div class="sidebar-section">
+            <div class="sidebar-label">Corsi</div>
+            <div class="course-list" id="courseList">
+                <button class="course-btn active" data-course="all">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Tutti</span>
+                    <span class="course-count" id="count-all">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tags filter -->
+        <div class="sidebar-section" id="tagsSection" style="display:none">
+            <div class="sidebar-label">Tag</div>
+            <div class="tag-cloud" id="tagCloud"></div>
+        </div>
+
+        <!-- Manage courses -->
+        <div class="sidebar-section">
+            <div class="sidebar-label">Gestione</div>
+            <button class="btn-ghost" id="btnAddCourse">
+                <i class="fa-solid fa-plus"></i> Aggiungi corso
+            </button>
+            <button class="btn-ghost" id="btnExport">
+                <i class="fa-solid fa-download"></i> Esporta JSON
+            </button>
+            <button class="btn-ghost" id="btnImport">
+                <i class="fa-solid fa-upload"></i> Importa JSON
+            </button>
+            <input type="file" id="importFile" accept=".json" style="display:none">
+        </div>
+
+    </aside>
+
+    <!-- NOTES AREA -->
+    <main class="notes-area" id="notesArea">
+
+        <!-- Toolbar -->
+        <div class="notes-toolbar">
+            <div class="toolbar-left">
+                <span class="notes-count" id="notesCount">0 appunti</span>
+                <span class="filter-active" id="filterActive" style="display:none"></span>
+            </div>
+            <div class="toolbar-right">
+                <button class="view-btn active" id="viewGrid" title="Griglia"><i class="fa-solid fa-grip"></i></button>
+                <button class="view-btn" id="viewList" title="Lista"><i class="fa-solid fa-list"></i></button>
+                <select class="sort-sel" id="sortSel">
+                    <option value="updated">Ultima modifica</option>
+                    <option value="created">Data creazione</option>
+                    <option value="title">Titolo A→Z</option>
+                    <option value="course">Corso</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Notes grid -->
+        <div class="notes-grid" id="notesGrid">
+            <!-- populated by JS -->
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState" style="display:none">
+            <div class="empty-icon"><i class="fa-solid fa-book-open"></i></div>
+            <h3>Nessun appunto</h3>
+            <p id="emptyMsg">Crea il tuo primo appunto con il pulsante "Nuovo appunto".</p>
+            <button class="btn-new-inline" id="btnNewInline">
+                <i class="fa-solid fa-plus"></i> Crea appunto
+            </button>
+        </div>
+
+    </main>
+</div>
+
+<!-- ═══ MODAL: NOTE EDITOR ═══ -->
+<div class="modal-overlay" id="editorModal" style="display:none">
+    <div class="modal editor-modal">
+        <div class="modal-header">
+            <div class="modal-title" id="editorTitle">Nuovo appunto</div>
+            <div class="modal-actions">
+                <button class="btn-save" id="btnSave"><i class="fa-solid fa-floppy-disk"></i> Salva</button>
+                <button class="modal-close" id="editorClose">×</button>
+            </div>
+        </div>
+
+        <div class="editor-body">
+            <div class="editor-meta">
+                <input type="text" id="noteTitle" class="note-title-input" placeholder="Titolo dell'appunto...">
+
+                <div class="meta-row">
+                    <div class="meta-field">
+                        <label class="meta-label">Corso</label>
+                        <select id="noteCourse" class="meta-select">
+                            <option value="">— Seleziona corso —</option>
+                        </select>
+                    </div>
+                    <div class="meta-field">
+                        <label class="meta-label">Tag (separati da virgola)</label>
+                        <input type="text" id="noteTags" class="meta-input" placeholder="es: formula, esame, laboratorio">
+                    </div>
+                    <div class="meta-field">
+                        <label class="meta-label">Colore</label>
+                        <div class="color-picker" id="colorPicker">
+                            <div class="color-dot active" data-color="default" style="background:var(--surface2);border:2px solid var(--accent)"></div>
+                            <div class="color-dot" data-color="blue"    style="background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.4)"></div>
+                            <div class="color-dot" data-color="green"   style="background:rgba(63,185,80,.12);border:1px solid rgba(63,185,80,.35)"></div>
+                            <div class="color-dot" data-color="yellow"  style="background:rgba(227,179,65,.12);border:1px solid rgba(227,179,65,.4)"></div>
+                            <div class="color-dot" data-color="red"     style="background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.4)"></div>
+                            <div class="color-dot" data-color="purple"  style="background:rgba(163,113,247,.12);border:1px solid rgba(163,113,247,.4)"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formatting toolbar -->
+            <div class="format-bar">
+                <button class="fmt-btn" data-cmd="bold" title="Grassetto"><i class="fa-solid fa-bold"></i></button>
+                <button class="fmt-btn" data-cmd="italic" title="Corsivo"><i class="fa-solid fa-italic"></i></button>
+                <button class="fmt-btn" data-cmd="underline" title="Sottolineato"><i class="fa-solid fa-underline"></i></button>
+                <div class="fmt-sep"></div>
+                <button class="fmt-btn" data-cmd="insertUnorderedList" title="Lista"><i class="fa-solid fa-list-ul"></i></button>
+                <button class="fmt-btn" data-cmd="insertOrderedList" title="Lista numerata"><i class="fa-solid fa-list-ol"></i></button>
+                <div class="fmt-sep"></div>
+                <button class="fmt-btn" data-insert="formula" title="Formula"><i class="fa-solid fa-square-root-variable"></i></button>
+                <button class="fmt-btn" data-insert="code" title="Codice inline"><i class="fa-solid fa-code"></i></button>
+                <button class="fmt-btn" data-insert="hr" title="Separatore"><i class="fa-solid fa-minus"></i></button>
+                <div class="fmt-sep"></div>
+                <button class="fmt-btn" data-cmd="h2" title="Titolo sezione"><b>H</b></button>
+                <button class="fmt-btn" data-cmd="h3" title="Sottotitolo"><b style="font-size:.7rem">H</b></button>
+            </div>
+
+            <div class="note-editor" id="noteContent" contenteditable="true"
+                 spellcheck="false"
+                 data-placeholder="Scrivi qui il tuo appunto...
+&#10;
+Puoi usare la toolbar per formattare il testo, aggiungere formule, elenchi e sezioni."></div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MODAL: ADD COURSE ═══ -->
+<div class="modal-overlay" id="courseModal" style="display:none">
+    <div class="modal small-modal">
+        <div class="modal-header">
+            <div class="modal-title">Aggiungi corso</div>
+            <button class="modal-close" id="courseClose">×</button>
+        </div>
+        <div style="padding:24px">
+            <div class="form-field">
+                <label class="meta-label">Nome del corso</label>
+                <input type="text" id="courseNameInput" class="meta-input" placeholder="es: Sistemi di Controllo">
+            </div>
+            <div class="form-field">
+                <label class="meta-label">Abbreviazione</label>
+                <input type="text" id="courseAbbrInput" class="meta-input" placeholder="es: SC" maxlength="6">
+            </div>
+            <div class="form-field">
+                <label class="meta-label">Anno accademico</label>
+                <input type="text" id="courseYearInput" class="meta-input" placeholder="es: 2025-26">
+            </div>
+            <div class="form-field">
+                <label class="meta-label">Colore</label>
+                <div class="color-picker" id="courseColorPicker">
+                    <div class="color-dot active" data-color="blue"   style="background:rgba(0,212,255,.15);border:2px solid rgba(0,212,255,.6)"></div>
+                    <div class="color-dot" data-color="green"  style="background:rgba(63,185,80,.12);border:1px solid rgba(63,185,80,.35)"></div>
+                    <div class="color-dot" data-color="yellow" style="background:rgba(227,179,65,.12);border:1px solid rgba(227,179,65,.4)"></div>
+                    <div class="color-dot" data-color="red"    style="background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.4)"></div>
+                    <div class="color-dot" data-color="purple" style="background:rgba(163,113,247,.12);border:1px solid rgba(163,113,247,.4)"></div>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:24px">
+                <button class="btn-save" id="btnSaveCourse" style="flex:1">Aggiungi</button>
+                <button class="btn-ghost" id="btnCancelCourse" style="flex:1;justify-content:center">Annulla</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MODAL: VIEW NOTE ═══ -->
+<div class="modal-overlay" id="viewModal" style="display:none">
+    <div class="modal view-modal">
+        <div class="modal-header">
+            <div>
+                <div class="modal-title" id="viewTitle"></div>
+                <div class="view-meta" id="viewMeta"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-ghost-sm" id="btnEdit"><i class="fa-solid fa-pen"></i> Modifica</button>
+                <button class="btn-ghost-sm danger" id="btnDelete"><i class="fa-solid fa-trash"></i></button>
+                <button class="modal-close" id="viewClose">×</button>
+            </div>
+        </div>
+        <div class="view-body" id="viewBody"></div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>© 2026 Matteo Cavalleri · Politecnico di Milano</p>
+    <p>dockhub.net / appunti</p>
+</footer>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════
+// DATA LAYER — localStorage
+// ═══════════════════════════════════════════════════════
+const LS_NOTES   = 'polimi_notes_v2';
+const LS_COURSES = 'polimi_courses_v2';
+
+const COLOR_MAP = {
+    default: { bg:'rgba(22,27,34,.0)', border:'var(--border)', accent:'var(--muted)' },
+    blue:    { bg:'rgba(0,212,255,.06)', border:'rgba(0,212,255,.3)', accent:'#00d4ff' },
+    green:   { bg:'rgba(63,185,80,.06)', border:'rgba(63,185,80,.3)', accent:'#3fb950' },
+    yellow:  { bg:'rgba(227,179,65,.06)', border:'rgba(227,179,65,.35)', accent:'#e3b341' },
+    red:     { bg:'rgba(255,107,53,.06)', border:'rgba(255,107,53,.3)', accent:'#ff6b35' },
+    purple:  { bg:'rgba(163,113,247,.06)', border:'rgba(163,113,247,.3)', accent:'#a371f7' },
+};
+
+const COURSE_COLOR_MAP = {
+    blue:  { bg:'rgba(0,212,255,.1)', text:'#00d4ff',   border:'rgba(0,212,255,.3)' },
+    green: { bg:'rgba(63,185,80,.1)',  text:'#3fb950',   border:'rgba(63,185,80,.3)' },
+    yellow:{ bg:'rgba(227,179,65,.1)', text:'#e3b341',   border:'rgba(227,179,65,.3)' },
+    red:   { bg:'rgba(255,107,53,.1)', text:'#ff6b35',   border:'rgba(255,107,53,.3)' },
+    purple:{ bg:'rgba(163,113,247,.1)',text:'#a371f7',   border:'rgba(163,113,247,.3)' },
+};
+
+// Default courses
+const DEFAULT_COURSES = [
+    { id:'c1', name:'Dynamics of Electrical Machines',   abbr:'DEMD',  year:'2025-26', color:'blue'   },
+    { id:'c2', name:'Software Engineering for Automation',abbr:'SE4A',  year:'2025-26', color:'green'  },
+    { id:'c3', name:'Automation and Control Systems',     abbr:'ACS',   year:'2025-26', color:'yellow' },
+    { id:'c4', name:'Industrial Robotics',                abbr:'IR',    year:'2025-26', color:'red'    },
+    { id:'c5', name:'Energy Management Systems',          abbr:'EMS',   year:'2025-26', color:'purple' },
+];
+
+function loadCourses() {
+    const raw = localStorage.getItem(LS_COURSES);
+    return raw ? JSON.parse(raw) : DEFAULT_COURSES;
+}
+function saveCourses(courses) { localStorage.setItem(LS_COURSES, JSON.stringify(courses)); }
+
+function loadNotes() {
+    const raw = localStorage.getItem(LS_NOTES);
+    return raw ? JSON.parse(raw) : [];
+}
+function saveNotes(notes) { localStorage.setItem(LS_NOTES, JSON.stringify(notes)); }
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function now() { return new Date().toISOString(); }
+function fmtDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}) +
+           ' ' + d.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+}
+function excerpt(html, len=180) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    const text = tmp.textContent || '';
+    return text.length > len ? text.slice(0,len).trimEnd()+'…' : text;
+}
+
+// ═══════════════════════════════════════════════════════
+// APP STATE
+// ═══════════════════════════════════════════════════════
+let notes   = loadNotes();
+let courses = loadCourses();
+let filterCourse = 'all';
+let filterTag    = null;
+let searchQuery  = '';
+let sortMode     = 'updated';
+let viewMode     = 'grid';
+let editingId    = null;
+let selectedColor = 'default';
+let selectedCourseColor = 'blue';
+
+// ═══════════════════════════════════════════════════════
+// RENDER SIDEBAR
+// ═══════════════════════════════════════════════════════
+function renderSidebar() {
+    const courseList = document.getElementById('courseList');
+    const totalVisible = getFiltered('all', null, '').length;
+
+    let html = `<button class="course-btn${filterCourse==='all'?' active':''}" data-course="all">
+        <i class="fa-solid fa-layer-group"></i><span>Tutti</span>
+        <span class="course-count">${totalVisible}</span></button>`;
+
+    courses.forEach(c => {
+        const count = getFiltered(c.id, null, '').length;
+        const cc = COURSE_COLOR_MAP[c.color] || COURSE_COLOR_MAP.blue;
+        html += `<button class="course-btn${filterCourse===c.id?' active':''}" data-course="${c.id}" style="${filterCourse===c.id?`background:${cc.bg};border-color:${cc.border};`:''}">
+            <span class="course-abbr" style="background:${cc.bg};color:${cc.text};border:1px solid ${cc.border}">${c.abbr}</span>
+            <span>${c.name}</span>
+            <span class="course-count">${count}</span>
+        </button>`;
+    });
+
+    courseList.innerHTML = html;
+    courseList.querySelectorAll('.course-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterCourse = btn.dataset.course;
+            filterTag = null;
+            document.getElementById('searchInput').value = '';
+            searchQuery = '';
+            renderSidebar();
+            renderNotes();
+        });
+    });
+
+    // Tags cloud
+    const allTags = {};
+    notes.forEach(n => (n.tags||[]).forEach(t => { allTags[t] = (allTags[t]||0)+1; }));
+    const tagCloud = document.getElementById('tagCloud');
+    const tagsSection = document.getElementById('tagsSection');
+    if(Object.keys(allTags).length === 0){ tagsSection.style.display='none'; return; }
+    tagsSection.style.display='';
+    tagCloud.innerHTML = Object.entries(allTags).map(([t,c]) =>
+        `<button class="tag-chip${filterTag===t?' active':''}" data-tag="${t}">${t} <span>${c}</span></button>`
+    ).join('');
+    tagCloud.querySelectorAll('.tag-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterTag = filterTag === btn.dataset.tag ? null : btn.dataset.tag;
+            renderSidebar();
+            renderNotes();
+        });
+    });
+}
+
+function renderCourseSelect() {
+    const sel = document.getElementById('noteCourse');
+    sel.innerHTML = '<option value="">— Seleziona corso —</option>' +
+        courses.map(c => `<option value="${c.id}">${c.name} (${c.abbr})</option>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// FILTER + SORT
+// ═══════════════════════════════════════════════════════
+function getFiltered(course=filterCourse, tag=filterTag, q=searchQuery) {
+    return notes.filter(n => {
+        if(course !== 'all' && n.courseId !== course) return false;
+        if(tag && !(n.tags||[]).includes(tag)) return false;
+        if(q) {
+            const text = (n.title + ' ' + n.content + ' ' + (n.tags||[]).join(' ')).toLowerCase();
+            if(!text.includes(q.toLowerCase())) return false;
+        }
+        return true;
+    });
+}
+
+function getSorted(arr) {
+    return [...arr].sort((a,b) => {
+        if(sortMode==='title')   return a.title.localeCompare(b.title);
+        if(sortMode==='course')  return (a.courseId||'').localeCompare(b.courseId||'');
+        if(sortMode==='created') return new Date(b.createdAt) - new Date(a.createdAt);
+        return new Date(b.updatedAt) - new Date(a.updatedAt);
+    });
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER NOTES
+// ═══════════════════════════════════════════════════════
+function renderNotes() {
+    const filtered = getSorted(getFiltered());
+    const grid = document.getElementById('notesGrid');
+    const empty = document.getElementById('emptyState');
+    const countEl = document.getElementById('notesCount');
+    const filterActiveEl = document.getElementById('filterActive');
+
+    countEl.textContent = filtered.length + (filtered.length===1?' appunto':' appunti');
+
+    // Filter breadcrumb
+    if(filterCourse!=='all' || filterTag || searchQuery) {
+        const parts = [];
+        if(filterCourse!=='all') {
+            const c = courses.find(x=>x.id===filterCourse);
+            if(c) parts.push(c.abbr);
+        }
+        if(filterTag) parts.push('#'+filterTag);
+        if(searchQuery) parts.push('"'+searchQuery+'"');
+        filterActiveEl.style.display='';
+        filterActiveEl.textContent = '· '+parts.join(' · ');
+    } else {
+        filterActiveEl.style.display='none';
+    }
+
+    if(filtered.length === 0) {
+        grid.style.display='none'; empty.style.display='';
+        document.getElementById('emptyMsg').textContent =
+            searchQuery ? `Nessun risultato per "${searchQuery}".` :
+            filterCourse!=='all' ? 'Nessun appunto per questo corso. Creane uno!' :
+            'Crea il tuo primo appunto con il pulsante "Nuovo appunto".';
+        return;
+    }
+
+    grid.style.display=''; empty.style.display='none';
+    grid.className = 'notes-grid ' + viewMode;
+
+    grid.innerHTML = filtered.map(n => {
+        const c  = courses.find(x=>x.id===n.courseId);
+        const cc = c ? (COURSE_COLOR_MAP[c.color]||COURSE_COLOR_MAP.blue) : null;
+        const nc = COLOR_MAP[n.color||'default'];
+        const tags = (n.tags||[]).slice(0,4);
+
+        return `<div class="note-card" data-id="${n.id}" style="background:var(--surface);border:1px solid ${nc.border};border-left:3px solid ${nc.accent}">
+            <div class="note-card-header">
+                ${c ? `<span class="note-course-badge" style="background:${cc.bg};color:${cc.text};border:1px solid ${cc.border}">${c.abbr}</span>` : ''}
+                <span class="note-date">${fmtDate(n.updatedAt)}</span>
+            </div>
+            <h3 class="note-title">${escHtml(n.title||'Senza titolo')}</h3>
+            <p class="note-excerpt">${escHtml(excerpt(n.content||''))}</p>
+            ${tags.length ? `<div class="note-tags">${tags.map(t=>`<span class="note-tag">#${escHtml(t)}</span>`).join('')}</div>` : ''}
+            <div class="note-card-footer">
+                <button class="card-btn" data-action="edit"  data-id="${n.id}"><i class="fa-solid fa-pen"></i></button>
+                <button class="card-btn danger" data-action="delete" data-id="${n.id}"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        </div>`;
+    }).join('');
+
+    // Click handlers
+    grid.querySelectorAll('.note-card').forEach(card => {
+        card.addEventListener('click', e => {
+            if(e.target.closest('.card-btn')) return;
+            openView(card.dataset.id);
+        });
+    });
+    grid.querySelectorAll('[data-action="edit"]').forEach(btn => {
+        btn.addEventListener('click', e => { e.stopPropagation(); openEditor(btn.dataset.id); });
+    });
+    grid.querySelectorAll('[data-action="delete"]').forEach(btn => {
+        btn.addEventListener('click', e => { e.stopPropagation(); deleteNote(btn.dataset.id); });
+    });
+}
+
+function escHtml(s) {
+    return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════════════
+// NOTE EDITOR
+// ═══════════════════════════════════════════════════════
+function openEditor(id=null) {
+    editingId = id;
+    const note = id ? notes.find(n=>n.id===id) : null;
+    selectedColor = note ? (note.color||'default') : 'default';
+
+    document.getElementById('editorTitle').textContent = id ? 'Modifica appunto' : 'Nuovo appunto';
+    document.getElementById('noteTitle').value   = note?.title || '';
+    document.getElementById('noteCourse').value  = note?.courseId || '';
+    document.getElementById('noteTags').value    = (note?.tags||[]).join(', ');
+    document.getElementById('noteContent').innerHTML = note?.content || '';
+
+    // Update color picker
+    document.querySelectorAll('#colorPicker .color-dot').forEach(d => {
+        d.classList.toggle('active', d.dataset.color === selectedColor);
+    });
+
+    renderCourseSelect();
+    if(note) document.getElementById('noteCourse').value = note.courseId||'';
+
+    document.getElementById('editorModal').style.display='flex';
+    document.getElementById('noteTitle').focus();
+}
+
+function saveNote() {
+    const title   = document.getElementById('noteTitle').value.trim();
+    const course  = document.getElementById('noteCourse').value;
+    const tagsRaw = document.getElementById('noteTags').value;
+    const content = document.getElementById('noteContent').innerHTML;
+    const tags    = tagsRaw.split(',').map(t=>t.trim()).filter(Boolean);
+
+    if(!title && !content) return;
+
+    if(editingId) {
+        const idx = notes.findIndex(n=>n.id===editingId);
+        if(idx>=0) notes[idx] = {...notes[idx], title:title||'Senza titolo', courseId:course, tags, content, color:selectedColor, updatedAt:now()};
+    } else {
+        notes.unshift({ id:uid(), title:title||'Senza titolo', courseId:course, tags, content, color:selectedColor, createdAt:now(), updatedAt:now() });
+    }
+    saveNotes(notes);
+    closeEditor();
+    renderSidebar();
+    renderNotes();
+}
+
+function closeEditor() { document.getElementById('editorModal').style.display='none'; }
+
+// ═══════════════════════════════════════════════════════
+// VIEW MODE
+// ═══════════════════════════════════════════════════════
+function openView(id) {
+    const note = notes.find(n=>n.id===id);
+    if(!note) return;
+    const c  = courses.find(x=>x.id===note.courseId);
+    const cc = c ? (COURSE_COLOR_MAP[c.color]||COURSE_COLOR_MAP.blue) : null;
+
+    document.getElementById('viewTitle').textContent = note.title||'Senza titolo';
+    document.getElementById('viewMeta').innerHTML =
+        (c ? `<span style="background:${cc.bg};color:${cc.text};border:1px solid ${cc.border};border-radius:3px;padding:2px 8px;font-size:.7rem;font-family:var(--mono)">${c.name}</span> ` : '')+
+        `<span style="color:var(--muted);font-size:.72rem;font-family:var(--mono)">Aggiornato ${fmtDate(note.updatedAt)}</span>`;
+
+    document.getElementById('viewBody').innerHTML = `
+        <div class="rendered-content">${note.content||'<em style="color:var(--muted)">Nessun contenuto</em>'}</div>
+        ${(note.tags||[]).length ? `<div class="view-tags" style="margin-top:24px;display:flex;gap:6px;flex-wrap:wrap">
+            ${note.tags.map(t=>`<span class="note-tag">#${escHtml(t)}</span>`).join('')}</div>` : ''}`;
+
+    document.getElementById('btnEdit').onclick   = () => { closeView(); openEditor(id); };
+    document.getElementById('btnDelete').onclick = () => { closeView(); deleteNote(id); };
+    document.getElementById('viewModal').style.display='flex';
+}
+function closeView() { document.getElementById('viewModal').style.display='none'; }
+
+// ═══════════════════════════════════════════════════════
+// DELETE
+// ═══════════════════════════════════════════════════════
+function deleteNote(id) {
+    if(!confirm('Eliminare questo appunto? L\'operazione non può essere annullata.')) return;
+    notes = notes.filter(n=>n.id!==id);
+    saveNotes(notes);
+    renderSidebar();
+    renderNotes();
+}
+
+// ═══════════════════════════════════════════════════════
+// COURSE MANAGEMENT
+// ═══════════════════════════════════════════════════════
+function openCourseModal() {
+    document.getElementById('courseNameInput').value = '';
+    document.getElementById('courseAbbrInput').value = '';
+    document.getElementById('courseYearInput').value = '2025-26';
+    selectedCourseColor = 'blue';
+    document.querySelectorAll('#courseColorPicker .color-dot').forEach(d => {
+        d.classList.toggle('active', d.dataset.color==='blue');
+    });
+    document.getElementById('courseModal').style.display='flex';
+    document.getElementById('courseNameInput').focus();
+}
+
+function saveCourse() {
+    const name = document.getElementById('courseNameInput').value.trim();
+    const abbr = document.getElementById('courseAbbrInput').value.trim().toUpperCase();
+    const year = document.getElementById('courseYearInput').value.trim();
+    if(!name||!abbr) return;
+    courses.push({ id:uid(), name, abbr, year, color:selectedCourseColor });
+    saveCourses(courses);
+    document.getElementById('courseModal').style.display='none';
+    renderSidebar();
+    renderCourseSelect();
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT / IMPORT
+// ═══════════════════════════════════════════════════════
+function exportData() {
+    const data = { notes, courses, exported: now() };
+    const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href=url; a.download='polimi_appunti_'+new Date().toISOString().slice(0,10)+'.json';
+    a.click(); URL.revokeObjectURL(url);
+}
+
+function importData(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if(data.notes && Array.isArray(data.notes)) {
+                if(!confirm(`Importare ${data.notes.length} appunti e ${data.courses?.length||0} corsi? I dati esistenti saranno mantenuti.`)) return;
+                // Merge (skip duplicates by id)
+                const existIds = new Set(notes.map(n=>n.id));
+                const newNotes = data.notes.filter(n=>!existIds.has(n.id));
+                notes = [...notes, ...newNotes];
+                saveNotes(notes);
+                if(data.courses) {
+                    const existCIds = new Set(courses.map(c=>c.id));
+                    const newCourses = data.courses.filter(c=>!existCIds.has(c.id));
+                    courses = [...courses, ...newCourses];
+                    saveCourses(courses);
+                }
+                renderSidebar(); renderNotes();
+                alert(`Importati ${newNotes.length} nuovi appunti.`);
+            }
+        } catch(err) { alert('File JSON non valido.'); }
+    };
+    reader.readAsText(file);
+}
+
+// ═══════════════════════════════════════════════════════
+// FORMATTING TOOLBAR
+// ═══════════════════════════════════════════════════════
+function initFormatBar() {
+    document.querySelectorAll('.fmt-btn[data-cmd]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const cmd = btn.dataset.cmd;
+            if(cmd==='h2'||cmd==='h3') document.execCommand('formatBlock',false,cmd);
+            else document.execCommand(cmd);
+            document.getElementById('noteContent').focus();
+        });
+    });
+    document.querySelectorAll('.fmt-btn[data-insert]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const ed = document.getElementById('noteContent');
+            ed.focus();
+            const sel = window.getSelection();
+            if(!sel.rangeCount) return;
+            const r = sel.getRangeAt(0);
+            let node;
+            if(btn.dataset.insert==='formula') {
+                node = document.createElement('code');
+                node.className='formula'; node.textContent='formula';
+            } else if(btn.dataset.insert==='code') {
+                node = document.createElement('code');
+                node.textContent = sel.toString()||'codice';
+            } else {
+                node = document.createElement('hr');
+            }
+            r.deleteContents(); r.insertNode(node);
+            r.setStartAfter(node); r.collapse(true);
+            sel.removeAllRanges(); sel.addRange(r);
+        });
+    });
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+    renderSidebar();
+    renderCourseSelect();
+    renderNotes();
+    initFormatBar();
+
+    // Buttons
+    document.getElementById('btnNew').addEventListener('click',()=>openEditor());
+    document.getElementById('btnNewInline').addEventListener('click',()=>openEditor());
+    document.getElementById('btnSave').addEventListener('click',saveNote);
+    document.getElementById('editorClose').addEventListener('click',closeEditor);
+    document.getElementById('viewClose').addEventListener('click',closeView);
+    document.getElementById('btnAddCourse').addEventListener('click',openCourseModal);
+    document.getElementById('courseClose').addEventListener('click',()=>document.getElementById('courseModal').style.display='none');
+    document.getElementById('btnCancelCourse').addEventListener('click',()=>document.getElementById('courseModal').style.display='none');
+    document.getElementById('btnSaveCourse').addEventListener('click',saveCourse);
+    document.getElementById('btnExport').addEventListener('click',exportData);
+    document.getElementById('btnImport').addEventListener('click',()=>document.getElementById('importFile').click());
+    document.getElementById('importFile').addEventListener('change',e=>{ if(e.target.files[0]) importData(e.target.files[0]); e.target.value=''; });
+
+    // Search
+    const si = document.getElementById('searchInput');
+    const sc = document.getElementById('searchClear');
+    si.addEventListener('input',()=>{
+        searchQuery=si.value;
+        sc.style.display=searchQuery?'':'none';
+        renderNotes();
+    });
+    sc.addEventListener('click',()=>{ si.value=''; searchQuery=''; sc.style.display='none'; renderNotes(); });
+
+    // Sort & view
+    document.getElementById('sortSel').addEventListener('change',e=>{ sortMode=e.target.value; renderNotes(); });
+    document.getElementById('viewGrid').addEventListener('click',()=>{ viewMode='grid'; document.getElementById('viewGrid').classList.add('active'); document.getElementById('viewList').classList.remove('active'); renderNotes(); });
+    document.getElementById('viewList').addEventListener('click',()=>{ viewMode='list'; document.getElementById('viewList').classList.add('active'); document.getElementById('viewGrid').classList.remove('active'); renderNotes(); });
+
+    // Color picker (editor)
+    document.querySelectorAll('#colorPicker .color-dot').forEach(d=>{
+        d.addEventListener('click',()=>{
+            selectedColor=d.dataset.color;
+            document.querySelectorAll('#colorPicker .color-dot').forEach(x=>x.classList.remove('active'));
+            d.classList.add('active');
+        });
+    });
+    // Color picker (course)
+    document.querySelectorAll('#courseColorPicker .color-dot').forEach(d=>{
+        d.addEventListener('click',()=>{
+            selectedCourseColor=d.dataset.color;
+            document.querySelectorAll('#courseColorPicker .color-dot').forEach(x=>x.classList.remove('active'));
+            d.classList.add('active');
+        });
+    });
+
+    // Close modals clicking overlay
+    ['editorModal','viewModal','courseModal'].forEach(id=>{
+        document.getElementById(id).addEventListener('click',e=>{
+            if(e.target.id===id) document.getElementById(id).style.display='none';
+        });
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown',e=>{
+        if(e.key==='Escape'){
+            ['editorModal','viewModal','courseModal'].forEach(id=>document.getElementById(id).style.display='none');
+        }
+        if((e.ctrlKey||e.metaKey)&&e.key==='s'&&document.getElementById('editorModal').style.display!=='none'){
+            e.preventDefault(); saveNote();
+        }
+        if((e.ctrlKey||e.metaKey)&&e.key==='n'){
+            e.preventDefault(); openEditor();
+        }
+    });
+
+    // Enter in course inputs
+    ['courseNameInput','courseAbbrInput','courseYearInput'].forEach(id=>{
+        document.getElementById(id).addEventListener('keydown',e=>{ if(e.key==='Enter') saveCourse(); });
+    });
+});
+</script>
+</body>
+</html>
