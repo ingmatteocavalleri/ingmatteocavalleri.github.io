@@ -14,8 +14,8 @@
 
 <!-- NAV -->
 <nav class="top-nav">
-    <a href="https://www.dockhub.net" class="nav-logo">mc<span>.eng</span></a>
-    <a href="https://www.dockhub.net" class="nav-back">
+    <a href="../" class="nav-logo">mc.eng</a>
+    <a href="../" class="nav-back">
         <i class="fa-solid fa-arrow-left"></i> Home
     </a>
 </nav>
@@ -438,12 +438,21 @@ prev_error     := error;</pre></div>
                 <div class="download-grid">
                     <div class="download-card">
                         <div class="download-icon"><i class="fa-solid fa-play-circle"></i></div>
-                        <div class="download-name">Simulazione Interattiva</div>
-                        <div class="download-desc">Simulazione real-time del supervisore SCADA.</div>
+                        <div class="download-name">Simulazione di Processo</div>
+                        <div class="download-desc">Simulazione interattiva del processo di potabilizzazione: PID Cl₂ in loop chiuso, allarmi ISA-18.2 live, disturbi e guasti simulabili in tempo reale.</div>
                         <a href="./simulation.html" class="download-btn">
                             <i class="fa-solid fa-arrow-right"></i> Apri Simulazione
                         </a>
                         <div class="download-note">// Runs in browser · No install required</div>
+                    </div>
+                    <div class="download-card">
+                        <div class="download-icon"><i class="fa-solid fa-network-wired"></i></div>
+                        <div class="download-name">Diagramma di Rete</div>
+                        <div class="download-desc">Diagramma interattivo dell'architettura di rete SCADA: zone ISA-95, firewall, PLC Siemens, protocolli OPC-UA e PROFINET con hover tooltip su ogni nodo.</div>
+                        <a href="./network.html" class="download-btn">
+                            <i class="fa-solid fa-arrow-right"></i> Apri Network Diagram
+                        </a>
+                        <div class="download-note">// ISA-95 · IEC 62443 · Interactive SVG</div>
                     </div>
                     <div class="download-card">
                         <div class="download-icon"><i class="fa-solid fa-microchip"></i></div>
@@ -472,11 +481,44 @@ prev_error     := error;</pre></div>
                         </a>
                         <div class="download-note">// PDF · P&ID · Alarm register</div>
                     </div>
+                    <div class="download-card">
+                        <div class="download-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div class="download-name">Security Assessment</div>
+                        <div class="download-desc">Documento di analisi del rischio IEC 62443, threat model, matrice RBAC e piano di risposta agli incidenti.</div>
+                        <a href="#" class="download-btn disabled">
+                            <i class="fa-solid fa-clock"></i> Coming soon
+                        </a>
+                        <div class="download-note">// IEC 62443-3-2 · NIS2</div>
+                    </div>
                 </div>
             </div>
 
         </article>
     </div><!-- /doc-layout -->
+
+    <!-- SIMULATION & NETWORK BANNERS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 56px">
+        <div style="padding:18px 20px;background:var(--surface);border:1px solid var(--border);border-radius:6px;display:flex;flex-direction:column;gap:10px">
+            <div>
+                <div style="font-family:var(--mono);font-size:.62rem;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px">// Interactive</div>
+                <div style="font-family:var(--display);font-size:.95rem;font-weight:700;margin-bottom:4px">SCADA Process Simulation</div>
+                <div style="color:var(--muted);font-size:.82rem">PID Cl₂ in loop chiuso, sistema allarmi ISA-18.2 live, disturbi e guasti simulabili.</div>
+            </div>
+            <a href="./simulation.html" style="display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:.75rem;font-weight:600;background:var(--accent);color:var(--bg);padding:8px 16px;border-radius:3px;text-decoration:none;align-self:flex-start">
+                ▶ Simulazione
+            </a>
+        </div>
+        <div style="padding:18px 20px;background:var(--surface);border:1px solid var(--border);border-radius:6px;display:flex;flex-direction:column;gap:10px">
+            <div>
+                <div style="font-family:var(--mono);font-size:.62rem;color:var(--purple,#a371f7);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px">// Network Diagram</div>
+                <div style="font-family:var(--display);font-size:.95rem;font-weight:700;margin-bottom:4px">SCADA Network — IEC 62443</div>
+                <div style="color:var(--muted);font-size:.82rem">Diagramma di rete interattivo: zone ISA-95, PLC, firewall, protocolli con hover tooltip.</div>
+            </div>
+            <a href="./network.html" style="display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:.75rem;font-weight:600;background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:8px 16px;border-radius:3px;text-decoration:none;align-self:flex-start">
+                ⬡ Network Diagram
+            </a>
+        </div>
+    </div>
 
 </div><!-- /page-wrapper -->
 
