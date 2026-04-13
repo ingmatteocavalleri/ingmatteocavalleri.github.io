@@ -11,20 +11,28 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-    /* SKILL BARS */
-    .skill-section { margin-top: 48px; }
-    .skill-category { margin-bottom: 28px; }
+    /* SKILL TAGS */
+    .skill-section { margin-top: 48px; display: flex; flex-direction: column; gap: 22px; }
+    .skill-group { }
     .skill-cat-label {
         font-family: var(--mono); font-size: .65rem; color: var(--accent);
         letter-spacing: .12em; text-transform: uppercase;
-        margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+        margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
     }
-    .skill-cat-label::after { content:''; flex:1; height:1px; background:var(--border); }
-    .skill-row { display: flex; align-items: center; gap: 12px; margin-bottom: 9px; }
-    .skill-name { font-family: var(--mono); font-size: .74rem; color: var(--text); width: 140px; flex-shrink: 0; }
-    .skill-bar-wrap { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-    .skill-bar { height: 100%; border-radius: 3px; width: 0; transition: width 1.2s cubic-bezier(.4,0,.2,1); }
-    .skill-level { font-family: var(--mono); font-size: .62rem; color: var(--muted); width: 80px; text-align: right; flex-shrink: 0; }
+    .skill-cat-label::before { content: '//'; color: var(--muted); }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .skill-tag {
+        font-family: var(--mono); font-size: .75rem; font-weight: 600;
+        padding: 6px 14px; border-radius: 3px;
+        border: 1px solid var(--border);
+        background: var(--surface2); color: var(--text);
+        transition: border-color .2s, color .2s, transform .15s;
+        cursor: default;
+    }
+    .skill-tag:hover { transform: translateY(-2px); }
+    .skill-tag.c-accent  { border-color: rgba(0,212,255,.3);  color: var(--accent);  background: rgba(0,212,255,.05); }
+    .skill-tag.c-green   { border-color: rgba(63,185,80,.3);  color: var(--green);   background: rgba(63,185,80,.05); }
+    .skill-tag.c-orange  { border-color: rgba(255,107,53,.3); color: var(--accent2); background: rgba(255,107,53,.05); }
 
     /* PORTFOLIO ENHANCEMENTS */
     .portfolio-tech { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0; }
@@ -151,27 +159,39 @@
             </div>
         </div>
 
-        <!-- SKILL BARS -->
+        <!-- SKILL TAGS -->
         <div class="skill-section">
-            <div class="skill-category skill-anim">
+            <div class="skill-group">
                 <div class="skill-cat-label">Controllo &amp; Simulazione</div>
-                <div class="skill-row"><span class="skill-name">MATLAB / Simulink</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="90" style="background:var(--accent)"></div></div><span class="skill-level">Avanzato</span></div>
-                <div class="skill-row"><span class="skill-name">Modelica / Dymola</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="70" style="background:var(--accent)"></div></div><span class="skill-level">Intermedio</span></div>
-                <div class="skill-row"><span class="skill-name">Controllo PID / PI</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="88" style="background:var(--accent)"></div></div><span class="skill-level">Avanzato</span></div>
-                <div class="skill-row"><span class="skill-name">Analisi Bode / Nyquist</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="82" style="background:var(--accent)"></div></div><span class="skill-level">Avanzato</span></div>
+                <div class="skill-tags">
+                    <span class="skill-tag c-accent">MATLAB / Simulink</span>
+                    <span class="skill-tag c-accent">Modelica / Dymola</span>
+                    <span class="skill-tag c-accent">Controllo PID / PI</span>
+                    <span class="skill-tag c-accent">Analisi Bode / Nyquist</span>
+                    <span class="skill-tag c-accent">State-Space</span>
+                    <span class="skill-tag c-accent">Simscape</span>
+                </div>
             </div>
-            <div class="skill-category skill-anim">
+            <div class="skill-group">
                 <div class="skill-cat-label">Automazione Industriale</div>
-                <div class="skill-row"><span class="skill-name">PLC / TIA Portal</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="70" style="background:var(--green)"></div></div><span class="skill-level">Intermedio</span></div>
-                <div class="skill-row"><span class="skill-name">SCADA / Ignition</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="68" style="background:var(--green)"></div></div><span class="skill-level">Intermedio</span></div>
-                <div class="skill-row"><span class="skill-name">OPC-UA / PROFINET</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="60" style="background:var(--green)"></div></div><span class="skill-level">Intermedio</span></div>
-                <div class="skill-row"><span class="skill-name">IEC 61131-3 ST</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="65" style="background:var(--green)"></div></div><span class="skill-level">Intermedio</span></div>
+                <div class="skill-tags">
+                    <span class="skill-tag c-green">PLC / TIA Portal</span>
+                    <span class="skill-tag c-green">SCADA / Ignition</span>
+                    <span class="skill-tag c-green">OPC-UA</span>
+                    <span class="skill-tag c-green">PROFINET</span>
+                    <span class="skill-tag c-green">IEC 61131-3 ST</span>
+                    <span class="skill-tag c-green">ISA-18.2 Alarms</span>
+                    <span class="skill-tag c-green">IEC 62443</span>
+                </div>
             </div>
-            <div class="skill-category skill-anim">
+            <div class="skill-group">
                 <div class="skill-cat-label">Software &amp; Dev</div>
-                <div class="skill-row"><span class="skill-name">Python</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="75" style="background:var(--yellow)"></div></div><span class="skill-level">Intermedio</span></div>
-                <div class="skill-row"><span class="skill-name">HTML / CSS / JS</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="70" style="background:var(--yellow)"></div></div><span class="skill-level">Intermedio</span></div>
-                <div class="skill-row"><span class="skill-name">Git / GitHub</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="78" style="background:var(--yellow)"></div></div><span class="skill-level">Intermedio</span></div>
+                <div class="skill-tags">
+                    <span class="skill-tag c-orange">Python</span>
+                    <span class="skill-tag c-orange">NumPy / Pandas</span>
+                    <span class="skill-tag c-orange">HTML / CSS / JS</span>
+                    <span class="skill-tag c-orange">Git / GitHub</span>
+                </div>
             </div>
         </div>
     </div>
@@ -189,7 +209,7 @@
                 <img src="img/portfolio/1.png" alt="DC Motor Control" class="portfolio-img"
                     onerror="this.outerHTML='<div class=\'portfolio-img-placeholder\'>DC MOTOR</div>'">
                 <div class="portfolio-body">
-                    <div class="portfolio-status status-done"><span class="status-dot"></span>Completato</div>
+                    <div class="portfolio-status status-wip"><span class="status-dot"></span>In sviluppo</div>
                     <span class="portfolio-tag">Simulation &middot; Control</span>
                     <h3>Tram &ldquo;Carelli 1928&rdquo; &mdash; DC Motor Speed Control</h3>
                     <p>Controllo in cascata PI con field-weakening e anti-windup per quattro motori DC del tram ATM Milano su percorso 10 km con pendenze.</p>
@@ -204,7 +224,7 @@
                 <img src="img/portfolio/2.png" alt="SCADA Water Treatment" class="portfolio-img"
                     onerror="this.outerHTML='<div class=\'portfolio-img-placeholder\'>SCADA</div>'">
                 <div class="portfolio-body">
-                    <div class="portfolio-status status-done"><span class="status-dot"></span>Completato</div>
+                    <div class="portfolio-status status-wip"><span class="status-dot"></span>In sviluppo</div>
                     <span class="portfolio-tag">Software Engineering &middot; SCADA</span>
                     <h3>SCADA &mdash; Water Treatment Plant</h3>
                     <p>Sistema supervisore per impianto di potabilizzazione: PLC Siemens S7, HMI Ignition 8.x, OPC-UA, allarmi ISA-18.2, cybersecurity IEC 62443.</p>
@@ -357,7 +377,7 @@
         <div class="contact-inner">
             <p>Sei interessato a collaborare su un progetto tecnico o hai bisogno di consulenza in automazione industriale o Industry 4.0? Rispondo entro 24h.</p>
             <div class="contact-links">
-                <a href="mailto:ingmatteocavalleri@gmail.com" class="contact-btn"><i class="fa-solid fa-envelope"></i> Email</a>
+                <a href="/cdn-cgi/l/email-protection#1d74737a707c696978727e7c6b7c7171786f745d7a707c7471337e7270" class="contact-btn"><i class="fa-solid fa-envelope"></i> Email</a>
                 <a href="https://github.com/ingmatteocavalleri" target="_blank" class="contact-btn"><i class="fa-brands fa-github"></i> GitHub</a>
                 <a href="https://www.linkedin.com/in/matteocavallerii" target="_blank" class="contact-btn"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
             </div>
@@ -370,7 +390,7 @@
     <p>dockhub.net</p>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // TYPING
 const phrases=['Automation & Control Engineer','MATLAB \u00b7 Simulink \u00b7 Modelica','PLC \u00b7 SCADA \u00b7 OPC-UA','PoliMi MSc \u00b7 Industry 4.0'];
 let pi=0,ci=0,del=false;
@@ -384,27 +404,9 @@ function type(){
 }
 type();
 
-// SKILL BARS — observe each category independently.
-// This ensures the third category animates when YOU SCROLL TO IT,
-// not when the first category enters the viewport.
-const sio=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-        if(!e.isIntersecting)return;
-        e.target.querySelectorAll('.skill-bar').forEach(b=>b.style.width=b.dataset.w+'%');
-        sio.unobserve(e.target);
-    });
-},{threshold:0.35});
-document.querySelectorAll('.skill-anim').forEach(cat=>sio.observe(cat));
-
 // ENTRANCE ANIMATIONS
 const io=new IntersectionObserver(entries=>{
     entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';}});
 },{threshold:0.07});
 document.querySelectorAll('.about-card,.portfolio-card,.now-card,.stack-chip').forEach(el=>{
-    el.style.opacity='0';el.style.transform='translateY(18px)';
-    el.style.transition='opacity .5s ease,transform .5s ease,border-color .3s,background .25s';
-    io.observe(el);
-});
-</script>
-</body>
-</html>
+    el.style.opacity='0';el.style.transform='transl
