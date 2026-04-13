@@ -1,248 +1,416 @@
 <!DOCTYPE html>
 <html lang="it">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Matteo Cavalleri — Automation Engineer</title>
+    <meta name="description" content="Automation and Control Engineer, PoliMi MSc. Controllo avanzato, simulazione dinamica, SCADA, Industry 4.0.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-</head>
+    <style>
+    /* SKILL BARS */
+    .skill-section { margin-top: 48px; }
+    .skill-category { margin-bottom: 28px; }
+    .skill-cat-label {
+        font-family: var(--mono); font-size: .65rem; color: var(--accent);
+        letter-spacing: .12em; text-transform: uppercase;
+        margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+    }
+    .skill-cat-label::after { content:''; flex:1; height:1px; background:var(--border); }
+    .skill-row { display: flex; align-items: center; gap: 12px; margin-bottom: 9px; }
+    .skill-name { font-family: var(--mono); font-size: .74rem; color: var(--text); width: 140px; flex-shrink: 0; }
+    .skill-bar-wrap { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+    .skill-bar { height: 100%; border-radius: 3px; width: 0; transition: width 1.2s cubic-bezier(.4,0,.2,1); }
+    .skill-level { font-family: var(--mono); font-size: .62rem; color: var(--muted); width: 80px; text-align: right; flex-shrink: 0; }
 
+    /* PORTFOLIO ENHANCEMENTS */
+    .portfolio-tech { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0; }
+    .portfolio-tech span { font-family: var(--mono); font-size: .6rem; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 2px 7px; border-radius: 2px; }
+    .portfolio-status { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: .62rem; padding: 2px 8px; border-radius: 2px; margin-bottom: 6px; }
+    .status-done { background: rgba(63,185,80,.08); color: var(--green); border: 1px solid rgba(63,185,80,.2); }
+    .status-wip  { background: rgba(227,179,65,.08); color: var(--yellow); border: 1px solid rgba(227,179,65,.2); }
+    .status-dot  { width: 5px; height: 5px; border-radius: 50%; background: currentColor; animation: pulse 2s infinite; }
+
+    /* GITHUB */
+    #github { background: var(--bg); border-top: 1px solid var(--border); }
+    .gh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 48px; }
+    .gh-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 22px; }
+    .gh-card-title { font-family: var(--mono); font-size: .65rem; color: var(--accent); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    .gh-event { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+    .gh-event:last-child { border-bottom: none; }
+    .gh-event-icon { color: var(--accent); font-size: .8rem; margin-top: 1px; flex-shrink: 0; width: 14px; }
+    .gh-event-body { flex: 1; min-width: 0; }
+    .gh-event-repo { font-family: var(--mono); font-size: .72rem; color: var(--text); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .gh-event-msg  { font-family: var(--mono); font-size: .65rem; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .gh-event-time { font-family: var(--mono); font-size: .6rem; color: var(--muted); flex-shrink: 0; }
+    .gh-repo-list { display: flex; flex-direction: column; gap: 8px; }
+    .gh-repo { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; text-decoration: none; transition: border-color .2s; }
+    .gh-repo:hover { border-color: rgba(0,212,255,.3); }
+    .gh-repo-name { font-family: var(--mono); font-size: .76rem; font-weight: 600; color: var(--accent); }
+    .gh-repo-desc { font-family: var(--mono); font-size: .63rem; color: var(--muted); margin-top: 3px; }
+    .gh-repo-meta { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: 10px; }
+    .gh-lang { font-family: var(--mono); font-size: .6rem; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+    .lang-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .gh-msg { font-family: var(--mono); font-size: .72rem; color: var(--muted); padding: 20px 0; text-align: center; }
+
+    /* NOW */
+    #now { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .now-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 48px; }
+    .now-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 24px 22px; transition: border-color .3s, transform .2s; }
+    .now-card:hover { border-color: rgba(0,212,255,.22); transform: translateY(-2px); }
+    .now-card-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .now-icon { width: 36px; height: 36px; border-radius: 6px; display: grid; place-items: center; font-size: .9rem; flex-shrink: 0; }
+    .now-card h4 { font-family: var(--display); font-size: .95rem; font-weight: 700; }
+    .now-card p { color: var(--muted); font-size: .86rem; line-height: 1.65; }
+    .now-tag { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: .62rem; background: rgba(0,212,255,.06); color: var(--accent); border: 1px solid rgba(0,212,255,.18); padding: 3px 8px; border-radius: 2px; margin-top: 12px; }
+
+    /* TYPING */
+    #typed::after { content: '|'; animation: blink .7s infinite; color: var(--accent); }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    @media (max-width: 700px) {
+        .gh-grid { grid-template-columns: 1fr; }
+        .now-grid { grid-template-columns: 1fr; }
+        .skill-name { width: 100px; }
+    }
+    </style>
+</head>
 <body>
 
-    <!-- NAV -->
-    <nav>
-        <a href="#" class="nav-logo">mc<span>.eng</span></a>
-        <ul class="nav-links">
-            <li><a href="#about">about</a></li>
-            <li><a href="#services">services</a></li>
-            <li><a href="#portfolio">portfolio</a></li>
-            <li><a href="#team">team</a></li>
-            <li><a href="#contact">contact</a></li>
-            <li><a href="https://ingmatteocavalleri.github.io/Carriera" style="color:var(--accent)">Carriera →</a></li>
-        </ul>
-    </nav>
+<nav>
+    <a href="#" class="nav-logo">mc<span>.eng</span></a>
+    <ul class="nav-links">
+        <li><a href="#about">about</a></li>
+        <li><a href="#portfolio">portfolio</a></li>
+        <li><a href="#github">github</a></li>
+        <li><a href="#now">now</a></li>
+        <li><a href="#contact">contact</a></li>
+        <li><a href="./Carriera/" style="color:var(--accent)">Carriera &#x2192;</a></li>
+        <li><a href="./appunti/" style="color:var(--muted)"><i class="fa-solid fa-book-open" style="font-size:.7rem"></i> Appunti</a></li>
+    </ul>
+</nav>
 
-    <!-- HERO -->
-    <section id="hero">
-        <div class="hero-grid"></div>
-        <div class="hero-glow"></div>
-        <div class="hero-inner">
-            <div class="hero-tag">Automation &amp; Control Engineer</div>
-            <h1 class="hero-title">
-                <span class="dim">Matteo</span><br>
-                <span>Cavalleri<span class="accent">.</span></span>
-            </h1>
-            <p class="hero-sub">
-                Ingegnere dell'automazione, consulente tecnico e appassionato di sistemi di controllo avanzati. Laurea
-                al Politecnico di Milano.
-            </p>
-            <div class="hero-ctas">
-                <a href="#portfolio" class="btn-primary"><i class="fa-solid fa-folder-open"></i> Portfolio</a>
-                <a href="https://ingmatteocavalleri.github.io/Carriera" class="btn-outline"><i
-                        class="fa-solid fa-id-card"></i> Carriera</a>
-                <a href="#contact" class="btn-outline"><i class="fa-solid fa-envelope"></i> Contatti</a>
+<!-- HERO -->
+<section id="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-inner">
+        <div class="hero-tag"><span id="typed"></span></div>
+        <h1 class="hero-title">
+            <span class="dim">Matteo</span><br>
+            <span>Cavalleri<span class="accent">.</span></span>
+        </h1>
+        <p class="hero-sub">
+            Automation &amp; Control Engineer &mdash; PoliMi MSc.<br>
+            Sistemi di controllo, simulazione dinamica, SCADA e Industry&nbsp;4.0.
+        </p>
+        <div class="hero-ctas">
+            <a href="#portfolio" class="btn-primary"><i class="fa-solid fa-folder-open"></i> Portfolio</a>
+            <a href="./Carriera/" class="btn-outline"><i class="fa-solid fa-id-card"></i> Carriera &amp; CV</a>
+            <a href="#contact" class="btn-outline"><i class="fa-solid fa-envelope"></i> Contatti</a>
+        </div>
+        <div class="hero-stats">
+            <div><div class="stat-num">2<span class="unit">+</span></div><div class="stat-label">progetti pubblicati</div></div>
+            <div><div class="stat-num">5</div><div class="stat-label">corsi magistrali</div></div>
+            <div><div class="stat-num">3<span class="unit">+</span></div><div class="stat-label">anni Industry 4.0</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- ABOUT + SKILLS -->
+<section id="about">
+    <div class="section">
+        <div class="section-label">About</div>
+        <h2 class="section-title">Competenze</h2>
+        <p class="section-desc">Stack tecnico acquisito tra PoliMi, consulenza industriale e progetti personali.</p>
+        <div class="about-grid" style="margin-top:36px">
+            <div class="about-card">
+                <div class="about-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <h3>Formazione</h3>
+                <p>Laurea Triennale (2021&ndash;25) e Magistrale in Automation &amp; Control Engineering al Politecnico di Milano. Controllo moderno, robotica, energy management, software industriale.</p>
             </div>
-            <div class="hero-stats">
-                <div>
-                    <div class="stat-num">5<span class="unit">+</span></div>
-                    <div class="stat-label">aree di expertise</div>
-                </div>
-                <div>
-                    <div class="stat-num">4<span class="unit">+</span></div>
-                    <div class="stat-label">progetti attivi</div>
-                </div>
+            <div class="about-card">
+                <div class="about-card-icon"><i class="fa-solid fa-briefcase"></i></div>
+                <h3>Esperienza</h3>
+                <p>Consulente tecnico per Studio Bartesaghi Romaniello e Tinexta Innovation Hub. Assessment tecnologico per aziende manifatturiere, documentazione incentivi Industria 4.0.</p>
             </div>
         </div>
-    </section>
 
-    <!-- ABOUT -->
-    <section id="about">
-        <div class="section">
-            <div class="section-label">About</div>
-            <h2 class="section-title">Chi sono</h2>
-            <p class="section-desc">Percorso tecnico tra università, industria e innovazione digitale nell'automazione
-                industriale.</p>
-            <div class="about-grid">
-                <div class="about-card">
-                    <div class="about-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-                    <h3>Formazione</h3>
-                    <p>Laurea triennale in Ingegneria dell'Automazione e magistrale in Automation &amp; Control
-                        Engineering al Politecnico di Milano.</p>
-                </div>
-                <div class="about-card">
-                    <div class="about-card-icon"><i class="fa-solid fa-briefcase"></i></div>
-                    <h3>Esperienza</h3>
-                    <p>Consulente tecnico per Studio Bartesaghi Romaniello e Tinexta Innovation Hub. Specializzato in
-                        documentazione per incentivi Industry 4.0.</p>
-                </div>
-                <div class="about-card">
-                    <div class="about-card-icon"><i class="fa-solid fa-microchip"></i></div>
-                    <h3>Hard Skills</h3>
-                    <p>MATLAB / Simulink, Modelica, CAD/CAM, sistemi di controllo, automazione
-                        industriale e residenziale. Sviluppo SCADA (Ignition 8.x), OPC-UA, ISA-18.2, architetture event-driven.</p>
-                </div>
-                <div class="about-card">
-                    <div class="about-card-icon"><i class="fa-solid fa-people-arrows"></i></div>
-                    <h3>Soft Skills</h3>
-                    <p>Project management, team leadership, comunicazione tecnica, problem solving e proattività in
-                        ambienti multidisciplinari.</p>
-                </div>
+        <!-- SKILL BARS -->
+        <div class="skill-section" id="skillSection">
+            <div class="skill-category">
+                <div class="skill-cat-label">Controllo &amp; Simulazione</div>
+                <div class="skill-row"><span class="skill-name">MATLAB / Simulink</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="90" style="background:var(--accent)"></div></div><span class="skill-level">Avanzato</span></div>
+                <div class="skill-row"><span class="skill-name">Modelica / Dymola</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="70" style="background:var(--accent)"></div></div><span class="skill-level">Intermedio</span></div>
+                <div class="skill-row"><span class="skill-name">Controllo PID / PI</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="88" style="background:var(--accent)"></div></div><span class="skill-level">Avanzato</span></div>
+                <div class="skill-row"><span class="skill-name">Analisi Bode / Nyquist</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="82" style="background:var(--accent)"></div></div><span class="skill-level">Avanzato</span></div>
+            </div>
+            <div class="skill-category">
+                <div class="skill-cat-label">Automazione Industriale</div>
+                <div class="skill-row"><span class="skill-name">PLC / TIA Portal</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="70" style="background:var(--green)"></div></div><span class="skill-level">Intermedio</span></div>
+                <div class="skill-row"><span class="skill-name">SCADA / Ignition</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="68" style="background:var(--green)"></div></div><span class="skill-level">Intermedio</span></div>
+                <div class="skill-row"><span class="skill-name">OPC-UA / PROFINET</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="60" style="background:var(--green)"></div></div><span class="skill-level">Intermedio</span></div>
+                <div class="skill-row"><span class="skill-name">IEC 61131-3 ST</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="65" style="background:var(--green)"></div></div><span class="skill-level">Intermedio</span></div>
+            </div>
+            <div class="skill-category">
+                <div class="skill-cat-label">Software &amp; Dev</div>
+                <div class="skill-row"><span class="skill-name">Python</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="75" style="background:var(--yellow)"></div></div><span class="skill-level">Intermedio</span></div>
+                <div class="skill-row"><span class="skill-name">HTML / CSS / JS</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="70" style="background:var(--yellow)"></div></div><span class="skill-level">Intermedio</span></div>
+                <div class="skill-row"><span class="skill-name">Git / GitHub</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="78" style="background:var(--yellow)"></div></div><span class="skill-level">Intermedio</span></div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- SERVICES -->
-    <section id="services">
-        <div class="section">
-            <div class="section-label">Services</div>
-            <h2 class="section-title">Cosa offro</h2>
-            <p class="section-desc">Competenze tecniche e gestionali al servizio di progetti complessi e innovativi.</p>
-            <div class="services-grid">
-                <div class="service-item">
-                    <div class="service-num">01</div>
-                    <h3>Project Management</h3>
-                    <p>Gestione di progetti tecnici complessi: pianificazione, coordinamento del team, controllo tempi e
-                        deliverable.</p>
-                </div>
-                <div class="service-item">
-                    <div class="service-num">02</div>
-                    <h3>Simulazione Dinamica</h3>
-                    <p>Modelli di simulazione in MATLAB/Simulink e Modelica per testare, ottimizzare e validare sistemi
-                        complessi.</p>
-                </div>
-                <div class="service-item">
-                    <div class="service-num">03</div>
-                    <h3>Efficienza Energetica</h3>
-                    <p>Ottimizzazione del consumo energetico e implementazione di soluzioni in ottica
-                        Industry 4.0.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+<!-- PORTFOLIO -->
+<section id="portfolio" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div class="section">
+        <div class="section-label">Portfolio</div>
+        <h2 class="section-title">Progetti</h2>
+        <p class="section-desc">Lavori tecnici con documentazione, modelli e simulazioni interattive.</p>
+        <div class="portfolio-grid" style="margin-top:48px">
 
-    <!-- PORTFOLIO -->
-    <section id="portfolio">
-        <div class="section">
-            <div class="section-label">Portfolio</div>
-            <h2 class="section-title">Progetti</h2>
-            <p class="section-desc">Raccolta di lavori tecnici, simulazioni e documentazione di progetto.</p>
-            <div class="portfolio-grid">
-
-                <a href="https://ingmatteocavalleri.github.io/DCmotor" class="portfolio-card">
-                    <img src="img/portfolio/1.png" alt="Tram FOC" class="portfolio-img"
-                        onerror="this.outerHTML='<div class=\'portfolio-img-placeholder\'>TRACTION CTRL</div>'">
-                    <div class="portfolio-body">
-                        <span class="portfolio-tag">Simulation · Control</span>
-                        <h3>Case study - Tram "Carelli 1928"</h3>
-                        <p>Controllo di un mezzo di trasporto ATM.</p>
-                        <div class="portfolio-arrow">Apri progetto <i class="fa-solid fa-arrow-right"></i></div>
+            <a href="./DCmotor/" class="portfolio-card">
+                <img src="img/portfolio/1.png" alt="DC Motor Control" class="portfolio-img"
+                    onerror="this.outerHTML='<div class=\'portfolio-img-placeholder\'>DC MOTOR</div>'">
+                <div class="portfolio-body">
+                    <div class="portfolio-status status-done"><span class="status-dot"></span>Completato</div>
+                    <span class="portfolio-tag">Simulation &middot; Control</span>
+                    <h3>Tram &ldquo;Carelli 1928&rdquo; &mdash; DC Motor Speed Control</h3>
+                    <p>Controllo in cascata PI con field-weakening e anti-windup per quattro motori DC del tram ATM Milano su percorso 10 km con pendenze.</p>
+                    <div class="portfolio-tech">
+                        <span>MATLAB</span><span>Simulink</span><span>Cascade PI</span><span>Field Weakening</span><span>PoliMi &middot; DEMD</span>
                     </div>
+                    <div class="portfolio-arrow">Apri progetto <i class="fa-solid fa-arrow-right"></i></div>
+                </div>
+            </a>
+
+            <a href="./SE4A/" class="portfolio-card">
+                <img src="img/portfolio/2.png" alt="SCADA Water Treatment" class="portfolio-img"
+                    onerror="this.outerHTML='<div class=\'portfolio-img-placeholder\'>SCADA</div>'">
+                <div class="portfolio-body">
+                    <div class="portfolio-status status-done"><span class="status-dot"></span>Completato</div>
+                    <span class="portfolio-tag">Software Engineering &middot; SCADA</span>
+                    <h3>SCADA &mdash; Water Treatment Plant</h3>
+                    <p>Sistema supervisore per impianto di potabilizzazione: PLC Siemens S7, HMI Ignition 8.x, OPC-UA, allarmi ISA-18.2, cybersecurity IEC 62443.</p>
+                    <div class="portfolio-tech">
+                        <span>TIA Portal</span><span>Ignition</span><span>OPC-UA</span><span>IEC 62443</span><span>PoliMi &middot; SE4A</span>
+                    </div>
+                    <div class="portfolio-arrow">Apri progetto <i class="fa-solid fa-arrow-right"></i></div>
+                </div>
+            </a>
+
+            <a href="./Modelica/" class="portfolio-card">
+                <div class="portfolio-img-placeholder" style="background:linear-gradient(135deg,rgba(255,107,53,.07),rgba(255,107,53,.02));flex-direction:column;gap:8px">
+                    <i class="fa-solid fa-temperature-half" style="font-size:2rem;color:var(--accent2)"></i>
+                    <span style="font-family:var(--mono);font-size:.68rem;color:var(--muted)">BUILDING THERMAL</span>
+                </div>
+                <div class="portfolio-body">
+                    <div class="portfolio-status status-wip"><span class="status-dot"></span>In sviluppo</div>
+                    <span class="portfolio-tag">Modelica &middot; Thermal</span>
+                    <h3>Building Thermal Model &mdash; PID HVAC</h3>
+                    <p>Rete RC multi-zona in Modelica. Regolatore PI con anti-windup, profilo temperatura invernale 24h, analisi energetica.</p>
+                    <div class="portfolio-tech">
+                        <span>Modelica 4.0</span><span>Dymola</span><span>RC Network</span><span>PID</span><span>PoliMi &middot; EMS</span>
+                    </div>
+                    <div class="portfolio-arrow">Apri progetto <i class="fa-solid fa-arrow-right"></i></div>
+                </div>
+            </a>
+
+            <div class="portfolio-card wip">
+                <div class="portfolio-img-placeholder">COMING SOON</div>
+                <div class="portfolio-body">
+                    <div class="portfolio-status status-wip"><span class="status-dot"></span>Pianificato</div>
+                    <span class="portfolio-tag">Work in Progress</span>
+                    <h3>Prossimo Progetto</h3>
+                    <p>In sviluppo &mdash; prossimamente disponibile.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- GITHUB ACTIVITY -->
+<section id="github">
+    <div class="section">
+        <div class="section-label">GitHub</div>
+        <h2 class="section-title">Attivit&agrave; recente</h2>
+        <p class="section-desc">Dati live dall&rsquo;API GitHub pubblica &mdash; si aggiornano ad ogni visita.</p>
+        <div class="gh-grid">
+            <div class="gh-card">
+                <div class="gh-card-title"><span class="live-dot"></span>Ultimi commit</div>
+                <div id="ghEvents"><div class="gh-msg"><i class="fa-solid fa-spinner fa-spin"></i> Caricamento&hellip;</div></div>
+            </div>
+            <div class="gh-card">
+                <div class="gh-card-title"><i class="fa-brands fa-github"></i> Repository pubblici</div>
+                <div class="gh-repo-list" id="ghRepos"><div class="gh-msg"><i class="fa-solid fa-spinner fa-spin"></i> Caricamento&hellip;</div></div>
+            </div>
+        </div>
+        <div id="ghStats" style="display:none;margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:16px 20px;display:none;gap:32px;flex-wrap:wrap;align-items:center">
+            <div>
+                <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px">Repository pubblici</div>
+                <div style="font-family:var(--display);font-size:1.4rem;font-weight:800" id="ghStatRepos">&mdash;</div>
+            </div>
+            <div>
+                <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px">Follower</div>
+                <div style="font-family:var(--display);font-size:1.4rem;font-weight:800" id="ghStatFollow">&mdash;</div>
+            </div>
+            <div style="margin-left:auto">
+                <a href="https://github.com/ingmatteocavalleri" target="_blank"
+                   style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.75rem;color:var(--accent);background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);padding:8px 16px;border-radius:3px;text-decoration:none;transition:background .2s"
+                   onmouseover="this.style.background='rgba(0,212,255,.14)'" onmouseout="this.style.background='rgba(0,212,255,.06)'">
+                    <i class="fa-brands fa-github"></i> Vedi profilo GitHub
                 </a>
-
-                <a href="https://ingmatteocavalleri.github.io/SCADA" class="portfolio-card">
-                    <img src="img/portfolio/2.png" alt="SCADA Water" class="portfolio-img"
-                        onerror="this.outerHTML='<div class=\'portfolio-img-placeholder\'>SCADA SYSTEM</div>'">
-                    <div class="portfolio-body">
-                        <span class="portfolio-tag">Software Engineering · ISA-18.2 · IEC 62443</span>
-                        <h3>SCADA — Water Treatment Plant</h3>
-                        <p>Sistema supervisore event-driven per impianto di potabilizzazione: controllo PID Cl₂, gestione allarmi ISA-18.2, accesso RBAC (Operatore / Manutenzione / Plant Manager / Ingegneria), ticketing manutenzione e KPI OEE. Pattern Observer + Strategy.</p>
-                        <div class="portfolio-arrow">Apri progetto <i class="fa-solid fa-arrow-right"></i></div>
-                    </div>
-                </a>
-
-                <a href="https://ingmatteocavalleri.github.io/SmartCity" class="portfolio-card">
-                    <div class="portfolio-img-placeholder">COMING SOON</div>
-                    <div class="portfolio-body">
-                        <span class="portfolio-tag">Work in progress</span>
-                        <h3>Nuovo progetto</h3>
-                        <p>In sviluppo - prossimamente disponibile</p>
-                        <div class="portfolio-arrow">Apri progetto <i class="fa-solid fa-arrow-right"></i></div>
-                    </div>
-                </a>
-
-                <div class="portfolio-card wip">
-                    <div class="portfolio-img-placeholder">COMING SOON</div>
-                    <div class="portfolio-body">
-                        <span class="portfolio-tag">Work in Progress</span>
-                        <h3>Nuovo Progetto</h3>
-                        <p>In sviluppo — prossimamente disponibile.</p>
-                    </div>
-                </div>
-
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- TEAM -->
-    <section id="team">
-        <div class="section">
-            <div class="section-label">Team</div>
-            <h2 class="section-title">Il mio team</h2>
-            <p class="section-desc">Professionisti che condividono la passione per l'ingegneria e l'innovazione.</p>
-            <div class="team-grid">
-                <div class="team-card">
-                    <img src="img/MC.jpg" alt="Matteo Cavalleri" class="team-avatar"
-                        onerror="this.outerHTML='<div class=\'team-avatar-fallback\'>MC</div>'">
-                    <div class="team-name">Matteo Cavalleri</div>
-                    <div class="team-role">Automation Engineer · Team leader</div>
-                    <p class="team-desc">Ingegnere dell'automazione specializzato in controllo avanzato, simulazione e
-                        Industry 4.0.</p>
-                    <a href="#contact" class="team-contact"><i class="fa-solid fa-envelope"></i> Collabora</a>
+<!-- NOW -->
+<section id="now">
+    <div class="section">
+        <div class="section-label">Now</div>
+        <h2 class="section-title">Cosa sto facendo</h2>
+        <p class="section-desc">Una snapshot aggiornata manualmente di ci&ograve; su cui mi sto concentrando.</p>
+        <div class="now-grid">
+            <div class="now-card">
+                <div class="now-card-hdr">
+                    <div class="now-icon" style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.15);color:var(--accent)"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <h4>Laurea Magistrale &mdash; PoliMi</h4>
                 </div>
+                <p>Secondo anno di MSc in Automation &amp; Control Engineering. Corsi attivi: DEMD, SE4A, Industrial Robotics, Energy Management Systems.</p>
+                <div class="now-tag"><i class="fa-solid fa-location-dot"></i> Milano &middot; Semestre II 2025-26</div>
+            </div>
+            <div class="now-card">
+                <div class="now-card-hdr">
+                    <div class="now-icon" style="background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.15);color:var(--accent2)"><i class="fa-solid fa-cube"></i></div>
+                    <h4>Progetto Modelica</h4>
+                </div>
+                <p>Modello RC multi-zona in Modelica/Dymola per il corso EMS. Prossima fase: confronto PID vs MPC con previsione meteo.</p>
+                <div class="now-tag" style="background:rgba(255,107,53,.06);color:var(--accent2);border-color:rgba(255,107,53,.2)"><i class="fa-solid fa-spinner fa-spin" style="font-size:.6rem"></i> In corso</div>
+            </div>
+            <div class="now-card">
+                <div class="now-card-hdr">
+                    <div class="now-icon" style="background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.15);color:var(--green)"><i class="fa-solid fa-briefcase"></i></div>
+                    <h4>Consulenza Industry 4.0</h4>
+                </div>
+                <p>Attivit&agrave; di consulenza per Studio Bartesaghi Romaniello e Tinexta. Assessment tecnologico e documentazione incentivi nazionali per aziende manifatturiere.</p>
+                <div class="now-tag" style="background:rgba(63,185,80,.06);color:var(--green);border-color:rgba(63,185,80,.2)"><i class="fa-solid fa-circle" style="font-size:.5rem"></i> Attivo</div>
+            </div>
+            <div class="now-card">
+                <div class="now-card-hdr">
+                    <div class="now-icon" style="background:rgba(163,113,247,.08);border:1px solid rgba(163,113,247,.15);color:var(--purple)"><i class="fa-solid fa-book-open"></i></div>
+                    <h4>Appunti PoliMi</h4>
+                </div>
+                <p>Raccolta sistematica di formulari e sintesi per tutti i corsi della magistrale. Disponibile nella sezione <a href="./appunti/" style="color:var(--accent);text-decoration:none">Appunti</a>.</p>
+                <div class="now-tag" style="background:rgba(163,113,247,.06);color:var(--purple);border-color:rgba(163,113,247,.2)"><i class="fa-solid fa-book-open" style="font-size:.6rem"></i> Aggiornati</div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- CONTACT -->
-    <section id="contact">
-        <div class="section">
-            <div class="section-label">Contact</div>
-            <h2 class="section-title">Contattami</h2>
-            <div class="contact-inner">
-                <p>Sei interessato a collaborare su un progetto tecnico o hai bisogno di consulenza in automazione
-                    industriale o Industry 4.0? Scrivimi.</p>
-                <div class="contact-links">
-                    <a href="mailto:ingmatteocavalleri@gmail.com" class="contact-btn"><i
-                            class="fa-solid fa-envelope"></i> Email</a>
-                    <a href="https://github.com/ingmatteocavalleri" target="_blank" class="contact-btn"><i
-                            class="fa-brands fa-github"></i> GitHub</a>
-                    <a href="https://www.linkedin.com/in/matteocavallerii" target="_blank" class="contact-btn"><i
-                            class="fa-brands fa-linkedin"></i> LinkedIn</a>
-                </div>
+<!-- CONTACT -->
+<section id="contact">
+    <div class="section">
+        <div class="section-label">Contact</div>
+        <h2 class="section-title">Contattami</h2>
+        <div class="contact-inner">
+            <p>Sei interessato a collaborare su un progetto tecnico o hai bisogno di consulenza in automazione industriale o Industry 4.0? Rispondo entro 24h.</p>
+            <div class="contact-links">
+                <a href="mailto:ingmatteocavalleri@gmail.com" class="contact-btn"><i class="fa-solid fa-envelope"></i> ingmatteocavalleri@gmail.com</a>
+                <a href="https://github.com/ingmatteocavalleri" target="_blank" class="contact-btn"><i class="fa-brands fa-github"></i> GitHub</a>
+                <a href="https://www.linkedin.com/in/matteocavallerii" target="_blank" class="contact-btn"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- FOOTER -->
-    <footer>
-        <p>© 2026 Matteo Cavalleri — Automation Engineer</p>
-        <p>dockhub.net</p>
-    </footer>
+<footer>
+    <p>&copy; 2026 Matteo Cavalleri &mdash; Automation Engineer &middot; PoliMi</p>
+    <p>dockhub.net</p>
+</footer>
 
-    <script>
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(e => {
-                if (e.isIntersecting) {
-                    e.target.style.opacity = '1';
-                    e.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, { threshold: 0.08 });
+<script>
+// TYPING
+const phrases=['Automation & Control Engineer','MATLAB · Simulink · Modelica','PLC · SCADA · OPC-UA','PoliMi MSc · Industry 4.0'];
+let pi=0,ci=0,del=false;
+const tel=document.getElementById('typed');
+function type(){
+    const p=phrases[pi];
+    tel.textContent=del?p.slice(0,ci--):p.slice(0,ci++);
+    if(!del&&ci>p.length){del=true;setTimeout(type,1400);return;}
+    if(del&&ci<0){del=false;pi=(pi+1)%phrases.length;ci=0;}
+    setTimeout(type,del?30:65);
+}
+type();
 
-        document.querySelectorAll('.about-card, .service-item, .portfolio-card, .team-card').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'opacity .5s ease, transform .5s ease, border-color .3s, background .25s';
-            observer.observe(el);
-        });
-    </script>
+// SKILL BARS
+const sio=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+        if(!e.isIntersecting)return;
+        e.target.querySelectorAll('.skill-bar').forEach(b=>b.style.width=b.dataset.w+'%');
+        sio.unobserve(e.target);
+    });
+},{threshold:0.15});
+const ss=document.getElementById('skillSection');
+if(ss)sio.observe(ss);
+
+// GITHUB API
+const GH='ingmatteocavalleri';
+const LCOLORS={JavaScript:'#f1e05a',Python:'#3572A5',HTML:'#e34c26',CSS:'#563d7c',MATLAB:'#e16737',Modelica:'#de3e35'};
+function ago(iso){const s=Math.floor((Date.now()-new Date(iso))/1000);if(s<60)return s+'s fa';if(s<3600)return Math.floor(s/60)+'m fa';if(s<86400)return Math.floor(s/3600)+'h fa';return Math.floor(s/86400)+'g fa';}
+function esc(s){return(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+async function loadGH(){
+    try{
+        // Profile
+        const pr=await fetch(`https://api.github.com/users/${GH}`);
+        if(pr.ok){const d=await pr.json();document.getElementById('ghStatRepos').textContent=d.public_repos;document.getElementById('ghStatFollow').textContent=d.followers;const gs=document.getElementById('ghStats');gs.style.display='flex';}
+
+        // Events
+        const er=await fetch(`https://api.github.com/users/${GH}/events/public?per_page=30`);
+        const ee=document.getElementById('ghEvents');
+        if(er.ok){
+            const evs=(await er.json()).filter(e=>e.type==='PushEvent');
+            if(!evs.length){ee.innerHTML='<div class="gh-msg">Nessun commit pubblico recente.</div>';return;}
+            ee.innerHTML=evs.slice(0,7).map(ev=>{
+                const c=ev.payload.commits||[];
+                const msg=c.length?c[c.length-1].message.split('\n')[0]:'push';
+                const repo=ev.repo.name.replace(GH+'/','');
+                return`<div class="gh-event"><div class="gh-event-icon"><i class="fa-solid fa-code-commit"></i></div><div class="gh-event-body"><div class="gh-event-repo">${esc(repo)}</div><div class="gh-event-msg">${esc(msg)}</div></div><div class="gh-event-time">${ago(ev.created_at)}</div></div>`;
+            }).join('');
+        }else{ee.innerHTML='<div class="gh-msg" style="color:var(--muted)">Rate limit GitHub. Riprova tra poco.</div>';}
+
+        // Repos
+        const rr=await fetch(`https://api.github.com/users/${GH}/repos?sort=pushed&per_page=6`);
+        const re=document.getElementById('ghRepos');
+        if(rr.ok){
+            const repos=await rr.json();
+            if(!repos.length){re.innerHTML='<div class="gh-msg">Nessun repository.</div>';return;}
+            re.innerHTML=repos.slice(0,5).map(r=>{
+                const col=LCOLORS[r.language]||'#8b949e';
+                return`<a href="${r.html_url}" target="_blank" class="gh-repo"><div style="min-width:0;flex:1"><div class="gh-repo-name">${esc(r.name)}</div><div class="gh-repo-desc">${esc(r.description||'')}</div></div><div class="gh-repo-meta">${r.language?`<div class="gh-lang"><div class="lang-dot" style="background:${col}"></div>${esc(r.language)}</div>`:''}</div></a>`;
+            }).join('');
+        }
+    }catch(e){
+        document.getElementById('ghEvents').innerHTML='<div class="gh-msg" style="color:var(--muted)">Errore di rete.</div>';
+        document.getElementById('ghRepos').innerHTML='<div class="gh-msg" style="color:var(--muted)">Errore di rete.</div>';
+    }
+}
+loadGH();
+
+// ENTRANCE ANIMATIONS
+const io=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';}});
+},{threshold:0.07});
+document.querySelectorAll('.about-card,.portfolio-card,.now-card,.gh-card').forEach(el=>{
+    el.style.opacity='0';el.style.transform='translateY(18px)';el.style.transition='opacity .5s ease,transform .5s ease,border-color .3s,background .25s';
+    io.observe(el);
+});
+</script>
 </body>
-
 </html>
