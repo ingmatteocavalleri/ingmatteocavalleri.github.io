@@ -36,6 +36,18 @@
 
     /* GITHUB */
     #github { background: var(--bg); border-top: 1px solid var(--border); }
+    /* STACK CHIP */
+    .stack-chip {
+        display: inline-flex; flex-direction: column; gap: 3px;
+        background: var(--surface2); border: 1px solid var(--border);
+        border-radius: 6px; padding: 10px 14px; min-width: 110px;
+        transition: border-color .2s, transform .15s;
+        cursor: default;
+    }
+    .stack-chip:hover { border-color: var(--cc, var(--accent)); transform: translateY(-2px); }
+    .stack-chip i { color: var(--cc, var(--accent)); font-size: .9rem; margin-bottom: 4px; }
+    .stack-chip span { font-family: var(--mono); font-size: .76rem; font-weight: 600; color: var(--text); }
+    .stack-chip small { font-family: var(--mono); font-size: .6rem; color: var(--muted); }
     .gh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 48px; }
     .gh-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 22px; }
     .gh-card-title { font-family: var(--mono); font-size: .65rem; color: var(--accent); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
@@ -86,11 +98,10 @@
     <ul class="nav-links">
         <li><a href="#about">about</a></li>
         <li><a href="#portfolio">portfolio</a></li>
-        <li><a href="#github">github</a></li>
+        <li><a href="#stack">stack</a></li>
         <li><a href="#now">now</a></li>
         <li><a href="#contact">contact</a></li>
         <li><a href="./Carriera/" style="color:var(--accent)">Carriera &#x2192;</a></li>
-        <li><a href="./appunti/" style="color:var(--muted)"><i class="fa-solid fa-book-open" style="font-size:.7rem"></i> Appunti</a></li>
     </ul>
 </nav>
 
@@ -141,22 +152,22 @@
         </div>
 
         <!-- SKILL BARS -->
-        <div class="skill-section" id="skillSection">
-            <div class="skill-category">
+        <div class="skill-section">
+            <div class="skill-category skill-anim">
                 <div class="skill-cat-label">Controllo &amp; Simulazione</div>
                 <div class="skill-row"><span class="skill-name">MATLAB / Simulink</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="90" style="background:var(--accent)"></div></div><span class="skill-level">Avanzato</span></div>
                 <div class="skill-row"><span class="skill-name">Modelica / Dymola</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="70" style="background:var(--accent)"></div></div><span class="skill-level">Intermedio</span></div>
                 <div class="skill-row"><span class="skill-name">Controllo PID / PI</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="88" style="background:var(--accent)"></div></div><span class="skill-level">Avanzato</span></div>
                 <div class="skill-row"><span class="skill-name">Analisi Bode / Nyquist</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="82" style="background:var(--accent)"></div></div><span class="skill-level">Avanzato</span></div>
             </div>
-            <div class="skill-category">
+            <div class="skill-category skill-anim">
                 <div class="skill-cat-label">Automazione Industriale</div>
                 <div class="skill-row"><span class="skill-name">PLC / TIA Portal</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="70" style="background:var(--green)"></div></div><span class="skill-level">Intermedio</span></div>
                 <div class="skill-row"><span class="skill-name">SCADA / Ignition</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="68" style="background:var(--green)"></div></div><span class="skill-level">Intermedio</span></div>
                 <div class="skill-row"><span class="skill-name">OPC-UA / PROFINET</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="60" style="background:var(--green)"></div></div><span class="skill-level">Intermedio</span></div>
                 <div class="skill-row"><span class="skill-name">IEC 61131-3 ST</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="65" style="background:var(--green)"></div></div><span class="skill-level">Intermedio</span></div>
             </div>
-            <div class="skill-category">
+            <div class="skill-category skill-anim">
                 <div class="skill-cat-label">Software &amp; Dev</div>
                 <div class="skill-row"><span class="skill-name">Python</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="75" style="background:var(--yellow)"></div></div><span class="skill-level">Intermedio</span></div>
                 <div class="skill-row"><span class="skill-name">HTML / CSS / JS</span><div class="skill-bar-wrap"><div class="skill-bar" data-w="70" style="background:var(--yellow)"></div></div><span class="skill-level">Intermedio</span></div>
@@ -189,7 +200,7 @@
                 </div>
             </a>
 
-            <a href="./SE4A/" class="portfolio-card">
+            <a href="./SCADA/" class="portfolio-card">
                 <img src="img/portfolio/2.png" alt="SCADA Water Treatment" class="portfolio-img"
                     onerror="this.outerHTML='<div class=\'portfolio-img-placeholder\'>SCADA</div>'">
                 <div class="portfolio-body">
@@ -234,39 +245,72 @@
     </div>
 </section>
 
-<!-- GITHUB ACTIVITY -->
-<section id="github">
+<!-- TECH STACK -->
+<section id="stack" style="background:var(--bg);border-top:1px solid var(--border)">
     <div class="section">
-        <div class="section-label">GitHub</div>
-        <h2 class="section-title">Attivit&agrave; recente</h2>
-        <p class="section-desc">Dati live dall&rsquo;API GitHub pubblica &mdash; si aggiornano ad ogni visita.</p>
-        <div class="gh-grid">
-            <div class="gh-card">
-                <div class="gh-card-title"><span class="live-dot"></span>Ultimi commit</div>
-                <div id="ghEvents"><div class="gh-msg"><i class="fa-solid fa-spinner fa-spin"></i> Caricamento&hellip;</div></div>
+        <div class="section-label">Tech Stack</div>
+        <h2 class="section-title">Strumenti &amp; Tecnologie</h2>
+        <p class="section-desc">Ecosistema tecnico usato nei progetti accademici e nella consulenza industriale.</p>
+
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:48px">
+
+            <!-- Row 1 -->
+            <div style="display:grid;grid-template-columns:120px 1fr;gap:6px;align-items:start">
+                <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;padding:14px 0;border-right:1px solid var(--border);margin-right:6px">Simulazione</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    <div class="stack-chip" style="--cc:var(--accent)"><i class="fa-solid fa-chart-line"></i><span>MATLAB</span><small>R2024b</small></div>
+                    <div class="stack-chip" style="--cc:var(--accent)"><i class="fa-solid fa-diagram-project"></i><span>Simulink</span><small>Multi-domain</small></div>
+                    <div class="stack-chip" style="--cc:var(--accent2)"><i class="fa-solid fa-cube"></i><span>Modelica</span><small>4.0 · Dymola</small></div>
+                    <div class="stack-chip" style="--cc:var(--muted)"><i class="fa-solid fa-wave-square"></i><span>Simscape</span><small>Electrical</small></div>
+                </div>
             </div>
-            <div class="gh-card">
-                <div class="gh-card-title"><i class="fa-brands fa-github"></i> Repository pubblici</div>
-                <div class="gh-repo-list" id="ghRepos"><div class="gh-msg"><i class="fa-solid fa-spinner fa-spin"></i> Caricamento&hellip;</div></div>
+
+            <div style="height:1px;background:var(--border);margin:4px 0"></div>
+
+            <!-- Row 2 -->
+            <div style="display:grid;grid-template-columns:120px 1fr;gap:6px;align-items:start">
+                <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;padding:14px 0;border-right:1px solid var(--border);margin-right:6px">Automazione</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    <div class="stack-chip" style="--cc:var(--yellow)"><i class="fa-solid fa-microchip"></i><span>TIA Portal V17</span><small>S7-1200/1500</small></div>
+                    <div class="stack-chip" style="--cc:var(--yellow)"><i class="fa-solid fa-display"></i><span>Ignition SCADA</span><small>8.x</small></div>
+                    <div class="stack-chip" style="--cc:var(--green)"><i class="fa-solid fa-network-wired"></i><span>OPC-UA</span><small>IEC 62541</small></div>
+                    <div class="stack-chip" style="--cc:var(--green)"><i class="fa-solid fa-ethernet"></i><span>PROFINET</span><small>RT / IRT</small></div>
+                    <div class="stack-chip" style="--cc:var(--muted)"><i class="fa-solid fa-code"></i><span>IEC 61131-3</span><small>ST · LAD · FBD</small></div>
+                </div>
+            </div>
+
+            <div style="height:1px;background:var(--border);margin:4px 0"></div>
+
+            <!-- Row 3 -->
+            <div style="display:grid;grid-template-columns:120px 1fr;gap:6px;align-items:start">
+                <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;padding:14px 0;border-right:1px solid var(--border);margin-right:6px">Software</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    <div class="stack-chip" style="--cc:var(--purple)"><i class="fa-brands fa-python"></i><span>Python</span><small>NumPy · Pandas</small></div>
+                    <div class="stack-chip" style="--cc:var(--purple)"><i class="fa-brands fa-js"></i><span>JavaScript</span><small>Canvas · Fetch API</small></div>
+                    <div class="stack-chip" style="--cc:var(--muted)"><i class="fa-brands fa-git-alt"></i><span>Git / GitHub</span><small>Pages · Actions</small></div>
+                    <div class="stack-chip" style="--cc:var(--muted)"><i class="fa-brands fa-html5"></i><span>HTML / CSS</span><small>Vanilla · No framework</small></div>
+                </div>
+            </div>
+
+            <div style="height:1px;background:var(--border);margin:4px 0"></div>
+
+            <!-- Row 4 -->
+            <div style="display:grid;grid-template-columns:120px 1fr;gap:6px;align-items:start">
+                <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;padding:14px 0;border-right:1px solid var(--border);margin-right:6px">Standard</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    <div class="stack-chip" style="--cc:var(--green)"><i class="fa-solid fa-shield-halved"></i><span>IEC 62443</span><small>Cybersecurity OT</small></div>
+                    <div class="stack-chip" style="--cc:var(--green)"><i class="fa-solid fa-bell"></i><span>ISA-18.2</span><small>Alarm management</small></div>
+                    <div class="stack-chip" style="--cc:var(--accent)"><i class="fa-solid fa-layer-group"></i><span>ISA-95</span><small>Arch. di automazione</small></div>
+                    <div class="stack-chip" style="--cc:var(--muted)"><i class="fa-solid fa-file-contract"></i><span>ISA-101</span><small>HMI design</small></div>
+                </div>
             </div>
         </div>
-        <div id="ghStats" style="display:none;margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:16px 20px;display:none;gap:32px;flex-wrap:wrap;align-items:center">
-            <div>
-                <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px">Repository pubblici</div>
-                <div style="font-family:var(--display);font-size:1.4rem;font-weight:800" id="ghStatRepos">&mdash;</div>
-            </div>
-            <div>
-                <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px">Follower</div>
-                <div style="font-family:var(--display);font-size:1.4rem;font-weight:800" id="ghStatFollow">&mdash;</div>
-            </div>
-            <div style="margin-left:auto">
-                <a href="https://github.com/ingmatteocavalleri" target="_blank"
-                   style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.75rem;color:var(--accent);background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);padding:8px 16px;border-radius:3px;text-decoration:none;transition:background .2s"
-                   onmouseover="this.style.background='rgba(0,212,255,.14)'" onmouseout="this.style.background='rgba(0,212,255,.06)'">
-                    <i class="fa-brands fa-github"></i> Vedi profilo GitHub
-                </a>
-            </div>
-        </div>
+
+        <a href="https://github.com/ingmatteocavalleri" target="_blank"
+           style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.75rem;color:var(--accent);background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);padding:9px 18px;border-radius:3px;text-decoration:none;margin-top:28px;transition:background .2s"
+           onmouseover="this.style.background='rgba(0,212,255,.14)'" onmouseout="this.style.background='rgba(0,212,255,.06)'">
+            <i class="fa-brands fa-github"></i> Vedi tutto il codice su GitHub
+        </a>
     </div>
 </section>
 
@@ -301,14 +345,6 @@
                 <p>Attivit&agrave; di consulenza per Studio Bartesaghi Romaniello e Tinexta. Assessment tecnologico e documentazione incentivi nazionali per aziende manifatturiere.</p>
                 <div class="now-tag" style="background:rgba(63,185,80,.06);color:var(--green);border-color:rgba(63,185,80,.2)"><i class="fa-solid fa-circle" style="font-size:.5rem"></i> Attivo</div>
             </div>
-            <div class="now-card">
-                <div class="now-card-hdr">
-                    <div class="now-icon" style="background:rgba(163,113,247,.08);border:1px solid rgba(163,113,247,.15);color:var(--purple)"><i class="fa-solid fa-book-open"></i></div>
-                    <h4>Appunti PoliMi</h4>
-                </div>
-                <p>Raccolta sistematica di formulari e sintesi per tutti i corsi della magistrale. Disponibile nella sezione <a href="./appunti/" style="color:var(--accent);text-decoration:none">Appunti</a>.</p>
-                <div class="now-tag" style="background:rgba(163,113,247,.06);color:var(--purple);border-color:rgba(163,113,247,.2)"><i class="fa-solid fa-book-open" style="font-size:.6rem"></i> Aggiornati</div>
-            </div>
         </div>
     </div>
 </section>
@@ -336,7 +372,7 @@
 
 <script>
 // TYPING
-const phrases=['Automation & Control Engineer','MATLAB · Simulink · Modelica','PLC · SCADA · OPC-UA','PoliMi MSc · Industry 4.0'];
+const phrases=['Automation & Control Engineer','MATLAB \u00b7 Simulink \u00b7 Modelica','PLC \u00b7 SCADA \u00b7 OPC-UA','PoliMi MSc \u00b7 Industry 4.0'];
 let pi=0,ci=0,del=false;
 const tel=document.getElementById('typed');
 function type(){
@@ -348,67 +384,25 @@ function type(){
 }
 type();
 
-// SKILL BARS
+// SKILL BARS — observe each category independently.
+// This ensures the third category animates when YOU SCROLL TO IT,
+// not when the first category enters the viewport.
 const sio=new IntersectionObserver(entries=>{
     entries.forEach(e=>{
         if(!e.isIntersecting)return;
         e.target.querySelectorAll('.skill-bar').forEach(b=>b.style.width=b.dataset.w+'%');
         sio.unobserve(e.target);
     });
-},{threshold:0.15});
-const ss=document.getElementById('skillSection');
-if(ss)sio.observe(ss);
-
-// GITHUB API
-const GH='ingmatteocavalleri';
-const LCOLORS={JavaScript:'#f1e05a',Python:'#3572A5',HTML:'#e34c26',CSS:'#563d7c',MATLAB:'#e16737',Modelica:'#de3e35'};
-function ago(iso){const s=Math.floor((Date.now()-new Date(iso))/1000);if(s<60)return s+'s fa';if(s<3600)return Math.floor(s/60)+'m fa';if(s<86400)return Math.floor(s/3600)+'h fa';return Math.floor(s/86400)+'g fa';}
-function esc(s){return(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-async function loadGH(){
-    try{
-        // Profile
-        const pr=await fetch(`https://api.github.com/users/${GH}`);
-        if(pr.ok){const d=await pr.json();document.getElementById('ghStatRepos').textContent=d.public_repos;document.getElementById('ghStatFollow').textContent=d.followers;const gs=document.getElementById('ghStats');gs.style.display='flex';}
-
-        // Events
-        const er=await fetch(`https://api.github.com/users/${GH}/events/public?per_page=30`);
-        const ee=document.getElementById('ghEvents');
-        if(er.ok){
-            const evs=(await er.json()).filter(e=>e.type==='PushEvent');
-            if(!evs.length){ee.innerHTML='<div class="gh-msg">Nessun commit pubblico recente.</div>';return;}
-            ee.innerHTML=evs.slice(0,7).map(ev=>{
-                const c=ev.payload.commits||[];
-                const msg=c.length?c[c.length-1].message.split('\n')[0]:'push';
-                const repo=ev.repo.name.replace(GH+'/','');
-                return`<div class="gh-event"><div class="gh-event-icon"><i class="fa-solid fa-code-commit"></i></div><div class="gh-event-body"><div class="gh-event-repo">${esc(repo)}</div><div class="gh-event-msg">${esc(msg)}</div></div><div class="gh-event-time">${ago(ev.created_at)}</div></div>`;
-            }).join('');
-        }else{ee.innerHTML='<div class="gh-msg" style="color:var(--muted)">Rate limit GitHub. Riprova tra poco.</div>';}
-
-        // Repos
-        const rr=await fetch(`https://api.github.com/users/${GH}/repos?sort=pushed&per_page=6`);
-        const re=document.getElementById('ghRepos');
-        if(rr.ok){
-            const repos=await rr.json();
-            if(!repos.length){re.innerHTML='<div class="gh-msg">Nessun repository.</div>';return;}
-            re.innerHTML=repos.slice(0,5).map(r=>{
-                const col=LCOLORS[r.language]||'#8b949e';
-                return`<a href="${r.html_url}" target="_blank" class="gh-repo"><div style="min-width:0;flex:1"><div class="gh-repo-name">${esc(r.name)}</div><div class="gh-repo-desc">${esc(r.description||'')}</div></div><div class="gh-repo-meta">${r.language?`<div class="gh-lang"><div class="lang-dot" style="background:${col}"></div>${esc(r.language)}</div>`:''}</div></a>`;
-            }).join('');
-        }
-    }catch(e){
-        document.getElementById('ghEvents').innerHTML='<div class="gh-msg" style="color:var(--muted)">Errore di rete.</div>';
-        document.getElementById('ghRepos').innerHTML='<div class="gh-msg" style="color:var(--muted)">Errore di rete.</div>';
-    }
-}
-loadGH();
+},{threshold:0.35});
+document.querySelectorAll('.skill-anim').forEach(cat=>sio.observe(cat));
 
 // ENTRANCE ANIMATIONS
 const io=new IntersectionObserver(entries=>{
     entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';}});
 },{threshold:0.07});
-document.querySelectorAll('.about-card,.portfolio-card,.now-card,.gh-card').forEach(el=>{
-    el.style.opacity='0';el.style.transform='translateY(18px)';el.style.transition='opacity .5s ease,transform .5s ease,border-color .3s,background .25s';
+document.querySelectorAll('.about-card,.portfolio-card,.now-card,.stack-chip').forEach(el=>{
+    el.style.opacity='0';el.style.transform='translateY(18px)';
+    el.style.transition='opacity .5s ease,transform .5s ease,border-color .3s,background .25s';
     io.observe(el);
 });
 </script>
