@@ -189,7 +189,7 @@
         <p class="section-desc">Lavori tecnici con documentazione, modelli e simulazioni interattive.</p>
         <div class="portfolio-grid" style="margin-top:48px">
 
-            <a href="./DCmotor/" class="portfolio-card">
+            <a href="./Project/DCmotor/" class="portfolio-card">
                 <img src="img/portfolio/1.png" alt="DC Motor Control" class="portfolio-img"
                     onerror="this.outerHTML='<div class=\'portfolio-img-placeholder\'>DC MOTOR</div>'">
                 <div class="portfolio-body">
@@ -204,7 +204,7 @@
                 </div>
             </a>
 
-            <a href="./SCADA/" class="portfolio-card">
+            <a href="./Project/SCADA/" class="portfolio-card">
                 <img src="img/portfolio/2.png" alt="SCADA Water Treatment" class="portfolio-img"
                     onerror="this.outerHTML='<div class=\'portfolio-img-placeholder\'>SCADA</div>'">
                 <div class="portfolio-body">
@@ -219,7 +219,7 @@
                 </div>
             </a>
 
-            <a href="./Modelica/" class="portfolio-card">
+            <a href="./Project/Modelica/" class="portfolio-card">
                 <div class="portfolio-img-placeholder" style="background:linear-gradient(135deg,rgba(255,107,53,.07),rgba(255,107,53,.02));flex-direction:column;gap:8px">
                     <i class="fa-solid fa-temperature-half" style="font-size:2rem;color:var(--accent2)"></i>
                     <span style="font-family:var(--mono);font-size:.68rem;color:var(--muted)">BUILDING THERMAL</span>
@@ -236,15 +236,22 @@
                 </div>
             </a>
 
-            <div class="portfolio-card wip">
-                <div class="portfolio-img-placeholder">COMING SOON</div>
-                <div class="portfolio-body">
-                    <div class="portfolio-status status-wip"><span class="status-dot"></span>Pianificato</div>
-                    <span class="portfolio-tag">Work in Progress</span>
-                    <h3>Prossimo Progetto</h3>
-                    <p>In sviluppo &mdash; prossimamente disponibile.</p>
+            <a href="./Project/IoT/" class="portfolio-card">
+                <div class="portfolio-img-placeholder" style="background:linear-gradient(135deg,rgba(0,212,255,.07),rgba(163,113,247,.04));flex-direction:column;gap:8px">
+                    <i class="fa-solid fa-network-wired" style="font-size:2rem;color:var(--accent)"></i>
+                    <span style="font-family:var(--mono);font-size:.68rem;color:var(--muted)">IoT / SMART BUILDING</span>
                 </div>
-            </div>
+                <div class="portfolio-body">
+                    <div class="portfolio-status status-wip"><span class="status-dot"></span>In sviluppo</div>
+                    <span class="portfolio-tag">IoT &middot; Embedded &middot; MQTT</span>
+                    <h3>IoT Sensor Network &mdash; Smart Building Monitoring</h3>
+                    <p>Rete distribuita di nodi ESP32 per monitoraggio ambientale real-time. Comunicazione MQTT, InfluxDB time-series, dashboard interattiva con anomaly detection.</p>
+                    <div class="portfolio-tech">
+                        <span>ESP32</span><span>MQTT</span><span>InfluxDB</span><span>C++</span><span>Python</span><span>PoliMi</span>
+                    </div>
+                    <div class="portfolio-arrow">Apri progetto <i class="fa-solid fa-arrow-right"></i></div>
+                </div>
+            </a>
         </div>
     </div>
 </section>
