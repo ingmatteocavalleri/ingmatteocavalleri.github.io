@@ -1,0 +1,262 @@
+/* ═══════════════════════════════════════════════════════════
+   style.css — IoT Sensor Network Project
+   Politecnico di Milano · Matteo Cavalleri · 10768765
+   ═══════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg:       #080c10;
+    --surface:  #0d1117;
+    --surface2: #161b22;
+    --border:   #21262d;
+    --accent:   #00d4ff;
+    --accent2:  #ff6b35;
+    --green:    #3fb950;
+    --yellow:   #e3b341;
+    --purple:   #a371f7;
+    --text:     #e6edf3;
+    --muted:    #8b949e;
+    --mono:     'IBM Plex Mono', monospace;
+    --display:  'Syne', sans-serif;
+    --body:     'Inter', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--body); background: var(--bg); color: var(--text); line-height: 1.7; }
+
+/* ──────────────────────────────────────────────────────────
+   NAV
+────────────────────────────────────────────────────────── */
+nav.top-nav {
+    position: sticky; top: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 clamp(20px, 5vw, 60px); height: 58px;
+    background: rgba(8,12,16,.97); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+}
+.nav-logo { font-family: var(--mono); font-size: .85rem; color: var(--accent); text-decoration: none; }
+.nav-back {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: .8rem;
+    color: var(--text); background: var(--surface2);
+    border: 1px solid var(--border); padding: 6px 14px; border-radius: 3px;
+    text-decoration: none; transition: border-color .2s, color .2s;
+}
+.nav-back:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ──────────────────────────────────────────────────────────
+   PAGE WRAPPER
+────────────────────────────────────────────────────────── */
+.page-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 clamp(20px, 6vw, 100px);
+}
+
+/* ──────────────────────────────────────────────────────────
+   PAGE HEADER
+────────────────────────────────────────────────────────── */
+.page-header {
+    padding-top: 64px;
+    padding-bottom: 0;
+}
+
+.page-header-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
+.meta-tag { font-family: var(--mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px; border-radius: 2px; }
+.tag-iot    { background: rgba(0,212,255,.08);   color: var(--accent);  border: 1px solid rgba(0,212,255,.25); }
+.tag-sensor { background: rgba(163,113,247,.08); color: var(--purple);  border: 1px solid rgba(163,113,247,.25); }
+.tag-data   { background: rgba(63,185,80,.08);   color: var(--green);   border: 1px solid rgba(63,185,80,.2);   }
+.tag-polimi { background: rgba(227,179,65,.08);  color: var(--yellow);  border: 1px solid rgba(227,179,65,.2);  }
+
+.page-header h1 {
+    font-family: var(--display);
+    font-size: clamp(1.9rem, 4.5vw, 3.2rem);
+    font-weight: 800; letter-spacing: -.02em; line-height: 1.06; margin-bottom: 16px;
+}
+.page-header h1 em { font-style: normal; color: var(--accent); }
+.page-header .subtitle { color: var(--muted); font-size: .97rem; font-weight: 300; max-width: 700px; line-height: 1.78; }
+
+.course-bar {
+    display: flex; flex-wrap: wrap; gap: 0;
+    margin-top: 28px;
+    border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+}
+.course-cell {
+    flex: 1; min-width: 140px;
+    padding: 12px 16px; border-right: 1px solid var(--border);
+    background: var(--surface2);
+}
+.course-cell:last-child { border-right: none; }
+.course-cell .cc-label { font-family: var(--mono); font-size: .6rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 3px; }
+.course-cell .cc-val   { font-family: var(--mono); font-size: .78rem; color: var(--text); }
+
+/* SPECS BAR */
+.specs-bar {
+    display: flex; flex-wrap: wrap;
+    border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+    margin: 16px 0 0;
+}
+.spec-cell { flex: 1; min-width: 95px; padding: 13px 16px; border-right: 1px solid var(--border); background: var(--surface); }
+.spec-cell:last-child { border-right: none; }
+.spec-val  { font-family: var(--display); font-size: 1.3rem; font-weight: 800; line-height: 1; }
+.spec-val .unit { font-size: .78rem; color: var(--accent); }
+.spec-key  { font-family: var(--mono); font-size: .6rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-top: 4px; }
+
+/* ──────────────────────────────────────────────────────────
+   DOC LAYOUT
+────────────────────────────────────────────────────────── */
+.doc-layout {
+    display: grid;
+    grid-template-columns: 190px minmax(0, 1fr);
+    gap: 44px;
+    align-items: start;
+    padding-top: 0;
+    padding-bottom: 100px;
+}
+
+/* ──────────────────────────────────────────────────────────
+   TOC
+────────────────────────────────────────────────────────── */
+.doc-toc {
+    position: sticky; top: 76px;
+    padding-top: 44px;
+    min-width: 0; overflow: hidden;
+}
+.toc-label { font-family: var(--mono); font-size: .6rem; color: var(--muted); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 10px; }
+.toc-list  { list-style: none; border-left: 1px solid var(--border); }
+.toc-list li a {
+    display: block; padding: 4px 0 4px 13px;
+    font-family: var(--mono); font-size: .7rem; color: var(--muted);
+    text-decoration: none; border-left: 2px solid transparent; margin-left: -1px;
+    transition: color .2s, border-left-color .2s;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.toc-list li a:hover,
+.toc-list li a.active { color: var(--accent); border-left-color: var(--accent); }
+.toc-list .toc-sub a { padding-left: 24px; font-size: .65rem; }
+
+/* ──────────────────────────────────────────────────────────
+   DOC CONTENT
+────────────────────────────────────────────────────────── */
+.doc-content { padding-top: 44px; min-width: 0; }
+.doc-section { margin-bottom: 60px; }
+.doc-section:last-child { margin-bottom: 0; }
+.section-anchor { display: block; height: 76px; margin-top: -76px; visibility: hidden; }
+
+.doc-section h2 {
+    font-family: var(--display); font-size: 1.35rem; font-weight: 800;
+    margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.sec-num {
+    font-family: var(--mono); font-size: .68rem; color: var(--accent);
+    background: rgba(0,212,255,.08); border: 1px solid rgba(0,212,255,.2);
+    padding: 2px 8px; border-radius: 2px; flex-shrink: 0;
+}
+.doc-section h3 { font-family: var(--display); font-size: 1.02rem; font-weight: 700; margin: 28px 0 10px; }
+.doc-section p  { color: var(--muted); margin-bottom: 11px; font-size: .94rem; line-height: 1.72; }
+.doc-section ul, .doc-section ol { padding-left: 18px; color: var(--muted); font-size: .92rem; margin-bottom: 11px; }
+.doc-section li { margin-bottom: 6px; }
+.doc-section li strong { color: var(--text); font-weight: 500; }
+
+/* ── PARAM GRID ── */
+.param-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 2px; margin: 16px 0;
+    border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+}
+.param-item { background: var(--surface2); padding: 10px 13px; }
+.param-name { font-family: var(--mono); font-size: .65rem; color: var(--muted); margin-bottom: 3px; }
+.param-val  { font-family: var(--mono); font-size: .85rem; color: var(--accent); font-weight: 600; }
+.param-item.dim .param-val { color: var(--purple); }
+
+/* ── TABLE ── */
+.cmp-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: .87rem; }
+.cmp-table th {
+    font-family: var(--mono); font-size: .65rem; color: var(--accent);
+    letter-spacing: .06em; text-transform: uppercase;
+    padding: 9px 13px; border-bottom: 1px solid var(--border);
+    text-align: left; background: var(--surface2);
+}
+.cmp-table td { padding: 9px 13px; border-bottom: 1px solid var(--border); color: var(--muted); }
+.cmp-table tr:last-child td { border-bottom: none; }
+.cmp-table tr:hover td { background: rgba(255,255,255,.018); }
+.cmp-table td:first-child { color: var(--text); font-family: var(--mono); font-size: .78rem; }
+.td-hl { color: var(--accent)  !important; font-weight: 600; }
+.td-g  { color: var(--green)   !important; font-weight: 600; }
+.td-w  { color: var(--yellow)  !important; }
+
+/* ── ALGO / MATH BOX ── */
+.algo-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 3px solid var(--accent); border-radius: 4px;
+    padding: 18px 22px; margin: 16px 0; overflow-x: auto;
+}
+.algo-box .algo-label { font-family: var(--mono); font-size: .63rem; color: var(--accent); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 11px; }
+.algo-box p { color: var(--text); margin-bottom: 7px; font-size: .92rem; }
+.algo-box p:last-child { margin-bottom: 0; }
+.algo-box .note { color: var(--muted) !important; font-size: .8rem !important; margin-top: 8px !important; }
+
+/* ── CALLOUTS ── */
+.callout { display: flex; gap: 12px; border-radius: 4px; padding: 12px 15px; margin: 14px 0; }
+.callout i { margin-top: 2px; flex-shrink: 0; }
+.callout p { margin: 0; font-size: .85rem; line-height: 1.62; }
+.callout-info   { background: rgba(0,212,255,.04);   border: 1px solid rgba(0,212,255,.15); }
+.callout-info   i { color: var(--accent); }  .callout-info   p { color: var(--muted); }
+.callout-warn   { background: rgba(227,179,65,.04);  border: 1px solid rgba(227,179,65,.18); }
+.callout-warn   i { color: var(--yellow); } .callout-warn   p { color: var(--muted); }
+.callout-green  { background: rgba(63,185,80,.04);   border: 1px solid rgba(63,185,80,.18); }
+.callout-green  i { color: var(--green); }  .callout-green  p { color: var(--muted); }
+.callout-purple { background: rgba(163,113,247,.04); border: 1px solid rgba(163,113,247,.2); }
+.callout-purple i { color: var(--purple); } .callout-purple p { color: var(--muted); }
+
+/* ── FOOTER ── */
+footer { border-top: 1px solid var(--border); padding: 22px clamp(20px,6vw,100px); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+footer p { font-family: var(--mono); font-size: .72rem; color: var(--muted); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 820px) {
+    .doc-layout { grid-template-columns: 1fr; }
+    .doc-toc    { display: none; }
+}
+@media (max-width: 560px) {
+    .specs-bar  { flex-direction: column; }
+    .spec-cell  { border-right: none; border-bottom: 1px solid var(--border); }
+    .spec-cell:last-child { border-bottom: none; }
+    .course-bar { flex-direction: column; }
+    .course-cell { border-right: none; border-bottom: 1px solid var(--border); }
+}
+
+/* ── DOWNLOAD SECTION ── */
+.download-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px; margin: 16px 0;
+}
+.download-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 10px;
+    transition: border-color .3s, transform .25s;
+}
+.download-card:hover { border-color: rgba(0,212,255,.35); transform: translateY(-2px); }
+.download-icon { font-size: 1.4rem; color: var(--accent); }
+.download-name { font-family: var(--display); font-size: .95rem; font-weight: 700; }
+.download-desc { color: var(--muted); font-size: .8rem; line-height: 1.55; flex: 1; }
+.download-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .04em;
+    background: rgba(0,212,255,.08); color: var(--accent);
+    border: 1px solid rgba(0,212,255,.25); padding: 7px 14px; border-radius: 3px;
+    text-decoration: none; transition: background .2s, border-color .2s;
+    align-self: flex-start;
+}
+.download-btn:hover { background: rgba(0,212,255,.16); border-color: var(--accent); }
+.download-note { font-family: var(--mono); font-size: .63rem; color: var(--muted); }

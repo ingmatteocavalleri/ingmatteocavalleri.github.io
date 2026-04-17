@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IoT Dashboard | Matteo Cavalleri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+<style>
+/* Dashboard-specific styles */
+.dash-header { padding:56px 0 32px; }
+.dash-header h1 { font-family:var(--display); font-size:clamp(1.6rem,4vw,2.6rem); font-weight:800; margin-bottom:8px; }
+.dash-header h1 em { font-style:normal; color:var(--accent2); }
+.dash-header p { color:var(--muted); font-size:.95rem; max-width:660px; }
+
+.ctrl-panel {
+  background:var(--surface); border:1px solid var(--border); border-radius:6px;
+  padding:14px 18px; margin-bottom:14px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.btn { display:inline-flex; align-items:center; gap:7px; font-family:var(--mono); font-size:.78rem; font-weight:600; padding:9px 20px; border-radius:3px; border:none; cursor:pointer; transition:opacity .15s,transform .1s; }
+.btn:active { transform:translateY(1px); }
+.btn-play  { background:var(--accent); color:#080c10; }
+.btn-stop  { background:rgba(0,212,255,.12); color:var(--accent); border:1px solid rgba(0,212,255,.3); }
+.btn-reset { background:var(--surface2); color:var(--muted); border:1px solid var(--border); }
+.ctrl-sep  { width:1px; height:24px; background:var(--border); }
+.ctrl-lbl  { font-family:var(--mono); font-size:.72rem; color:var(--muted); }
+.ctrl-sel  { font-family:var(--mono); font-size:.74rem; background:var(--surface2); color:var(--text); border:1px solid var(--border); padding:7px 10px; border-radius:3px; outline:none; }
+
+.stats-bar {
+  display:grid; grid-template-columns:repeat(6,1fr); gap:2px;
+  border:1px solid var(--border); border-radius:6px; overflow:hidden; margin-bottom:14px;
+}
+.sc { background:var(--surface); padding:10px 12px; }
+.sc-lbl { font-family:var(--mono); font-size:.57rem; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-bottom:3px; }
+.sc-val { font-family:var(--display); font-size:1.15rem; font-weight:800; }
+.sc-unit { font-size:.66rem; color:var(--accent); }
+
+.plots { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+.pc { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 14px; }
+.pc-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.pc-title { font-family:var(--mono); font-size:.6rem; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; }
+.pc-cur { font-family:var(--mono); font-size:.78rem; font-weight:600; }
+
+canvas { display:block; }
+
+.legend { display:flex; gap:18px; flex-wrap:wrap; margin-top:6px; }
+.leg-item { display:flex; align-items:center; gap:5px; font-family:var(--mono); font-size:.62rem; color:var(--muted); }
+.leg-dot { width:10px; height:3px; border-radius:2px; flex-shrink:0; }
+
+.node-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:14px; }
+.node-card { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 14px; }
+.nc-name { font-family:var(--mono); font-size:.68rem; color:var(--accent); font-weight:600; margin-bottom:8px; }
+.nc-reading { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--border); font-size:.75rem; }
+.nc-reading:last-child { border-bottom:none; }
+.nc-val { font-family:var(--mono); color:var(--accent2); font-weight:600; }
+
+@media(max-width:800px){ .plots{grid-template-columns:1fr} .stats-bar{grid-template-columns:repeat(3,1fr)} .node-grid{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:460px){ .stats-bar{grid-template-columns:repeat(2,1fr)} .node-grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="../" class="nav-logo">mc.eng / iot</a>
+  <a href="./" class="nav-back"><i class="fa-solid fa-arrow-left"></i> Report</a>
+</nav>
+
+<div class="page-wrapper">
+
+  <div class="dash-header">
+    <div style="font-family:var(--mono);font-size:.7rem;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px">// Interactive Dashboard</div>
+    <h1>IoT Sensor Network Dashboard<br><em>Smart Building Real-Time Monitoring</em></h1>
+    <p>6 distributed sensor nodes, MQTT pub/sub architecture, InfluxDB time-series storage. Monitor temperature, humidity, CO₂, and occupancy across multiple rooms in real-time.</p>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="ctrl-panel">
+    <button class="btn btn-play" id="btnPlay">▶ Simulate</button>
+    <button class="btn btn-stop" id="btnStop" disabled>⏸ Pause</button>
+    <button class="btn btn-reset" id="btnReset">↺ Reset</button>
+    <div class="ctrl-sep"></div>
+    <span class="ctrl-lbl">Simulation Speed</span>
+    <select class="ctrl-sel" id="simSpeed">
+      <option value="10">10×</option>
+      <option value="30">30×</option>
+      <option value="60" selected>60×</option>
+      <option value="120">120×</option>
+    </select>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="sc"><div class="sc-lbl">Simulated Time</div><div class="sc-val"><span id="sv-time">00:00</span></div></div>
+    <div class="sc"><div class="sc-lbl">Avg Temperature</div><div class="sc-val"><span id="sv-T-avg">20.0</span><span class="sc-unit">°C</span></div></div>
+    <div class="sc"><div class="sc-lbl">Avg Humidity</div><div class="sc-val"><span id="sv-H-avg">45</span><span class="sc-unit">%RH</span></div></div>
+    <div class="sc"><div class="sc-lbl">Avg CO₂</div><div class="sc-val"><span id="sv-CO2-avg">650</span><span class="sc-unit">ppm</span></div></div>
+    <div class="sc"><div class="sc-lbl">Total Occupancy</div><div class="sc-val"><span id="sv-occ">0</span><span class="sc-unit">persons</span></div></div>
+    <div class="sc"><div class="sc-lbl">Nodes Online</div><div class="sc-val"><span id="sv-nodes">6</span><span class="sc-unit">/6</span></div></div>
+  </div>
+
+  <!-- NODE CARDS -->
+  <div style="margin-bottom:16px">
+    <div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">// Sensor Nodes</div>
+    <div class="node-grid" id="nodeGrid">
+      <!-- Populated by JavaScript -->
+    </div>
+  </div>
+
+  <!-- PLOT GRID -->
+  <div class="plots">
+    <div class="pc">
+      <div class="pc-hdr">
+        <span class="pc-title">// Temperature by Room T(t)</span>
+        <span class="pc-cur" id="cur-T" style="color:var(--accent2)">20.0 °C</span>
+      </div>
+      <canvas id="cTemp"></canvas>
+      <div class="legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#ff6b35"></div>Living Room</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#00d4ff"></div>Bedroom</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#3fb950"></div>Bathroom</div>
+      </div>
+    </div>
+    <div class="pc">
+      <div class="pc-hdr">
+        <span class="pc-title">// Humidity by Room H(t)</span>
+        <span class="pc-cur" id="cur-H" style="color:var(--yellow)">45 %</span>
+      </div>
+      <canvas id="cHum"></canvas>
+      <div class="legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#e3b341"></div>Average RH</div>
+      </div>
+    </div>
+    <div class="pc">
+      <div class="pc-hdr">
+        <span class="pc-title">// CO₂ Levels CO₂(t)</span>
+        <span class="pc-cur" id="cur-CO2" style="color:var(--accent)">600 ppm</span>
+      </div>
+      <canvas id="cCO2"></canvas>
+      <div class="legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#a371f7"></div>CO₂ Equivalent</div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(163,113,247,.4)"></div>Threshold: 1000 ppm</div>
+      </div>
+    </div>
+    <div class="pc">
+      <div class="pc-hdr">
+        <span class="pc-title">// Occupancy Profile O(t)</span>
+        <span class="pc-cur" id="cur-O" style="color:var(--green)">0 persons</span>
+      </div>
+      <canvas id="cOcc"></canvas>
+      <div class="legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#3fb950"></div>Total Occupancy</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-wrapper -->
+
+<footer>
+  <p>© 2026 Matteo Cavalleri · Politecnico di Milano · ID 10768765</p>
+  <p>dockhub.net / IoT Dashboard</p>
+</footer>
+
+<script>
+'use strict';
+
+// ──────────────────────────────────────────────────────────
+// NODE DATA & STATE
+// ──────────────────────────────────────────────────────────
+const nodes = [
+  { id: 1, name: 'Living Room', floor: 'F1', baseT: 21, baseH: 45, baseC: 550, occ: 1 },
+  { id: 2, name: 'Bedroom', floor: 'F1', baseT: 19, baseH: 50, baseC: 480, occ: 1 },
+  { id: 3, name: 'Bathroom', floor: 'F1', baseT: 22, baseH: 65, baseC: 520, occ: 0 },
+  { id: 4, name: 'Kitchen', floor: 'F2', baseT: 20, baseH: 48, baseC: 600, occ: 0 },
+  { id: 5, name: 'Office', floor: 'F2', baseT: 21, baseH: 42, baseC: 570, occ: 0 },
+  { id: 6, name: 'Storage', floor: 'B', baseT: 18, baseH: 55, baseC: 450, occ: 0 },
+];
+
+let t_sim = 0;
+let running = false, rafId = null;
+
+// History arrays
+const HMAX = 1440; // 24h × 60min
+let h_T = [], h_H = [], h_CO2 = [], h_Occ = [];
+let nodeData = {};
+nodes.forEach(n => {
+  nodeData[n.id] = { T: n.baseT, H: n.baseH, CO2: n.baseC, occ: n.occ };
+});
+
+// ──────────────────────────────────────────────────────────
+// OCCUPANCY PROFILE (realistic daily pattern)
+// ──────────────────────────────────────────────────────────
+function getOccupancy(t_s) {
+  const h = (t_s % 86400) / 3600;
+  let occ = 0;
+  if (h >= 7 && h < 9)   occ = 2;   // Morning: arrival
+  else if (h >= 9 && h < 12)  occ = 1;  // Work/study time
+  else if (h >= 12 && h < 13) occ = 2;  // Lunch
+  else if (h >= 13 && h < 18) occ = 1;  // Afternoon work
+  else if (h >= 18 && h < 22) occ = 3;  // Evening: peak occupancy
+  else if (h >= 22 || h < 7)  occ = 0;  // Night: sleeping/empty
+  return occ;
+}
+
+// ──────────────────────────────────────────────────────────
+// STEP — update sensor readings
+// ──────────────────────────────────────────────────────────
+function step(dt) {
+  const occ = getOccupancy(t_sim);
+
+  // Simulate temperature drift (slow): +0.5°C per occupancy person
+  nodes.forEach(n => {
+    const occ_contrib = n.occ * 0.5;
+    const drift = (occ_contrib - (nodeData[n.id].T - n.baseT) / 2) * 0.01;
+    nodeData[n.id].T += drift;
+
+    // Humidity: +5% per person, decay back to base
+    const h_contrib = n.occ * 5;
+    const h_drift = (n.baseH + h_contrib - nodeData[n.id].H) * 0.02;
+    nodeData[n.id].H += h_drift;
+
+    // CO₂: +50 ppm per person, ventilation decay
+    const co2_contrib = n.occ * 60;
+    const co2_drift = (n.baseC + co2_contrib - nodeData[n.id].CO2) * 0.015;
+    nodeData[n.id].CO2 += co2_drift;
+
+    // Occupancy (random walk)
+    if (Math.random() < 0.05) {
+      n.occ = Math.max(0, Math.min(3, n.occ + (Math.random() > 0.5 ? 1 : -1)));
+    }
+  });
+
+  // Noise
+  nodes.forEach(n => {
+    nodeData[n.id].T += (Math.random() - 0.5) * 0.2;
+    nodeData[n.id].H += (Math.random() - 0.5) * 2;
+    nodeData[n.id].CO2 += (Math.random() - 0.5) * 20;
+  });
+
+  t_sim += dt;
+}
+
+// ──────────────────────────────────────────────────────────
+// CANVAS SETUP
+// ──────────────────────────────────────────────────────────
+const CV = {};
+function setupCanvas(id, parentId, H) {
+  const par = document.getElementById(parentId);
+  if (!par) return false;
+  const W = par.offsetWidth ? par.offsetWidth - 28 : 300;
+  if (W <= 0) return false;
+  const c = document.getElementById(id);
+  if (!c) return false;
+  c.width = W; c.height = H;
+  c.style.width = W + 'px'; c.style.height = H + 'px';
+  CV[id] = { ctx: c.getContext('2d'), W, H };
+  return true;
+}
+
+function setupAll() {
+  setupCanvas('cTemp', null, 160) || (CV['cTemp'] = null);
+  setupCanvas('cHum', null, 160) || (CV['cHum'] = null);
+  setupCanvas('cCO2', null, 160) || (CV['cCO2'] = null);
+  setupCanvas('cOcc', null, 160) || (CV['cOcc'] = null);
+
+  // Fallback: create canvas
+  ['cTemp', 'cHum', 'cCO2', 'cOcc'].forEach(id => {
+    if (!CV[id]) {
+      const c = document.getElementById(id);
+      const W = c.parentElement.offsetWidth - 28;
+      const H = 160;
+      if (W > 0) {
+        c.width = W; c.height = H;
+        CV[id] = { ctx: c.getContext('2d'), W, H };
+      }
+    }
+  });
+}
+
+function bg(id) {
+  const cv = CV[id]; if (!cv) return;
+  const { ctx, W, H } = cv;
+  ctx.fillStyle = '#0d1117'; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = '#21262d'; ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = i / 4 * H;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+}
+
+function plotLines(id, datasets, yMin, yMax) {
+  const cv = CV[id]; if (!cv) return;
+  const { ctx, W, H } = cv;
+  bg(id);
+  const cl = (v,a,b) => Math.max(a, Math.min(b, v));
+  const my = v => H - (cl(v, yMin, yMax) - yMin) / (yMax - yMin) * H;
+
+  // Y-axis labels
+  for (let i = 0; i <= 4; i++) {
+    const val = yMax - (yMax - yMin) * i / 4;
+    ctx.fillStyle = '#8b949e'; ctx.font = "9px 'IBM Plex Mono'"; ctx.textAlign = 'left';
+    const lbl = Math.abs(val) >= 100 ? val.toFixed(0) : val.toFixed(1);
+    const y = i / 4 * H;
+    ctx.fillText(lbl, 3, y > 8 ? y - 2 : 9);
+  }
+
+  // Data lines
+  datasets.forEach(({ data, color, dash }) => {
+    if (data.length < 2) return;
+    ctx.strokeStyle = color; ctx.lineWidth = 2;
+    if (dash) ctx.setLineDash([5, 3]); else ctx.setLineDash([]);
+    ctx.beginPath();
+    data.forEach((v, i) => {
+      const px = i / (data.length - 1) * W, py = my(v);
+      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    });
+    ctx.stroke(); ctx.setLineDash([]);
+  });
+}
+
+function drawAll() {
+  const avgT = nodes.reduce((s, n) => s + nodeData[n.id].T, 0) / nodes.length;
+  const avgH = nodes.reduce((s, n) => s + nodeData[n.id].H, 0) / nodes.length;
+  const avgC = nodes.reduce((s, n) => s + nodeData[n.id].CO2, 0) / nodes.length;
+  const totOcc = nodes.reduce((s, n) => s + n.occ, 0);
+
+  plotLines('cTemp', [
+    { data: h_T, color: '#ff6b35' }
+  ], 15, 25);
+  plotLines('cHum', [
+    { data: h_H, color: '#e3b341' }
+  ], 30, 70);
+  plotLines('cCO2', [
+    { data: h_CO2, color: '#a371f7' }
+  ], 400, 1000);
+  plotLines('cOcc', [
+    { data: h_Occ, color: '#3fb950' }
+  ], 0, 6);
+
+  const hh = String(Math.floor(t_sim / 3600)).padStart(2,'0');
+  const mm = String(Math.floor((t_sim % 3600) / 60)).padStart(2,'0');
+  document.getElementById('sv-time').textContent = hh + ':' + mm;
+  document.getElementById('sv-T-avg').textContent = avgT.toFixed(1);
+  document.getElementById('sv-H-avg').textContent = Math.round(avgH);
+  document.getElementById('sv-CO2-avg').textContent = Math.round(avgC);
+  document.getElementById('sv-occ').textContent = totOcc;
+  document.getElementById('cur-T').textContent = avgT.toFixed(1) + ' °C';
+  document.getElementById('cur-H').textContent = Math.round(avgH) + ' %';
+  document.getElementById('cur-CO2').textContent = Math.round(avgC) + ' ppm';
+  document.getElementById('cur-O').textContent = totOcc + ' persons';
+
+  // Update node cards
+  const grid = document.getElementById('nodeGrid');
+  grid.innerHTML = '';
+  nodes.forEach(n => {
+    const d = nodeData[n.id];
+    const card = document.createElement('div');
+    card.className = 'node-card';
+    card.innerHTML = `
+      <div class="nc-name">${n.name}</div>
+      <div class="nc-reading"><span>Temperature</span><span class="nc-val">${d.T.toFixed(1)}°C</span></div>
+      <div class="nc-reading"><span>Humidity</span><span class="nc-val">${d.H.toFixed(0)}%</span></div>
+      <div class="nc-reading"><span>CO₂</span><span class="nc-val">${d.CO2.toFixed(0)}ppm</span></div>
+      <div class="nc-reading"><span>Occupancy</span><span class="nc-val">${n.occ} persons</span></div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ──────────────────────────────────────────────────────────
+// ANIMATION LOOP
+// ──────────────────────────────────────────────────────────
+const SIM_DT = 60;
+const HIST_DT = 60;
+let hist_timer = 0;
+
+function frame() {
+  if (!running) { rafId = null; return; }
+  const spd = parseInt(document.getElementById('simSpeed').value);
+  const steps = Math.max(1, Math.round(spd / 60));
+
+  for (let i = 0; i < steps && t_sim < 86400; i++) {
+    step(SIM_DT);
+    hist_timer += SIM_DT;
+    if (hist_timer >= HIST_DT) {
+      const avgT = nodes.reduce((s, n) => s + nodeData[n.id].T, 0) / nodes.length;
+      const avgH = nodes.reduce((s, n) => s + nodeData[n.id].H, 0) / nodes.length;
+      const avgC = nodes.reduce((s, n) => s + nodeData[n.id].CO2, 0) / nodes.length;
+      const totOcc = nodes.reduce((s, n) => s + n.occ, 0);
+
+      h_T.push(avgT); h_H.push(avgH); h_CO2.push(avgC); h_Occ.push(totOcc);
+      if (h_T.length > HMAX) {
+        [h_T, h_H, h_CO2, h_Occ].forEach(a => a.shift());
+      }
+      hist_timer = 0;
+    }
+  }
+  drawAll();
+
+  if (t_sim >= 86400) {
+    running = false; rafId = null;
+    const bp = document.getElementById('btnPlay');
+    bp.textContent = '✓ 24h Complete'; bp.style.background = '#3fb950'; bp.disabled = true;
+    document.getElementById('btnStop').disabled = true;
+    return;
+  }
+  rafId = requestAnimationFrame(frame);
+}
+
+// ──────────────────────────────────────────────────────────
+// BUTTONS & CONTROLS
+// ──────────────────────────────────────────────────────────
+function uiReset() {
+  running = false; cancelAnimationFrame(rafId); rafId = null;
+  t_sim = 0;
+  h_T = []; h_H = []; h_CO2 = []; h_Occ = [];
+  nodes.forEach(n => {
+    nodeData[n.id] = { T: n.baseT, H: n.baseH, CO2: n.baseC, occ: n.occ };
+  });
+
+  const bp = document.getElementById('btnPlay');
+  bp.textContent = '▶ Simulate'; bp.style.background = 'var(--accent)'; bp.style.color = '#080c10'; bp.disabled = false;
+  document.getElementById('btnStop').disabled = true;
+  setupAll();
+  ['cTemp','cHum','cCO2','cOcc'].forEach(id => bg(id));
+  drawAll();
+}
+
+document.getElementById('btnPlay').addEventListener('click', () => {
+  if (!running) {
+    running = true;
+    const bp = document.getElementById('btnPlay');
+    bp.textContent = '⏸ Pause'; bp.style.background = '#e3b341'; bp.style.color = '#080c10';
+    document.getElementById('btnStop').disabled = false;
+    if (!rafId) rafId = requestAnimationFrame(frame);
+  } else {
+    running = false;
+    document.getElementById('btnPlay').textContent = '▶ Resume';
+    document.getElementById('btnPlay').style.background = 'var(--accent)';
+  }
+});
+document.getElementById('btnStop').addEventListener('click', uiReset);
+document.getElementById('btnReset').addEventListener('click', uiReset);
+
+window.addEventListener('resize', () => {
+  setupAll();
+  ['cTemp','cHum','cCO2','cOcc'].forEach(id => bg(id));
+  if (h_T.length > 0) drawAll();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  setupAll();
+  ['cTemp','cHum','cCO2','cOcc'].forEach(id => bg(id));
+  drawAll();
+});
+</script>
+</body>
+</html>

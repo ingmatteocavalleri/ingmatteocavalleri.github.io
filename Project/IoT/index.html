@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IoT Sensor Network — Smart Building | Matteo Cavalleri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>MathJax = { tex: { inlineMath:[['\\(','\\)']], displayMath:[['$$','$$']] } };</script>
+<link rel="stylesheet" href="style.css">
+<style>
+/* IoT-specific tags */
+.tag-iot    { background:rgba(0,212,255,.08);   color:var(--accent);  border:1px solid rgba(0,212,255,.25); }
+.tag-sensor { background:rgba(163,113,247,.08); color:var(--purple);  border:1px solid rgba(163,113,247,.22); }
+.tag-data   { background:rgba(63,185,80,.08);   color:var(--green);   border:1px solid rgba(63,185,80,.2);   }
+.tag-polimi { background:rgba(227,179,65,.08);  color:var(--yellow);  border:1px solid rgba(227,179,65,.2);  }
+
+/* Network diagram */
+.network-diagram {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:6px; padding:24px 20px; margin:16px 0;
+    display:flex; align-items:center; justify-content:center;
+    gap:12px; flex-wrap:wrap; overflow-x:auto;
+}
+.node {
+    background:var(--surface2); border:1px solid var(--border);
+    border-radius:6px; padding:10px 12px; text-align:center;
+    min-width:80px; flex-shrink:0;
+}
+.node.hl  { border-color:rgba(0,212,255,.5);    background:rgba(0,212,255,.06);    }
+.node.hl2 { border-color:rgba(163,113,247,.5);  background:rgba(163,113,247,.06);  }
+.node.hl3 { border-color:rgba(63,185,80,.5);    background:rgba(63,185,80,.06);    }
+.n-label { font-family:var(--mono); font-size:.68rem; font-weight:600; color:var(--text); }
+.n-sub   { font-family:var(--mono); font-size:.58rem; color:var(--muted); margin-top:3px; }
+.n-val   { font-family:var(--mono); font-size:.62rem; color:var(--accent); margin-top:4px; }
+.n-arrow { color:var(--muted); padding:0 6px; font-size:1rem; flex-shrink:0; align-self:center; }
+.n-arrow.act { color:var(--accent2); }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="../" class="nav-logo">mc.eng</a>
+  <a href="../" class="nav-back"><i class="fa-solid fa-arrow-left"></i> Home</a>
+</nav>
+
+<div class="page-wrapper">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-header-meta">
+      <span class="meta-tag tag-iot">IoT / MQTT</span>
+      <span class="meta-tag tag-sensor">Wireless Sensors</span>
+      <span class="meta-tag tag-data">Data Collection</span>
+      <span class="meta-tag tag-polimi">PoliMi — Smart Building</span>
+    </div>
+    <h1>IoT Sensor Network<br><em>Smart Building Monitoring</em></h1>
+    <p class="subtitle">
+      Distributed IoT sensor network for real-time monitoring of environmental parameters in a smart building. MQTT-based communication, edge processing with time-series database, and interactive dashboard for data visualization and anomaly detection.
+    </p>
+    <div class="course-bar">
+      <div class="course-cell"><div class="cc-label">Domain</div><div class="cc-val">Internet of Things / Embedded Systems</div></div>
+      <div class="course-cell"><div class="cc-label">Platform</div><div class="cc-val">ESP32 · MQTT · InfluxDB</div></div>
+      <div class="course-cell"><div class="cc-label">Languages</div><div class="cc-val">C++ · Python · JavaScript</div></div>
+      <div class="course-cell"><div class="cc-label">Author</div><div class="cc-val">Matteo Cavalleri · 10768765</div></div>
+    </div>
+    <div class="specs-bar">
+      <div class="spec-cell"><div class="spec-val">6<span class="unit"> nodes</span></div><div class="spec-key">Sensor Nodes</div></div>
+      <div class="spec-cell"><div class="spec-val">±0.5<span class="unit"> °C</span></div><div class="spec-key">Temperature Accuracy</div></div>
+      <div class="spec-cell"><div class="spec-val">30<span class="unit"> s</span></div><div class="spec-key">Publication Interval</div></div>
+      <div class="spec-cell"><div class="spec-val">3<span class="unit"> days</span></div><div class="spec-key">Data Retention</div></div>
+      <div class="spec-cell"><div class="spec-val">5<span class="unit"> V</span></div><div class="spec-key">Supply Voltage</div></div>
+      <div class="spec-cell"><div class="spec-val">WiFi</div><div class="spec-key">Connectivity</div></div>
+    </div>
+  </div>
+
+  <!-- DOC LAYOUT -->
+  <div class="doc-layout">
+
+    <nav class="doc-toc" aria-label="Table of contents">
+      <div class="toc-label">Contents</div>
+      <ul class="toc-list">
+        <li><a href="#abstract">1. Abstract</a></li>
+        <li><a href="#architecture">2. System Architecture</a></li>
+        <li class="toc-sub"><a href="#network">→ Network Topology</a></li>
+        <li class="toc-sub"><a href="#sensors">→ Sensor Nodes</a></li>
+        <li class="toc-sub"><a href="#protocol">→ MQTT Protocol</a></li>
+        <li><a href="#hardware">3. Hardware Implementation</a></li>
+        <li class="toc-sub"><a href="#esp32">→ ESP32 Module</a></li>
+        <li class="toc-sub"><a href="#sensors-hw">→ Sensor Modules</a></li>
+        <li><a href="#firmware">4. Firmware & Software</a></li>
+        <li class="toc-sub"><a href="#embedded">→ Embedded Code</a></li>
+        <li class="toc-sub"><a href="#backend">→ Backend / Database</a></li>
+        <li><a href="#dashboard">5. Dashboard & Visualization</a></li>
+        <li><a href="#data">6. Data Analytics</a></li>
+        <li><a href="#conclusions">7. Conclusions</a></li>
+        <li><a href="#download">8. Download</a></li>
+      </ul>
+    </nav>
+
+    <article class="doc-content">
+
+      <!-- 1 ABSTRACT -->
+      <div class="doc-section">
+        <span class="section-anchor" id="abstract"></span>
+        <h2><span class="sec-num">01</span> Abstract</h2>
+        <p>
+          This project implements a <strong style="color:var(--text)">distributed IoT sensor network</strong> for real-time environmental monitoring in a smart building. A collection of wireless sensor nodes (ESP32-based) measure temperature, humidity, CO₂, and occupancy, publishing data via MQTT to a central broker. A time-series database (InfluxDB) stores measurements with 30-second granularity over a 3-day rolling window. An interactive web dashboard provides live visualization, historical analysis, and rule-based anomaly detection for HVAC optimization.
+        </p>
+        <p>
+          The system is designed for <strong style="color:var(--text)">scalability and resilience</strong>: nodes include local data buffering to tolerate network interruptions, edge-side data aggregation reduces backend load, and the MQTT pub/sub pattern decouples sensors from analysis systems.
+        </p>
+        <div class="callout callout-info">
+          <i class="fa-solid fa-circle-info"></i>
+          <p>This IoT architecture demonstrates core principles applicable to smart cities, industrial automation, and environmental monitoring — all areas where distributed sensing and real-time decision-making are critical.</p>
+        </div>
+      </div>
+
+      <!-- 2 ARCHITECTURE -->
+      <div class="doc-section">
+        <span class="section-anchor" id="architecture"></span>
+        <h2><span class="sec-num">02</span> System Architecture</h2>
+
+        <span class="section-anchor" id="network"></span>
+        <h3>Network Topology</h3>
+        <p>
+          The network follows a <strong>star topology</strong> centered on an MQTT broker (Mosquitto, on Raspberry Pi). Each sensor node is an independent device communicating wirelessly via WiFi (802.11b/g/n on 2.4 GHz). Nodes publish sensor readings to topic hierarchies (e.g., <code>building/floor1/room_a/temperature</code>), and a Python subscriber on the backend aggregates and persists data to InfluxDB.
+        </p>
+
+        <div class="network-diagram">
+          <div class="node hl"><div class="n-label">WiFi Router</div><div class="n-sub">2.4 GHz</div><div class="n-val">✓ Online</div></div>
+          <div class="n-arrow">←→</div>
+          <div class="node hl2"><div class="n-label">MQTT Broker</div><div class="n-sub">Raspberry Pi</div><div class="n-val">1883 TCP</div></div>
+          <div class="n-arrow">←→</div>
+          <div class="node hl3"><div class="n-label">Backend Agg.</div><div class="n-sub">Python</div><div class="n-val">Subscriber</div></div>
+          <div class="n-arrow">←→</div>
+          <div class="node hl"><div class="n-label">InfluxDB</div><div class="n-sub">Time-Series</div><div class="n-val">Data</div></div>
+        </div>
+
+        <div class="network-diagram">
+          <div class="node hl2"><div class="n-label">Node 1</div><div class="n-sub">Living Room</div><div class="n-val">ESP32-1</div></div>
+          <div class="n-arrow act">⟲</div>
+          <div class="node hl2"><div class="n-label">Node 2</div><div class="n-sub">Bedroom</div><div class="n-val">ESP32-2</div></div>
+          <div class="n-arrow act">⟲</div>
+          <div class="node hl2"><div class="n-label">Node 3</div><div class="n-sub">Bathroom</div><div class="n-val">ESP32-3</div></div>
+          <div class="n-arrow act">⟲</div>
+          <div class="node hl"><div class="n-label">MQTT Broker</div><div class="n-sub">Central Hub</div><div class="n-val">All Nodes</div></div>
+        </div>
+
+        <span class="section-anchor" id="sensors"></span>
+        <h3>Sensor Nodes</h3>
+        <p>
+          Each node hosts up to four sensors and publishes data on an independent cadence. Readings are timestamped locally and include metadata (node_id, location, battery level). If network connectivity is lost, data is buffered in flash memory (up to 1000 records) and replayed upon reconnection.
+        </p>
+
+        <span class="section-anchor" id="protocol"></span>
+        <h3>MQTT Protocol & Topics</h3>
+        <p>
+          Topic structure follows the convention <code>building/{floor}/{room}/{parameter}</code>. QoS level 1 (at-least-once delivery) ensures no loss during temporary disconnections. Retained messages on <code>building/status/+/last_seen</code> allow subscribers to detect stale data and trigger alerts.
+        </p>
+        <div class="algo-box">
+          <div class="algo-label">Example MQTT Topic Hierarchy</div>
+          <p><code>building/floor1/living_room/temperature</code> → 22.3 °C</p>
+          <p><code>building/floor1/living_room/humidity</code> → 45.2 %RH</p>
+          <p><code>building/floor1/living_room/co2</code> → 580 ppm</p>
+          <p><code>building/floor1/living_room/occupancy</code> → 2 persons</p>
+          <p class="note">Each node publishes every 30 seconds. Broker stores retained messages for 60 minutes.</p>
+        </div>
+      </div>
+
+      <!-- 3 HARDWARE -->
+      <div class="doc-section">
+        <span class="section-anchor" id="hardware"></span>
+        <h2><span class="sec-num">03</span> Hardware Implementation</h2>
+
+        <span class="section-anchor" id="esp32"></span>
+        <h3>ESP32 Module</h3>
+        <p>
+          The <strong>Espressif ESP32</strong> is a dual-core 32-bit MCU with integrated WiFi and Bluetooth, ideal for battery-constrained IoT. Each node runs FreeRTOS and custom firmware in C++ (using the Arduino framework). Power consumption is ~80 mA during active transmission and ~2 mA in deep sleep.
+        </p>
+        <div class="param-grid">
+          <div class="param-item"><div class="param-name">CPU</div><div class="param-val">Xtensa 32-bit @ 240 MHz</div></div>
+          <div class="param-item"><div class="param-name">RAM</div><div class="param-val">520 KB SRAM</div></div>
+          <div class="param-item"><div class="param-name">Flash</div><div class="param-val">16 MB (4 MB code + 12 MB SPIFFS)</div></div>
+          <div class="param-item"><div class="param-name">WiFi</div><div class="param-val">802.11 b/g/n, 2.4 GHz</div></div>
+          <div class="param-item dim"><div class="param-name">Typical Current</div><div class="param-val">80 mA (TX), 2 mA (sleep)</div></div>
+          <div class="param-item dim"><div class="param-name">Supply</div><div class="param-val">5 V USB or 3.7 V LiPo</div></div>
+        </div>
+
+        <span class="section-anchor" id="sensors-hw"></span>
+        <h3>Sensor Modules</h3>
+        <p>
+          All sensors communicate via I²C (address 0x60–0x77). Calibration is stored in EEPROM; auto-ranging is applied for CO₂. Noise filtering uses a 5-tap moving average.
+        </p>
+        <table class="cmp-table">
+          <thead><tr><th>Sensor</th><th>Parameter</th><th>Range</th><th>Accuracy</th></tr></thead>
+          <tbody>
+            <tr><td>DHT22</td><td>Temperature, Humidity</td><td>−40 to +80 °C, 0–100 %RH</td><td>±0.5 °C, ±2 %RH</td></tr>
+            <tr><td>CCS811</td><td>CO₂ equivalent (eCO₂)</td><td>400–8192 ppm</td><td>±25 % (typ)</td></tr>
+            <tr><td>PIR + counter</td><td>Motion / Occupancy</td><td>0–10 persons</td><td>±1 person</td></tr>
+            <tr><td>ADC (ACS712)</td><td>Power consumption</td><td>0–30 A</td><td>±1.5 % FS</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 4 FIRMWARE -->
+      <div class="doc-section">
+        <span class="section-anchor" id="firmware"></span>
+        <h2><span class="sec-num">04</span> Firmware & Software Architecture</h2>
+
+        <span class="section-anchor" id="embedded"></span>
+        <h3>Embedded Firmware (C++)</h3>
+        <p>
+          Firmware runs three concurrent FreeRTOS tasks: <strong>SensorTask</strong> (read sensors, apply filters), <strong>NetworkTask</strong> (WiFi/MQTT), and <strong>StorageTask</strong> (manage flash buffer). A watchdog timer resets the device if any task hangs.
+        </p>
+
+        <span class="section-anchor" id="backend"></span>
+        <h3>Backend & Data Pipeline</h3>
+        <p>
+          A Python subscriber runs on a Raspberry Pi, consuming MQTT messages and inserting them into InfluxDB. Rules engine triggers alerts if temperature deviates >3 °C from setpoint or CO₂ exceeds 1000 ppm (indoor air quality threshold). Alerts are logged and published to a <code>building/alerts</code> topic.
+        </p>
+        <div class="callout callout-green">
+          <i class="fa-solid fa-leaf"></i>
+          <p>The decoupled architecture (sensors → MQTT → backend) allows independent scaling: more sensors can be added without modifying the analysis pipeline, and the backend can be upgraded (switch DB, add ML) without touching firmware.</p>
+        </div>
+      </div>
+
+      <!-- 5 DASHBOARD -->
+      <div class="doc-section">
+        <span class="section-anchor" id="dashboard"></span>
+        <h2><span class="sec-num">05</span> Dashboard & Visualization</h2>
+        <p>
+          An interactive web dashboard (built with <code>plotly.js</code> and <code>fetch</code> API) queries InfluxDB for historical data and displays:
+        </p>
+        <ul>
+          <li><strong>Live metrics:</strong> Current temperature, humidity, CO₂, occupancy for each room (updates every 10 seconds).</li>
+          <li><strong>Time-series plots:</strong> 24-hour temperature profile, cumulative energy (if power sensor present).</li>
+          <li><strong>Heatmaps:</strong> Room-by-room thermal distribution overlaid on floor plan.</li>
+          <li><strong>Alerts log:</strong> Time-stamped anomalies with acknowledgment buttons.</li>
+        </ul>
+        <div class="callout callout-info">
+          <i class="fa-solid fa-chart-line"></i>
+          <p>The dashboard is available in a dedicated HTML page (<code>dashboard.html</code>) and is fully responsive for mobile monitoring.</p>
+        </div>
+      </div>
+
+      <!-- 6 DATA ANALYTICS -->
+      <div class="doc-section">
+        <span class="section-anchor" id="data"></span>
+        <h2><span class="sec-num">06</span> Data Analytics & Insights</h2>
+        <p>
+          Post-processing scripts (Python + pandas) extract weekly and monthly occupancy patterns, thermal inertia characterization, and correlation between internal temperature and outdoor conditions. Results feed back into HVAC scheduling algorithms.
+        </p>
+      </div>
+
+      <!-- 7 CONCLUSIONS -->
+      <div class="doc-section">
+        <span class="section-anchor" id="conclusions"></span>
+        <h2><span class="sec-num">07</span> Conclusions</h2>
+        <p>
+          This IoT system demonstrates a complete end-to-end architecture from embedded sensor nodes through cloud data ingestion to user-facing analytics. The MQTT-based design is inherently scalable and resilient, making it suitable for deployment in diverse environments (offices, homes, industrial facilities).
+        </p>
+        <div class="callout callout-purple">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <p>Progetto per l'area Smart Building e IoT — Politecnico di Milano, Dipartimento di Ingegneria Informatica.</p>
+        </div>
+      </div>
+
+      <!-- 8 DOWNLOAD -->
+      <div class="doc-section">
+        <span class="section-anchor" id="download"></span>
+        <h2><span class="sec-num">08</span> Download — Project Files</h2>
+        <div class="download-grid">
+          <div class="download-card">
+            <div class="download-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <div class="download-name">Interactive Dashboard</div>
+            <div class="download-desc">Real-time sensor data visualization: live metrics, 24h temperature profile, room heatmaps, alerts log, and historical analysis.</div>
+            <a href="./dashboard.html" class="download-btn"><i class="fa-solid fa-arrow-right"></i> Open Dashboard</a>
+            <div class="download-note">// JavaScript · Plotly · runs in browser</div>
+          </div>
+          <div class="download-card">
+            <div class="download-icon" style="color:var(--accent2)"><i class="fa-solid fa-code"></i></div>
+            <div class="download-name">Firmware & Source Code</div>
+            <div class="download-desc">Complete C++ firmware for ESP32 nodes, Python backend subscriber, InfluxDB setup scripts, and MQTT configuration files.</div>
+            <a href="https://github.com/ingmatteocavalleri/IoT_SmartBuilding" target="_blank" class="download-btn"><i class="fa-brands fa-github"></i> GitHub Repository</a>
+            <div class="download-note">// C++ (Arduino) · Python · MQTT · InfluxDB</div>
+          </div>
+          <div class="download-card">
+            <div class="download-icon" style="color:var(--yellow)"><i class="fa-solid fa-file-pdf"></i></div>
+            <div class="download-name">Technical Report</div>
+            <div class="download-desc">Complete documentation: system design, protocol specifications, hardware schematics, data pipeline architecture, and performance benchmarks.</div>
+            <a href="https://github.com/ingmatteocavalleri/IoT_SmartBuilding" target="_blank" class="download-btn"><i class="fa-brands fa-github"></i> GitHub Repository</a>
+            <div class="download-note">// PDF · Politecnico di Milano · 2026</div>
+          </div>
+        </div>
+      </div>
+
+    </article>
+  </div><!-- /doc-layout -->
+
+  <!-- BOTTOM BANNER -->
+  <div style="margin:0 0 56px;padding:20px 24px;background:var(--surface);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+    <div>
+      <div style="font-family:var(--mono);font-size:.65rem;color:var(--accent2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">// Interactive Dashboard</div>
+      <div style="font-family:var(--display);font-size:1.05rem;font-weight:700;margin-bottom:5px">IoT Sensor Data Visualization</div>
+      <div style="color:var(--muted);font-size:.85rem">Real-time monitoring, historical analysis, anomaly detection, room-by-room thermal mapping.</div>
+    </div>
+    <a href="./dashboard.html" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.78rem;font-weight:600;background:var(--accent2);color:#080c10;padding:10px 22px;border-radius:3px;text-decoration:none;white-space:nowrap;flex-shrink:0">
+      → Open Dashboard
+    </a>
+  </div>
+
+</div><!-- /page-wrapper -->
+
+<footer>
+  <p>© 2026 Matteo Cavalleri · Politecnico di Milano · ID 10768765</p>
+  <p>dockhub.net / IoT</p>
+</footer>
+
+<script>
+  const sections=document.querySelectorAll('.doc-section');
+  const links=document.querySelectorAll('.toc-list a');
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      links.forEach(l=>l.classList.remove('active'));
+      const anc=e.target.querySelector('.section-anchor');
+      if(anc){const lnk=document.querySelector(`.toc-list a[href="#${anc.id}"]`);if(lnk)lnk.classList.add('active');}
+    });
+  },{rootMargin:'-12% 0px -68% 0px'});
+  sections.forEach(s=>io.observe(s));
+
+  const io2=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      e.target.style.opacity='1';e.target.style.transform='translateY(0)';io2.unobserve(e.target);
+    });
+  },{threshold:0.04});
+  document.querySelectorAll('.doc-section,.algo-box,.callout,.specs-bar,.param-grid,.code-block,.cmp-table,.network-diagram').forEach(el=>{
+    el.style.opacity='0';el.style.transform='translateY(10px)';el.style.transition='opacity .45s ease,transform .45s ease';
+    io2.observe(el);
+  });
+</script>
+</body>
+</html>
