@@ -110,6 +110,11 @@
         <li><a href="#now">now</a></li>
         <li><a href="#contact">contact</a></li>
         <li><a href="./Carriera/" style="color:var(--accent)">Carriera &#x2192;</a></li>
+        <li>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Cambia tema" title="Cambia tema">
+                <i class="fa-solid fa-moon" id="theme-icon"></i>
+            </button>
+        </li>
     </ul>
 </nav>
 
@@ -219,7 +224,10 @@
                 </div>
             </a>
 
-            <a href="./Project/Modelica/" class="portfolio-card">
+            <!-- WIP: collegamento Modelica temporaneamente disabilitato — ripristinare href quando il progetto è pronto:
+                 <a href="./Project/Modelica/" class="portfolio-card"> ... </a> -->
+            <div class="portfolio-card wip-card">
+                <div class="wip-overlay"><i class="fa-solid fa-clock"></i> Work in Progress</div>
                 <div class="portfolio-img-placeholder" style="background:linear-gradient(135deg,rgba(255,107,53,.07),rgba(255,107,53,.02));flex-direction:column;gap:8px">
                     <i class="fa-solid fa-temperature-half" style="font-size:2rem;color:var(--accent2)"></i>
                     <span style="font-family:var(--mono);font-size:.68rem;color:var(--muted)">BUILDING THERMAL</span>
@@ -232,11 +240,15 @@
                     <div class="portfolio-tech">
                         <span>Modelica 4.0</span><span>Dymola</span><span>RC Network</span><span>PID</span><span>PoliMi &middot; EMS</span>
                     </div>
-                    <div class="portfolio-arrow">Apri progetto <i class="fa-solid fa-arrow-right"></i></div>
+                    <div class="portfolio-arrow" style="opacity:.4">In arrivo <i class="fa-solid fa-clock"></i></div>
                 </div>
-            </a>
+            </div>
+            <!-- /WIP Modelica -->
 
-            <a href="./Project/IoT/" class="portfolio-card">
+            <!-- WIP: collegamento IoT temporaneamente disabilitato — ripristinare href quando il progetto è pronto:
+                 <a href="./Project/IoT/" class="portfolio-card"> ... </a> -->
+            <div class="portfolio-card wip-card">
+                <div class="wip-overlay"><i class="fa-solid fa-clock"></i> Work in Progress</div>
                 <div class="portfolio-img-placeholder" style="background:linear-gradient(135deg,rgba(0,212,255,.07),rgba(163,113,247,.04));flex-direction:column;gap:8px">
                     <i class="fa-solid fa-network-wired" style="font-size:2rem;color:var(--accent)"></i>
                     <span style="font-family:var(--mono);font-size:.68rem;color:var(--muted)">IoT / SMART BUILDING</span>
@@ -249,9 +261,10 @@
                     <div class="portfolio-tech">
                         <span>ESP32</span><span>MQTT</span><span>InfluxDB</span><span>C++</span><span>Python</span><span>PoliMi</span>
                     </div>
-                    <div class="portfolio-arrow">Apri progetto <i class="fa-solid fa-arrow-right"></i></div>
+                    <div class="portfolio-arrow" style="opacity:.4">In arrivo <i class="fa-solid fa-clock"></i></div>
                 </div>
-            </a>
+            </div>
+            <!-- /WIP IoT -->
         </div>
     </div>
 </section>
@@ -366,6 +379,23 @@
 </footer>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// THEME TOGGLE
+(function(){
+  const root = document.documentElement;
+  const btn  = document.getElementById('theme-toggle');
+  const icon = document.getElementById('theme-icon');
+  const saved = localStorage.getItem('mc-theme') || 'dark';
+  function apply(theme){
+    root.setAttribute('data-theme', theme);
+    icon.className = theme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+    localStorage.setItem('mc-theme', theme);
+  }
+  apply(saved);
+  btn.addEventListener('click', function(){
+    apply(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+  });
+})();
+
 // TYPING
 const phrases=['Automation & Control Engineer','MATLAB \u00b7 Simulink \u00b7 Modelica','PLC \u00b7 SCADA \u00b7 OPC-UA','PoliMi MSc \u00b7 Industry 4.0'];
 let pi=0,ci=0,del=false;

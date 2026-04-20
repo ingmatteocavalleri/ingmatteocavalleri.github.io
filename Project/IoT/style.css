@@ -217,6 +217,35 @@ nav.top-nav {
 footer { border-top: 1px solid var(--border); padding: 22px clamp(20px,6vw,100px); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 footer p { font-family: var(--mono); font-size: .72rem; color: var(--muted); }
 
+/* ── LIGHT MODE ── */
+[data-theme="light"] {
+    --bg:       #f0f6fc;
+    --surface:  #ffffff;
+    --surface2: #f6f8fa;
+    --border:   #d0d7de;
+    --accent:   #0078a8;
+    --accent2:  #bc4a1a;
+    --green:    #1a7f37;
+    --yellow:   #9a6700;
+    --purple:   #6e40c9;
+    --text:     #1f2328;
+    --muted:    #656d76;
+}
+[data-theme="light"] body { background: var(--bg); color: var(--text); }
+[data-theme="light"] nav.top-nav { background: rgba(240,246,252,.97); }
+[data-theme="light"] .code-block { background: #f6f8fa; }
+
+/* ── THEME TOGGLE BUTTON ── */
+.theme-toggle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--muted); cursor: pointer;
+    transition: border-color .2s, color .2s, background .2s;
+    font-size: .82rem;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
