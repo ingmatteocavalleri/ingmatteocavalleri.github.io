@@ -57,12 +57,7 @@
 
 <nav class="top-nav">
   <a href="../../" class="nav-logo">mc.eng</a>
-  <div style="display:flex;align-items:center;gap:12px">
-    <a href="../../" class="nav-back"><i class="fa-solid fa-arrow-left"></i> Home</a>
-    <button id="theme-toggle" class="theme-toggle" aria-label="Cambia tema" title="Cambia tema">
-      <i class="fa-solid fa-moon" id="theme-icon"></i>
-    </button>
-  </div>
+  <a href="../../" class="nav-back"><i class="fa-solid fa-arrow-left"></i> Home</a>
 </nav>
 
 <div class="page-wrapper">
@@ -424,23 +419,6 @@
 </footer>
 
 <script>
-  // THEME TOGGLE
-  (function(){
-    const root = document.documentElement;
-    const btn  = document.getElementById('theme-toggle');
-    const icon = document.getElementById('theme-icon');
-    const saved = localStorage.getItem('mc-theme') || 'dark';
-    function apply(theme){
-      root.setAttribute('data-theme', theme);
-      icon.className = theme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
-      localStorage.setItem('mc-theme', theme);
-    }
-    apply(saved);
-    btn.addEventListener('click', function(){
-      apply(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
-    });
-  })();
-
   const sections=document.querySelectorAll('.doc-section');
   const links=document.querySelectorAll('.toc-list a');
   const io=new IntersectionObserver(entries=>{

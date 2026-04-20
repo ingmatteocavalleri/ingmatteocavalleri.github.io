@@ -285,63 +285,6 @@ footer {
 }
 footer p { font-family: var(--mono); font-size: .72rem; color: var(--muted); }
 
-/* ── LIGHT MODE ── */
-[data-theme="light"] {
-    --bg:       #f0f6fc;
-    --surface:  #ffffff;
-    --surface2: #f6f8fa;
-    --border:   #d0d7de;
-    --accent:   #0078a8;
-    --accent2:  #bc4a1a;
-    --green:    #1a7f37;
-    --yellow:   #9a6700;
-    --purple:   #6e40c9;
-    --text:     #1f2328;
-    --muted:    #656d76;
-}
-[data-theme="light"] body { background: var(--bg); color: var(--text); }
-[data-theme="light"] nav  { background: rgba(240,246,252,.92); }
-[data-theme="light"] body::before { opacity: .15; }
-[data-theme="light"] .hero-grid {
-    background-image:
-        linear-gradient(rgba(0,120,168,.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,120,168,.04) 1px, transparent 1px);
-}
-[data-theme="light"] .hero-glow { background: radial-gradient(circle, rgba(0,120,168,.06) 0%, transparent 70%); }
-[data-theme="light"] .btn-primary { background: var(--accent); color: #fff; }
-
-/* ── THEME TOGGLE BUTTON ── */
-.theme-toggle {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 32px; height: 32px; border-radius: 50%;
-    background: var(--surface2); border: 1px solid var(--border);
-    color: var(--muted); cursor: pointer;
-    transition: border-color .2s, color .2s, background .2s;
-    font-size: .85rem;
-}
-.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
-
-/* ── WIP CARD ── */
-.portfolio-card.wip-card {
-    position: relative;
-    opacity: 0.6;
-    cursor: not-allowed;
-    pointer-events: none;
-    transform: none !important;
-    border-style: dashed;
-    border-color: rgba(227,179,65,.4);
-}
-.portfolio-card.wip-card:hover { transform: none !important; border-color: rgba(227,179,65,.4); }
-.wip-overlay {
-    position: absolute; top: 0; left: 0; right: 0; z-index: 10;
-    background: rgba(227,179,65,.08);
-    border-bottom: 1px dashed rgba(227,179,65,.35);
-    display: flex; align-items: center; justify-content: center; gap: 7px;
-    padding: 7px 12px;
-    font-family: var(--mono); font-size: .67rem; font-weight: 600;
-    color: rgba(227,179,65,.85); letter-spacing: .1em; text-transform: uppercase;
-}
-
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
