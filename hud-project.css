@@ -83,7 +83,7 @@ body::after {
 .corner-br::before { bottom: -1px; right: -1px; }
 
 /* ── NAV ── */
-nav.top-nav, nav {
+nav.top-nav {
     position: sticky; top: 0; z-index: 200;
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 clamp(20px, 5vw, 60px); height: 50px;
@@ -216,7 +216,19 @@ nav.top-nav, nav {
 }
 
 /* ── TOC ── */
-.doc-toc { position: sticky; top: 68px; padding-top: 44px; min-width: 0; overflow: hidden; }
+.doc-toc {
+    position: sticky;
+    top: 58px;           /* nav height 50px + 8px gap */
+    padding-top: 44px;
+    min-width: 0;
+    align-self: start;   /* required for sticky in CSS Grid */
+    max-height: calc(100vh - 66px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 50;
+    scrollbar-width: none;
+}
+.doc-toc::-webkit-scrollbar { display: none; }
 .toc-label {
     font-family: 'Orbitron', sans-serif; font-size: .5rem; color: var(--hud-text-dim);
     letter-spacing: .2em; text-transform: uppercase; margin-bottom: 10px;
