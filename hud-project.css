@@ -212,17 +212,18 @@ nav.top-nav {
     display: grid;
     grid-template-columns: 190px minmax(0, 1fr);
     gap: 44px; align-items: start;
-    padding-top: 0; padding-bottom: 100px;
+    margin-top: 48px;
+    padding-bottom: 100px;
 }
 
 /* ── TOC ── */
 .doc-toc {
     position: sticky;
-    top: 58px;           /* nav height 50px + 8px gap */
-    padding-top: 44px;
+    top: 66px;           /* nav height 50px + 16px gap */
+    padding-top: 16px;
     min-width: 0;
     align-self: start;   /* required for sticky in CSS Grid */
-    max-height: calc(100vh - 66px);
+    max-height: calc(100vh - 82px);
     overflow-y: auto;
     overflow-x: hidden;
     z-index: 50;
@@ -250,7 +251,7 @@ nav.top-nav {
 .doc-content { padding-top: 44px; min-width: 0; }
 .doc-section { margin-bottom: 60px; }
 .doc-section:last-child { margin-bottom: 0; }
-.section-anchor { display: block; height: 68px; margin-top: -68px; visibility: hidden; }
+.section-anchor { display: block; height: 82px; margin-top: -82px; visibility: hidden; }
 
 .doc-section h2 {
     font-family: 'Orbitron', sans-serif; font-size: 1.1rem; font-weight: 900;
