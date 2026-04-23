@@ -12,32 +12,40 @@
 <script>MathJax = { tex: { inlineMath:[['\\(','\\)']], displayMath:[['$$','$$']] } };</script>
 <link rel="stylesheet" href="style.css">
 <style>
-/* IoT-specific tags */
-.tag-iot    { background:rgba(0,212,255,.08);   color:var(--accent);  border:1px solid rgba(0,212,255,.25); }
-.tag-sensor { background:rgba(163,113,247,.08); color:var(--purple);  border:1px solid rgba(163,113,247,.22); }
-.tag-data   { background:rgba(63,185,80,.08);   color:var(--green);   border:1px solid rgba(63,185,80,.2);   }
-.tag-polimi { background:rgba(227,179,65,.08);  color:var(--yellow);  border:1px solid rgba(227,179,65,.2);  }
+/* IoT-specific tags — JARVIS HUD Edition */
+.tag-iot    { background:rgba(0,212,255,.08);   color:var(--hud-cyan);   border:1px solid rgba(0,212,255,.25); }
+.tag-sensor { background:rgba(163,113,247,.08); color:var(--hud-purple); border:1px solid rgba(163,113,247,.22); }
+.tag-data   { background:rgba(0,255,136,.08);   color:var(--hud-green);  border:1px solid rgba(0,255,136,.2);   }
+.tag-polimi { background:rgba(255,204,0,.08);   color:var(--hud-yellow); border:1px solid rgba(255,204,0,.2);   }
 
 /* Network diagram */
 .network-diagram {
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:6px; padding:24px 20px; margin:16px 0;
+    background:var(--hud-surface); border:1px solid var(--hud-cyan-border);
+    padding:24px 20px; margin:16px 0;
     display:flex; align-items:center; justify-content:center;
-    gap:12px; flex-wrap:wrap; overflow-x:auto;
+    gap:12px; flex-wrap:wrap; overflow-x:auto; position:relative;
+}
+.network-diagram::before {
+    content:''; position:absolute; top:-1px; left:-1px; width:7px; height:7px;
+    border-top:1px solid var(--hud-orange); border-left:1px solid var(--hud-orange);
 }
 .node {
-    background:var(--surface2); border:1px solid var(--border);
-    border-radius:6px; padding:10px 12px; text-align:center;
-    min-width:80px; flex-shrink:0;
+    background:var(--hud-surface2); border:1px solid var(--hud-cyan-border);
+    padding:10px 12px; text-align:center;
+    min-width:80px; flex-shrink:0; position:relative;
+}
+.node::before {
+    content:''; position:absolute; top:-1px; left:-1px; width:4px; height:4px;
+    border-top:1px solid rgba(255,119,0,.5); border-left:1px solid rgba(255,119,0,.5);
 }
 .node.hl  { border-color:rgba(0,212,255,.5);    background:rgba(0,212,255,.06);    }
 .node.hl2 { border-color:rgba(163,113,247,.5);  background:rgba(163,113,247,.06);  }
-.node.hl3 { border-color:rgba(63,185,80,.5);    background:rgba(63,185,80,.06);    }
-.n-label { font-family:var(--mono); font-size:.68rem; font-weight:600; color:var(--text); }
-.n-sub   { font-family:var(--mono); font-size:.58rem; color:var(--muted); margin-top:3px; }
-.n-val   { font-family:var(--mono); font-size:.62rem; color:var(--accent); margin-top:4px; }
-.n-arrow { color:var(--muted); padding:0 6px; font-size:1rem; flex-shrink:0; align-self:center; }
-.n-arrow.act { color:var(--accent2); }
+.node.hl3 { border-color:rgba(0,255,136,.5);    background:rgba(0,255,136,.06);    }
+.n-label { font-family:var(--hud-mono); font-size:.68rem; font-weight:600; color:var(--hud-text); }
+.n-sub   { font-family:var(--hud-mono); font-size:.58rem; color:var(--hud-text-dim); margin-top:3px; }
+.n-val   { font-family:var(--hud-mono); font-size:.62rem; color:var(--hud-cyan); margin-top:4px; }
+.n-arrow { color:var(--hud-text-dim); padding:0 6px; font-size:1rem; flex-shrink:0; align-self:center; }
+.n-arrow.act { color:var(--hud-orange); }
 </style>
 </head>
 <body>
@@ -309,13 +317,14 @@
   </div><!-- /doc-layout -->
 
   <!-- BOTTOM BANNER -->
-  <div style="margin:0 0 56px;padding:20px 24px;background:var(--surface);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+  <div style="margin:0 0 56px;padding:20px 24px;background:var(--hud-surface);border:1px solid var(--hud-cyan-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;position:relative;">
+    <div style="position:absolute;top:-1px;left:-1px;width:7px;height:7px;border-top:1px solid var(--hud-orange);border-left:1px solid var(--hud-orange);"></div>
     <div>
-      <div style="font-family:var(--mono);font-size:.65rem;color:var(--accent2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">// Interactive Dashboard</div>
-      <div style="font-family:var(--display);font-size:1.05rem;font-weight:700;margin-bottom:5px">IoT Sensor Data Visualization</div>
-      <div style="color:var(--muted);font-size:.85rem">Real-time monitoring, historical analysis, anomaly detection, room-by-room thermal mapping.</div>
+      <div style="font-family:var(--hud-mono);font-size:.65rem;color:var(--hud-orange);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">// Interactive Dashboard</div>
+      <div style="font-family:var(--hud-display);font-size:1.05rem;font-weight:700;margin-bottom:5px">IoT Sensor Data Visualization</div>
+      <div style="color:var(--hud-text-dim);font-size:.85rem">Real-time monitoring, historical analysis, anomaly detection, room-by-room thermal mapping.</div>
     </div>
-    <a href="./dashboard.html" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.78rem;font-weight:600;background:var(--accent2);color:#080c10;padding:10px 22px;border-radius:3px;text-decoration:none;white-space:nowrap;flex-shrink:0">
+    <a href="./dashboard.html" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--hud-mono);font-size:.78rem;font-weight:600;background:var(--hud-orange);color:#020810;padding:10px 22px;text-decoration:none;white-space:nowrap;flex-shrink:0;text-transform:uppercase;letter-spacing:.06em;">
       → Open Dashboard
     </a>
   </div>
