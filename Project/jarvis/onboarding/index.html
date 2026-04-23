@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J.A.R.V.I.S. — Onboarding Protocol</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #00060f;
+    --bg-secondary: #000d1a;
+    --cyan: #00d4ff;
+    --cyan-dim: #0088aa;
+    --cyan-glow: rgba(0, 212, 255, 0.15);
+    --orange: #ff6b00;
+    --orange-glow: rgba(255, 107, 0, 0.2);
+    --green: #00ff41;
+    --green-dim: #00aa2a;
+    --text-primary: #c8eeff;
+    --text-secondary: #4a7a8a;
+    --text-mono: #7ecfdf;
+    --border-cyan: rgba(0, 212, 255, 0.3);
+    --border-orange: rgba(255, 107, 0, 0.5);
+    --grid-color: rgba(0, 212, 255, 0.04);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* ── GRID BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--grid-color) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SCANLINES ── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.08) 2px,
+      rgba(0, 0, 0, 0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 24px;
+    background: rgba(0, 6, 15, 0.9);
+    border-bottom: 1px solid var(--border-cyan);
+    font-size: 10px; letter-spacing: 3px;
+    color: var(--text-secondary); z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+  .status-dot {
+    display: inline-block; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--green);
+    margin-right: 8px;
+    animation: pulse-dot 2s infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100%{ opacity:1; box-shadow: 0 0 6px var(--green); }
+    50%{ opacity:0.5; box-shadow: none; }
+  }
+  .status-right { display:flex; gap:20px; }
+
+  /* ── MAIN WRAPPER ── */
+  .app {
+    position: relative; z-index: 2;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding-top: 40px;
+  }
+
+  /* ── SCREEN MANAGEMENT ── */
+  .screen { display: none; width: 100%; max-width: 720px; padding: 20px; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+  /* ── ARC REACTOR ── */
+  .arc-reactor {
+    position: relative; width: 120px; height: 120px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 20px auto;
+  }
+  .arc-ring {
+    position: absolute; border-radius: 50%;
+    border: 1.5px solid transparent;
+    animation: rotate-ring linear infinite;
+  }
+  .arc-ring-1 {
+    width: 120px; height: 120px;
+    border-top-color: var(--cyan); border-right-color: var(--cyan-dim);
+    animation-duration: 8s;
+  }
+  .arc-ring-2 {
+    width: 95px; height: 95px;
+    border-top-color: var(--orange); border-left-color: rgba(255,107,0,0.4);
+    animation-duration: 5s; animation-direction: reverse;
+  }
+  .arc-ring-3 {
+    width: 70px; height: 70px;
+    border-top-color: var(--cyan); border-bottom-color: rgba(0,212,255,0.3);
+    animation-duration: 3s;
+  }
+  .arc-core {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: radial-gradient(circle, #ffffff 0%, var(--cyan) 40%, var(--cyan-dim) 100%);
+    box-shadow: 0 0 20px var(--cyan), 0 0 40px rgba(0,212,255,0.5), 0 0 80px rgba(0,212,255,0.2);
+    animation: core-pulse 3s ease-in-out infinite;
+    z-index: 1;
+  }
+  @keyframes rotate-ring { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  @keyframes core-pulse {
+    0%,100%{ box-shadow: 0 0 20px var(--cyan), 0 0 40px rgba(0,212,255,0.5); }
+    50%{ box-shadow: 0 0 30px var(--cyan), 0 0 60px rgba(0,212,255,0.7), 0 0 100px rgba(0,212,255,0.3); }
+  }
+
+  /* ── LOGO ── */
+  .jarvis-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 900;
+    letter-spacing: 12px;
+    color: var(--cyan);
+    text-shadow: 0 0 20px rgba(0,212,255,0.8), 0 0 60px rgba(0,212,255,0.3);
+    text-align: center;
+    animation: flicker 8s infinite;
+  }
+  @keyframes flicker {
+    0%,95%,100%{ opacity:1; }
+    96%{ opacity:0.7; }
+    97%{ opacity:1; }
+    98%{ opacity:0.4; }
+    99%{ opacity:1; }
+  }
+  .jarvis-subtitle {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px; letter-spacing: 4px;
+    color: var(--text-secondary); text-align: center;
+    margin-top: 4px; text-transform: uppercase;
+  }
+  .jarvis-tagline {
+    font-size: 12px; letter-spacing: 2px;
+    color: var(--text-secondary); text-align: center;
+    margin-top: 16px; font-family: 'Rajdhani', sans-serif;
+    text-transform: uppercase;
+  }
+
+  /* ── WELCOME TEXT ── */
+  .welcome-text {
+    text-align: center; margin: 24px 0;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px; line-height: 1.8;
+    color: var(--text-primary); max-width: 520px;
+  }
+  .welcome-text .highlight { color: var(--orange); font-weight: 600; }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    display: block; width: 100%; max-width: 340px;
+    padding: 14px 32px; margin: 10px auto;
+    background: transparent;
+    border: 1px solid var(--orange);
+    color: var(--cyan);
+    font-family: 'Orbitron', monospace;
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 4px; text-transform: uppercase;
+    cursor: pointer;
+    position: relative; overflow: hidden;
+    transition: all 0.3s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+  .btn-primary::before {
+    content: ''; position: absolute; inset: 0;
+    background: var(--orange-glow);
+    transform: translateX(-100%); transition: transform 0.3s;
+  }
+  .btn-primary:hover::before { transform: translateX(0); }
+  .btn-primary:hover {
+    border-color: var(--cyan);
+    box-shadow: 0 0 20px rgba(255,107,0,0.4), inset 0 0 20px rgba(0,212,255,0.05);
+    color: #fff;
+  }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 24px; margin: 6px auto;
+    background: transparent;
+    border: 1px solid var(--border-cyan);
+    color: var(--text-secondary);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; letter-spacing: 2px;
+    cursor: pointer; transition: all 0.3s;
+  }
+  .btn-secondary:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  /* ── STEP INDICATOR ── */
+  .step-indicator {
+    display: flex; align-items: center; gap: 0;
+    margin: 16px auto 24px; justify-content: center;
+  }
+  .step-circle {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 2px solid var(--border-cyan);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700;
+    color: var(--text-secondary);
+    transition: all 0.4s; position: relative;
+  }
+  .step-circle.active {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 15px rgba(0,212,255,0.5);
+  }
+  .step-circle.done {
+    border-color: var(--green);
+    background: rgba(0,255,65,0.1);
+    color: var(--green);
+  }
+  .step-line {
+    width: 60px; height: 1px;
+    background: var(--border-cyan); transition: background 0.4s;
+  }
+  .step-line.active { background: var(--cyan); }
+
+  /* ── SECTION BADGE ── */
+  .section-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 20px;
+    border: 1px solid var(--border-orange);
+    background: rgba(255,107,0,0.05);
+    font-family: 'Orbitron', monospace; font-size: 11px;
+    letter-spacing: 3px; color: var(--orange);
+    margin-bottom: 20px;
+  }
+
+  /* ── HUD PANEL ── */
+  .hud-panel {
+    width: 100%;
+    border: 1px solid var(--border-cyan);
+    background: rgba(0, 20, 40, 0.6);
+    padding: 24px;
+    position: relative;
+    backdrop-filter: blur(4px);
+  }
+  .hud-panel::before {
+    content: ''; position: absolute;
+    top: -1px; left: 20px; width: 60px; height: 2px;
+    background: var(--orange);
+  }
+  .hud-panel::after {
+    content: ''; position: absolute;
+    bottom: -1px; right: 20px; width: 40px; height: 2px;
+    background: var(--cyan);
+  }
+  .hud-panel-corner {
+    position: absolute; width: 12px; height: 12px;
+    border-color: var(--orange); border-style: solid;
+  }
+  .hud-panel-corner.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+  .hud-panel-corner.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+  .hud-panel-corner.bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+  .hud-panel-corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+  /* ── FORM ELEMENTS ── */
+  .form-label {
+    display: block; font-size: 10px; letter-spacing: 3px;
+    color: var(--text-secondary); margin-bottom: 8px;
+    font-family: 'Orbitron', monospace;
+  }
+  .form-input {
+    width: 100%; padding: 12px 16px;
+    background: rgba(0, 212, 255, 0.03);
+    border: 1px solid var(--border-cyan);
+    color: var(--cyan);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px; letter-spacing: 2px;
+    outline: none; transition: all 0.3s;
+  }
+  .form-input::placeholder { color: var(--text-secondary); }
+  .form-input:focus {
+    border-color: var(--cyan);
+    background: rgba(0, 212, 255, 0.06);
+    box-shadow: 0 0 15px rgba(0,212,255,0.15);
+  }
+  .form-group { margin-bottom: 20px; }
+
+  .panel-title {
+    font-family: 'Rajdhani', sans-serif; font-size: 14px;
+    color: var(--text-primary); margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .panel-title .accent { color: var(--orange); font-weight: 600; }
+
+  /* ── FOOTER BAR ── */
+  .footer-bar {
+    width: 100%; display: flex; align-items: center;
+    justify-content: space-between; margin-top: 24px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0,212,255,0.1);
+    font-size: 9px; letter-spacing: 2px; color: var(--text-secondary);
+  }
+  .progress-bar-outer {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 2px; background: rgba(0,212,255,0.1); z-index: 100;
+  }
+  .progress-bar-inner {
+    height: 100%; background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* ── SITE GRID ── */
+  .category-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 4px 14px; margin: 16px 0 10px;
+    border: 1px solid var(--border-orange);
+    background: rgba(255,107,0,0.05);
+    font-family: 'Orbitron', monospace; font-size: 9px;
+    letter-spacing: 3px; color: var(--orange);
+  }
+  .site-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; width: 100%;
+  }
+  .site-card {
+    padding: 10px 12px;
+    border: 1px solid rgba(0,212,255,0.15);
+    background: rgba(0, 20, 40, 0.4);
+    cursor: pointer; transition: all 0.25s;
+    display: flex; align-items: center; gap: 10px;
+    position: relative;
+  }
+  .site-card:hover {
+    border-color: var(--cyan);
+    background: rgba(0,212,255,0.06);
+    box-shadow: 0 0 10px rgba(0,212,255,0.1);
+  }
+  .site-card.selected {
+    border-color: var(--orange);
+    background: rgba(255,107,0,0.08);
+    box-shadow: 0 0 12px rgba(255,107,0,0.2);
+  }
+  .site-card.selected::after {
+    content: '✓'; position: absolute; top: 4px; right: 6px;
+    font-size: 9px; color: var(--orange);
+  }
+  .site-icon {
+    width: 28px; height: 28px; border-radius: 4px;
+    background: rgba(0,212,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+  .site-info { min-width: 0; }
+  .site-name {
+    font-family: 'Orbitron', monospace; font-size: 9px;
+    letter-spacing: 1px; color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .site-url { font-size: 8px; color: var(--text-secondary); }
+
+  /* ── COUNTER ── */
+  .selection-counter {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 12px;
+    font-size: 10px; color: var(--text-secondary); letter-spacing: 2px;
+  }
+  .counter-dots { display: flex; gap: 6px; }
+  .counter-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    border: 1px solid var(--border-cyan);
+    transition: all 0.3s;
+  }
+  .counter-dot.filled {
+    background: var(--orange); border-color: var(--orange);
+    box-shadow: 0 0 8px rgba(255,107,0,0.5);
+  }
+
+  /* ── CUSTOM SITE PANEL ── */
+  .custom-panel {
+    width: 100%; margin-top: 20px;
+    border: 1px solid var(--border-orange);
+    background: rgba(255,107,0,0.03);
+    padding: 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .custom-panel-title {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Orbitron', monospace; font-size: 10px;
+    letter-spacing: 2px; color: var(--orange);
+  }
+  .custom-row {
+    display: flex; gap: 8px;
+  }
+  .custom-row .form-input { flex: 1; font-size: 12px; padding: 8px 12px; }
+  .btn-send {
+    padding: 8px 16px;
+    background: transparent; border: 1px solid var(--orange);
+    color: var(--orange); font-family: 'Orbitron', monospace;
+    font-size: 9px; letter-spacing: 2px; cursor: pointer;
+    transition: all 0.3s; white-space: nowrap;
+  }
+  .btn-send:hover { background: rgba(255,107,0,0.1); box-shadow: 0 0 10px rgba(255,107,0,0.2); }
+
+  /* ── SUCCESS SCREEN ── */
+  .success-link-box {
+    width: 100%; padding: 14px 16px;
+    background: rgba(0,255,65,0.05);
+    border: 1px solid rgba(0,255,65,0.3);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin: 16px 0;
+  }
+  .success-link {
+    font-size: 12px; color: var(--green);
+    flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .btn-copy {
+    padding: 6px 12px; background: transparent;
+    border: 1px solid rgba(0,255,65,0.4); color: var(--green);
+    font-family: 'Share Tech Mono', monospace; font-size: 10px;
+    cursor: pointer; transition: all 0.3s; white-space: nowrap;
+  }
+  .btn-copy:hover { background: rgba(0,255,65,0.1); }
+
+  .integrity-bar {
+    font-size: 9px; letter-spacing: 2px;
+    color: var(--text-secondary); text-align: center; margin-top: 8px;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .screen.active > * {
+    animation: slide-in 0.4s ease both;
+  }
+  .screen.active > *:nth-child(2) { animation-delay: 0.05s; }
+  .screen.active > *:nth-child(3) { animation-delay: 0.1s; }
+  .screen.active > *:nth-child(4) { animation-delay: 0.15s; }
+  .screen.active > *:nth-child(5) { animation-delay: 0.2s; }
+
+  /* typing cursor */
+  .typing::after {
+    content: '|'; animation: blink 1s infinite;
+    color: var(--cyan);
+  }
+  @keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+
+  /* glitch on logo hover */
+  .jarvis-logo:hover {
+    animation: glitch 0.3s linear;
+  }
+  @keyframes glitch {
+    0%  { text-shadow: 0 0 20px rgba(0,212,255,0.8); }
+    20% { text-shadow: -2px 0 var(--orange), 2px 0 var(--cyan); }
+    40% { text-shadow: 2px 0 var(--orange), -2px 0 var(--cyan); }
+    60% { text-shadow: -2px 0 var(--cyan), 2px 0 var(--orange); }
+    80% { text-shadow: 0 0 20px rgba(0,212,255,0.8); }
+    100%{ text-shadow: 0 0 60px rgba(0,212,255,0.3); }
+  }
+
+  @media (max-width: 500px) {
+    .site-grid { grid-template-columns: repeat(2, 1fr); }
+    .jarvis-logo { font-size: 28px; letter-spacing: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <span><span class="status-dot"></span>J.A.R.V.I.S. ONLINE</span>
+  <div class="status-right">
+    <span>STARK INDUSTRIES v4.2</span>
+    <span>AES-256 ENC</span>
+  </div>
+</div>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar-outer">
+  <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
+</div>
+
+<div class="app">
+
+  <!-- ═══════════════════════════════ SCREEN 0: LANDING ═══════════════════════════════ -->
+  <div class="screen active" id="screen-0">
+    <div class="arc-reactor">
+      <div class="arc-ring arc-ring-1"></div>
+      <div class="arc-ring arc-ring-2"></div>
+      <div class="arc-ring arc-ring-3"></div>
+      <div class="arc-core"></div>
+    </div>
+
+    <div class="jarvis-logo">J.A.R.V.I.S.</div>
+    <div class="jarvis-subtitle">Just A Rather Very Intelligent System</div>
+
+    <div class="jarvis-tagline">MANI LIBERE. MENTE SVEGLIA. AGENTE PRO.</div>
+
+    <div class="welcome-text">
+      Benvenuto. JARVIS è pronto per te.<br><br>
+      Crea il tuo profilo in <span class="highlight">30 secondi</span>. Scegli 2 siti,
+      aggiungi un link personale e JARVIS si attiva.<br>
+      <span class="highlight">Un click e sei operativo, Sir.</span>
+    </div>
+
+    <button class="btn-primary" onclick="goTo(1)">⚡ INIZIA ONBOARDING</button>
+
+    <div class="footer-bar">
+      <span>SYS.INTEGRITY: 100%</span>
+      <span>PROTOCOLLO: ATTIVO</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SCREEN 1: IDENTIFICAZIONE ═══════════════════════════════ -->
+  <div class="screen" id="screen-1">
+    <div class="arc-reactor" style="width:80px;height:80px;margin:10px auto;">
+      <div class="arc-ring arc-ring-1" style="width:80px;height:80px"></div>
+      <div class="arc-ring arc-ring-2" style="width:62px;height:62px"></div>
+      <div class="arc-ring arc-ring-3" style="width:44px;height:44px"></div>
+      <div class="arc-core" style="width:20px;height:20px"></div>
+    </div>
+
+    <div class="jarvis-logo" style="font-size:28px;letter-spacing:8px">J.A.R.V.I.S.</div>
+    <div class="jarvis-subtitle" style="font-size:9px;letter-spacing:6px">ONBOARDING PROTOCOL</div>
+
+    <div class="step-indicator">
+      <div class="step-circle active" id="sc-1">01</div>
+      <div class="step-line" id="sl-1"></div>
+      <div class="step-circle" id="sc-2">02</div>
+      <div class="step-line" id="sl-2"></div>
+      <div class="step-circle" id="sc-3">03</div>
+    </div>
+
+    <div class="section-badge">⚡ IDENTIFICAZIONE</div>
+
+    <div class="hud-panel" style="max-width:500px">
+      <div class="hud-panel-corner tl"></div>
+      <div class="hud-panel-corner tr"></div>
+      <div class="hud-panel-corner bl"></div>
+      <div class="hud-panel-corner br"></div>
+
+      <div class="panel-title">
+        JARVIS ha bisogno del tuo nome per creare un'interfaccia personalizzata.
+        <span class="accent">Ogni dettaglio conta, Sir.</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">OPERATOR NAME</label>
+        <input class="form-input" id="operatorName" type="text" placeholder="Il tuo nome...">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">EMAIL — CANALE SICURO</label>
+        <input class="form-input" id="operatorEmail" type="email" placeholder="email@example.com">
+      </div>
+
+      <button class="btn-primary" onclick="goToStep2()" style="max-width:100%;clip-path:none">
+        INIZIALIZZA →
+      </button>
+    </div>
+
+    <div class="footer-bar">
+      <span>SYS.INTEGRITY: 100%</span>
+      <button class="btn-secondary" onclick="goTo(0)">← BACK</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SCREEN 2: SELEZIONE SITI ═══════════════════════════════ -->
+  <div class="screen" id="screen-2">
+    <div class="jarvis-logo" style="font-size:24px;letter-spacing:8px;margin-top:20px">J.A.R.V.I.S.</div>
+    <div class="jarvis-subtitle" style="font-size:9px;letter-spacing:6px">ONBOARDING PROTOCOL</div>
+
+    <div class="step-indicator">
+      <div class="step-circle done" id="sc2-1">✓</div>
+      <div class="step-line active" id="sl2-1"></div>
+      <div class="step-circle active" id="sc2-2">02</div>
+      <div class="step-line" id="sl2-2"></div>
+      <div class="step-circle" id="sc2-3">03</div>
+    </div>
+
+    <div class="section-badge">● SELEZIONE SITI</div>
+
+    <div style="width:100%;font-family:'Rajdhani',sans-serif;font-size:13px;color:var(--text-primary);margin-bottom:12px">
+      Seleziona <span style="color:var(--orange);font-weight:600">2 SITI</span> che JARVIS aprirà al momento dell'attivazione.
+    </div>
+
+    <div style="width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <span style="font-size:10px;letter-spacing:2px;color:var(--text-secondary)">SITI SELEZIONATI</span>
+      <div class="selection-counter">
+        <div class="counter-dots">
+          <div class="counter-dot" id="dot1"></div>
+          <div class="counter-dot" id="dot2"></div>
+        </div>
+        <span id="counterText" style="color:var(--orange);font-family:'Orbitron',monospace;font-size:10px">0/2</span>
+      </div>
+    </div>
+
+    <!-- AI & PRODUCTIVITY -->
+    <div class="category-label">AI & PRODUTTIVITÀ</div>
+    <div class="site-grid">
+      <div class="site-card" onclick="toggleSite(this,'ChatGPT','chat.openai.com')">
+        <div class="site-icon">🤖</div>
+        <div class="site-info">
+          <div class="site-name">CHATGPT</div>
+          <div class="site-url">chat.openai.com</div>
+        </div>
+      </div>
+      <div class="site-card" onclick="toggleSite(this,'Claude AI','claude.ai')">
+        <div class="site-icon">🧠</div>
+        <div class="site-info">
+          <div class="site-name">CLAUDE AI</div>
+          <div class="site-url">claude.ai</div>
+        </div>
+      </div>
+      <div class="site-card" onclick="toggleSite(this,'Gmail','mail.google.com')">
+        <div class="site-icon">📧</div>
+        <div class="site-info">
+          <div class="site-name">GMAIL</div>
+          <div class="site-url">mail.google.com</div>
+        </div>
+      </div>
+      <div class="site-card" onclick="toggleSite(this,'Google','google.com')">
+        <div class="site-icon">🔍</div>
+        <div class="site-info">
+          <div class="site-name">GOOGLE</div>
+          <div class="site-url">google.com</div>
+        </div>
+      </div>
+      <div class="site-card" onclick="toggleSite(this,'Notion','notion.so')">
+        <div class="site-icon">📒</div>
+        <div class="site-info">
+          <div class="site-name">NOTION</div>
+          <div class="site-url">notion.so</div>
+        </div>
+      </div>
+      <div class="site-card" onclick="toggleSite(this,'Microsoft Teams','teams.microsoft.com')">
+        <div class="site-icon">💬</div>
+        <div class="site-info">
+          <div class="site-name">MS TEAMS</div>
+          <div class="site-url">teams.microsoft.com</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEV & TECH -->
+    <div class="category-label">DEV & TECH</div>
+    <div class="site-grid">
+      <div class="site-card" onclick="toggleSite(this,'GitHub','github.com')">
+        <div class="site-icon">💻</div>
+        <div class="site-info">
+          <div class="site-name">GITHUB</div>
+          <div class="site-url">github.com</div>
+        </div>
+      </div>
+      <div class="site-card" onclick="toggleSite(this,'Wikipedia','wikipedia.org')">
+        <div class="site-icon">📚</div>
+        <div class="site-info">
+          <div class="site-name">WIKIPEDIA</div>
+          <div class="site-url">wikipedia.org</div>
+        </div>
+      </div>
+      <div class="site-card" onclick="toggleSite(this,'Stack Overflow','stackoverflow.com')">
+        <div class="site-icon">⚙️</div>
+        <div class="site-info">
+          <div class="site-name">STACK OVF</div>
+          <div class="site-url">stackoverflow.com</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOCIAL & MEDIA -->
+    <div class="category-label">SOCIAL & MEDIA</div>
+    <div class="site-grid">
+      <div class="site-card" onclick="toggleSite(this,'YouTube','youtube.com')">
+        <div class="site-icon">▶️</div>
+        <div class="site-info">
+          <div class="site-name">YOUTUBE</div>
+          <div class="site-url">youtube.com</div>
+        </div>
+      </div>
+      <div class="site-card" onclick="toggleSite(this,'Instagram','instagram.com')">
+        <div class="site-icon">📸</div>
+        <div class="site-info">
+          <div class="site-name">INSTAGRAM</div>
+          <div class="site-url">instagram.com</div>
+        </div>
+      </div>
+      <div class="site-card" onclick="toggleSite(this,'Discord','discord.com')">
+        <div class="site-icon">🎮</div>
+        <div class="site-info">
+          <div class="site-name">DISCORD</div>
+          <div class="site-url">discord.com</div>
+        </div>
+      </div>
+      <div class="site-card" onclick="toggleSite(this,'LinkedIn','linkedin.com')">
+        <div class="site-icon">💼</div>
+        <div class="site-info">
+          <div class="site-name">LINKEDIN</div>
+          <div class="site-url">linkedin.com</div>
+        </div>
+      </div>
+      <div class="site-card" onclick="toggleSite(this,'X / Twitter','x.com')">
+        <div class="site-icon">✖️</div>
+        <div class="site-info">
+          <div class="site-name">X / TWITTER</div>
+          <div class="site-url">x.com</div>
+        </div>
+      </div>
+      <div class="site-card" onclick="toggleSite(this,'Reddit','reddit.com')">
+        <div class="site-icon">👽</div>
+        <div class="site-info">
+          <div class="site-name">REDDIT</div>
+          <div class="site-url">reddit.com</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STREAMING -->
+    <div class="category-label">STREAMING & FUN</div>
+    <div class="site-grid">
+      <div class="site-card" onclick="toggleSite(this,'Netflix','netflix.com')">
+        <div class="site-icon">🎬</div>
+        <div class="site-info">
+          <div class="site-name">NETFLIX</div>
+          <div class="site-url">netflix.com</div>
+        </div>
+      </div>
+      <div class="site-card" onclick="toggleSite(this,'Spotify','open.spotify.com')">
+        <div class="site-icon">🎧</div>
+        <div class="site-info">
+          <div class="site-name">SPOTIFY</div>
+          <div class="site-url">open.spotify.com</div>
+        </div>
+      </div>
+      <div class="site-card" onclick="toggleSite(this,'Twitch','twitch.tv')">
+        <div class="site-icon">🟣</div>
+        <div class="site-info">
+          <div class="site-name">TWITCH</div>
+          <div class="site-url">twitch.tv</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAPPE & UTILITY -->
+    <div class="category-label">MAPPE & UTILITY</div>
+    <div class="site-grid">
+      <div class="site-card" onclick="toggleSite(this,'Google Maps','maps.google.com')">
+        <div class="site-icon">🗺️</div>
+        <div class="site-info">
+          <div class="site-name">GOOGLE MAPS</div>
+          <div class="site-url">maps.google.com</div>
+        </div>
+      </div>
+      <div class="site-card" onclick="toggleSite(this,'WhatsApp','web.whatsapp.com')">
+        <div class="site-icon">📱</div>
+        <div class="site-info">
+          <div class="site-name">WHATSAPP</div>
+          <div class="site-url">web.whatsapp.com</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOM SITE -->
+    <div class="custom-panel">
+      <div class="custom-panel-title">🔗 NON TROVI IL TUO SITO?</div>
+      <div style="font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--text-secondary);margin-bottom:8px">
+        Proponi un sito da aggiungere. Verrà valutato e, se approvato, sarà disponibile per tutti.
+      </div>
+      <div class="custom-row">
+        <input class="form-input" id="customUrl" type="url" placeholder="https://example.com">
+        <input class="form-input" id="customName" type="text" placeholder="Nome" style="max-width:120px">
+        <button class="btn-send" onclick="submitCustomSite()">INVIA →</button>
+      </div>
+    </div>
+
+    <div style="width:100%;display:flex;gap:10px;margin-top:20px">
+      <button class="btn-secondary" onclick="goTo(1)" style="flex:1">← INDIETRO</button>
+      <button class="btn-primary" onclick="goTo(3)" id="btnNext2"
+        style="flex:2;max-width:none;clip-path:none;opacity:0.4;cursor:not-allowed" disabled>
+        CONTINUA →
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SCREEN 3: CONFERMA ═══════════════════════════════ -->
+  <div class="screen" id="screen-3">
+    <div class="arc-reactor" style="width:100px;height:100px;margin:20px auto">
+      <div class="arc-ring arc-ring-1" style="width:100px;height:100px"></div>
+      <div class="arc-ring arc-ring-2" style="width:78px;height:78px"></div>
+      <div class="arc-ring arc-ring-3" style="width:56px;height:56px"></div>
+      <div class="arc-core" style="width:22px;height:22px;background:radial-gradient(circle,#fff 0%,var(--green) 40%,var(--green-dim) 100%);box-shadow:0 0 20px var(--green),0 0 40px rgba(0,255,65,0.5)"></div>
+    </div>
+
+    <div class="jarvis-logo" style="font-size:26px;letter-spacing:8px;color:var(--green);text-shadow:0 0 20px rgba(0,255,65,0.8)">
+      J.A.R.V.I.S.
+    </div>
+    <div class="jarvis-subtitle" style="font-size:9px;letter-spacing:6px">SISTEMA ATTIVATO</div>
+
+    <div class="step-indicator">
+      <div class="step-circle done">✓</div>
+      <div class="step-line active"></div>
+      <div class="step-circle done">✓</div>
+      <div class="step-line active"></div>
+      <div class="step-circle done" style="border-color:var(--green);color:var(--green);box-shadow:0 0 15px rgba(0,255,65,0.4)">✓</div>
+    </div>
+
+    <div class="hud-panel" style="max-width:500px;border-color:rgba(0,255,65,0.3)">
+      <div class="hud-panel-corner tl" style="border-color:var(--green)"></div>
+      <div class="hud-panel-corner tr" style="border-color:var(--green)"></div>
+      <div class="hud-panel-corner bl" style="border-color:var(--green)"></div>
+      <div class="hud-panel-corner br" style="border-color:var(--green)"></div>
+
+      <div class="panel-title" style="text-align:center;font-size:15px;margin-bottom:20px">
+        <span id="confirmName" style="color:var(--green);font-weight:600"></span>,
+        il tuo profilo JARVIS è operativo.<br>
+        <span class="accent">Benvenuto a bordo, Sir.</span>
+      </div>
+
+      <div style="margin-bottom:16px">
+        <div class="form-label" style="margin-bottom:8px">SITI CONFIGURATI</div>
+        <div id="selectedSitesList" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+
+      <div class="form-label" style="margin-bottom:8px">IL TUO LINK PERSONALE</div>
+      <div class="success-link-box">
+        <span class="success-link" id="personalLink">jarvis.app/op/--</span>
+        <button class="btn-copy" onclick="copyLink()">COPIA</button>
+      </div>
+
+      <button class="btn-primary" onclick="activateJarvis()"
+        style="max-width:100%;clip-path:none;border-color:var(--green);color:var(--green);margin-top:8px">
+        ⚡ ATTIVA JARVIS
+      </button>
+    </div>
+
+    <div class="integrity-bar">SYS.INTEGRITY: 100% — STARK INDUSTRIES v4.2 — AES-256 ENCRYPTED</div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+  // ── STATE ──
+  const state = {
+    step: 0,
+    name: '',
+    email: '',
+    selectedSites: [],
+    maxSites: 2
+  };
+
+  // ── NAVIGATION ──
+  function goTo(n) {
+    document.getElementById('screen-' + state.step).classList.remove('active');
+    state.step = n;
+    document.getElementById('screen-' + n).classList.add('active');
+    // scroll top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // progress
+    const pct = [0, 33, 66, 100];
+    document.getElementById('progressBar').style.width = pct[n] + '%';
+  }
+
+  function goToStep2() {
+    const name = document.getElementById('operatorName').value.trim();
+    const email = document.getElementById('operatorEmail').value.trim();
+    if (!name) { flash(document.getElementById('operatorName')); return; }
+    if (!email || !email.includes('@')) { flash(document.getElementById('operatorEmail')); return; }
+    state.name = name;
+    state.email = email;
+    goTo(2);
+  }
+
+  function flash(el) {
+    el.style.borderColor = 'var(--orange)';
+    el.style.boxShadow = '0 0 12px rgba(255,107,0,0.4)';
+    setTimeout(() => {
+      el.style.borderColor = '';
+      el.style.boxShadow = '';
+    }, 800);
+  }
+
+  // ── SITE SELECTION ──
+  function toggleSite(card, name, url) {
+    const idx = state.selectedSites.findIndex(s => s.url === url);
+    if (idx > -1) {
+      // deselect
+      state.selectedSites.splice(idx, 1);
+      card.classList.remove('selected');
+    } else {
+      if (state.selectedSites.length >= state.maxSites) {
+        // max reached — shake
+        card.style.animation = 'shake 0.3s';
+        setTimeout(() => card.style.animation = '', 300);
+        return;
+      }
+      state.selectedSites.push({ name, url });
+      card.classList.add('selected');
+    }
+    updateCounter();
+  }
+
+  function updateCounter() {
+    const n = state.selectedSites.length;
+    document.getElementById('counterText').textContent = n + '/2';
+    document.getElementById('dot1').classList.toggle('filled', n >= 1);
+    document.getElementById('dot2').classList.toggle('filled', n >= 2);
+
+    const btn = document.getElementById('btnNext2');
+    if (n === 2) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+    } else {
+      btn.disabled = true;
+      btn.style.opacity = '0.4';
+      btn.style.cursor = 'not-allowed';
+    }
+  }
+
+  function submitCustomSite() {
+    const url = document.getElementById('customUrl').value.trim();
+    const name = document.getElementById('customName').value.trim() || 'CUSTOM';
+    if (!url.startsWith('http')) { flash(document.getElementById('customUrl')); return; }
+    // simulate submission
+    document.getElementById('customUrl').value = '';
+    document.getElementById('customName').value = '';
+    const btn = document.querySelector('.btn-send');
+    btn.textContent = 'INVIATO ✓';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'var(--green)';
+    setTimeout(() => { btn.textContent = 'INVIA →'; btn.style.color=''; btn.style.borderColor=''; }, 2000);
+  }
+
+  // ── CONFIRM SCREEN ──
+  document.getElementById('screen-3') && null; // ensure DOM ready
+  const _goTo3Orig = goTo;
+
+  // patch goTo for step 3
+  window.goTo = function(n) {
+    if (n === 3) {
+      // populate confirm screen
+      document.getElementById('confirmName').textContent = state.name;
+      const link = 'jarvis.app/op/' + state.name.toLowerCase().replace(/\s/g,'-') + '-' + Math.random().toString(36).slice(2,6);
+      document.getElementById('personalLink').textContent = link;
+      document.getElementById('personalLink').dataset.link = link;
+
+      const list = document.getElementById('selectedSitesList');
+      list.innerHTML = '';
+      state.selectedSites.forEach(s => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:6px 10px;background:rgba(0,255,65,0.04);border:1px solid rgba(0,255,65,0.15)';
+        row.innerHTML = `<span style="color:var(--green);font-size:10px">▶</span>
+          <span style="font-family:Orbitron,monospace;font-size:10px;letter-spacing:1px;color:var(--text-primary)">${s.name}</span>
+          <span style="font-size:9px;color:var(--text-secondary);margin-left:auto">${s.url}</span>`;
+        list.appendChild(row);
+      });
+    }
+    _goTo3Orig(n);
+  };
+
+  function copyLink() {
+    const link = document.getElementById('personalLink').dataset.link ||
+                 document.getElementById('personalLink').textContent;
+    navigator.clipboard.writeText(link).catch(() => {});
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = 'COPIATO!';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.textContent = 'COPIA'; btn.style.color = ''; }, 2000);
+  }
+
+  function activateJarvis() {
+    // Persist operator data
+    localStorage.setItem('jarvis_operator', state.name);
+    localStorage.setItem('jarvis_email', state.email);
+    localStorage.setItem('jarvis_sites', JSON.stringify(state.selectedSites));
+    localStorage.setItem('jarvis_activated', '1');
+
+    // Visual feedback then redirect
+    const btn = event.target;
+    btn.textContent = '✓ JARVIS ATTIVATO — CARICAMENTO...';
+    btn.style.background = 'rgba(0,255,65,0.1)';
+
+    // Open selected sites in new tabs
+    state.selectedSites.forEach(s => {
+      window.open('https://' + s.url, '_blank');
+    });
+
+    // Redirect to home after short delay
+    setTimeout(() => {
+      window.location.href = './home/index.html';
+    }, 1200);
+  }
+
+  // ── SHAKE KEYFRAME ──
+  const style = document.createElement('style');
+  style.textContent = `@keyframes shake {
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-4px)}
+    75%{transform:translateX(4px)}
+  }`;
+  document.head.appendChild(style);
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<!-- index.html nella root del repo -->
+<script>
+    if (localStorage.getItem('jarvis_activated')) {
+        location.replace('./home/index.html');
+    } else {
+        location.replace('./onboarding/index.html');
+    }
+</script>

@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J.A.R.V.I.S. — Meteo HUD</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#00060f;--cyan:#00d4ff;--cyan2:#0088aa;--cyan3:rgba(0,212,255,0.08);
+  --orange:#ff6b00;--green:#00ff41;--green2:#00aa2a;
+  --yellow:#ffd700;--blue:#1e90ff;--red:#ff2244;
+  --text:#c8eeff;--text2:#4a7a8a;--text3:#2a4a5a;
+  --bc:rgba(0,212,255,0.22);--bo:rgba(255,107,0,0.35);--bg2:rgba(0,18,36,0.6);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden;}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,212,255,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,0.025) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+body::after{
+  content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);
+}
+
+/* ── STATUS BAR ── */
+.sbar{
+  position:fixed;top:0;left:0;right:0;z-index:200;height:38px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;background:rgba(0,6,15,0.97);
+  border-bottom:1px solid var(--bc);backdrop-filter:blur(12px);
+  font-size:9px;letter-spacing:2px;
+}
+.sbar-l{display:flex;align-items:center;gap:14px;}
+.sb-logo{font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:5px;color:var(--cyan);text-shadow:0 0 12px rgba(0,212,255,.6);}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:dp 2s infinite;}
+@keyframes dp{0%,100%{opacity:1;box-shadow:0 0 6px var(--green)}50%{opacity:.4;box-shadow:none}}
+.sbar-r{display:flex;align-items:center;gap:18px;color:var(--text2);}
+.sb-clock{font-family:'Orbitron',monospace;font-size:12px;color:var(--cyan);}
+.back-btn{font-size:9px;letter-spacing:2px;color:var(--text2);text-decoration:none;border:1px solid var(--bc);padding:3px 10px;transition:all .2s;}
+.back-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* ── PAGE LAYOUT ── */
+.page{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:54px 16px 36px;display:flex;flex-direction:column;gap:12px;}
+
+/* ── PANEL ── */
+.panel{border:1px solid var(--bc);background:var(--bg2);position:relative;backdrop-filter:blur(6px);}
+.panel::before{content:'';position:absolute;top:-1px;left:14px;width:36px;height:2px;background:var(--orange);}
+.c{position:absolute;width:10px;height:10px;border-color:var(--orange);border-style:solid;}
+.tl{top:-1px;left:-1px;border-width:2px 0 0 2px} .tr{top:-1px;right:-1px;border-width:2px 2px 0 0}
+.bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px} .br{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.ptitle{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:3px;color:var(--orange);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+
+/* ── HERO ROW ── */
+.hero-row{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch;}
+
+/* CURRENT WEATHER */
+.cur-weather{padding:20px 22px;}
+.cur-loc{font-size:9px;letter-spacing:4px;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.cur-city{font-family:'Orbitron',monospace;font-size:clamp(18px,2.5vw,24px);font-weight:700;color:var(--cyan);letter-spacing:3px;}
+.cur-temp-row{display:flex;align-items:flex-end;gap:10px;margin:14px 0 8px;}
+.cur-temp{font-family:'Orbitron',monospace;font-size:clamp(52px,8vw,72px);font-weight:900;color:var(--text);line-height:1;}
+.cur-unit{font-family:'Orbitron',monospace;font-size:20px;color:var(--cyan);align-self:flex-start;margin-top:8px;}
+.cur-feels{font-size:9px;letter-spacing:2px;color:var(--text2);margin-bottom:4px;}
+.cur-desc{font-family:'Rajdhani',sans-serif;font-size:16px;letter-spacing:3px;color:var(--cyan);text-transform:uppercase;}
+.cur-icon{font-size:56px;text-align:center;}
+.cur-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;}
+.cm-item{padding:8px 10px;border:1px solid var(--bc);background:rgba(0,212,255,.03);}
+.cm-label{font-size:8px;letter-spacing:2px;color:var(--text2);margin-bottom:4px;}
+.cm-val{font-family:'Orbitron',monospace;font-size:14px;color:var(--cyan);}
+
+/* RADAR CANVAS */
+.radar-wrap{padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:240px;}
+#radar{border-radius:50%;border:1px solid rgba(0,212,255,.2);display:block;}
+.radar-label{font-size:8px;letter-spacing:3px;color:var(--text2);}
+
+/* AQI / ENV */
+.env-panel{padding:16px 18px;}
+.aqi-big{font-family:'Orbitron',monospace;font-size:48px;font-weight:900;line-height:1;}
+.aqi-big.good{color:var(--green);}
+.aqi-big.mod{color:var(--yellow);}
+.aqi-big.bad{color:var(--red);}
+.aqi-label{font-size:9px;letter-spacing:3px;color:var(--text2);margin-top:2px;margin-bottom:14px;}
+.env-bars{display:flex;flex-direction:column;gap:8px;}
+.ebar{display:flex;align-items:center;gap:8px;}
+.ebar-name{font-size:8px;letter-spacing:2px;color:var(--text2);width:46px;flex-shrink:0;}
+.ebar-track{flex:1;height:4px;background:rgba(0,212,255,.1);border-radius:2px;}
+.ebar-fill{height:100%;border-radius:2px;transition:width 1.4s ease;}
+.ebar-val{font-family:'Orbitron',monospace;font-size:10px;width:40px;text-align:right;flex-shrink:0;}
+
+/* ── FORECAST ROW ── */
+.forecast-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:16px;}
+.fc-card{
+  padding:14px 10px;border:1px solid rgba(0,212,255,.12);background:rgba(0,212,255,.02);
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  transition:all .25s;cursor:default;
+}
+.fc-card:hover{border-color:var(--cyan);background:rgba(0,212,255,.06);box-shadow:0 0 14px rgba(0,212,255,.08);}
+.fc-day{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;color:var(--orange);}
+.fc-icon{font-size:26px;}
+.fc-hi{font-family:'Orbitron',monospace;font-size:16px;color:var(--text);}
+.fc-lo{font-family:'Orbitron',monospace;font-size:12px;color:var(--text2);}
+.fc-desc{font-size:8px;letter-spacing:1px;color:var(--text2);text-align:center;}
+.fc-rain{display:flex;align-items:center;gap:4px;font-size:8px;color:var(--blue);}
+
+/* ── METRICS BOTTOM ROW ── */
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.met-card{padding:14px 16px;border:1px solid var(--bc);background:rgba(0,18,36,.5);position:relative;}
+.met-card::before{content:'';position:absolute;top:-1px;left:12px;width:24px;height:2px;background:var(--orange);}
+.met-label{font-size:8px;letter-spacing:2px;color:var(--text2);margin-bottom:8px;}
+.met-val{font-family:'Orbitron',monospace;font-size:22px;}
+.met-unit{font-size:10px;color:var(--text2);}
+.met-bar{height:2px;background:rgba(0,212,255,.1);margin-top:10px;border-radius:1px;}
+.met-fill{height:100%;border-radius:1px;transition:width 1.4s ease;}
+
+/* ── HOURLY CHART ── */
+.hourly-wrap{padding:16px 18px;}
+#hourlyChart{width:100%;height:100px;}
+
+/* ── UV INDEX GAUGE ── */
+.uv-wrap{padding:16px 18px;display:flex;flex-direction:column;align-items:center;gap:8px;}
+#uvGauge{display:block;}
+.uv-val{font-family:'Orbitron',monospace;font-size:28px;font-weight:700;color:var(--yellow);}
+.uv-desc{font-size:9px;letter-spacing:2px;color:var(--text2);}
+
+/* ── ALERTS ── */
+.alert-box{
+  padding:12px 16px;
+  border:1px solid rgba(255,215,0,.35);background:rgba(255,215,0,.04);
+  display:flex;align-items:center;gap:14px;
+}
+.alert-ico{font-size:20px;}
+.alert-txt{font-family:'Rajdhani',sans-serif;font-size:13px;color:var(--yellow);}
+.alert-sub{font-size:9px;letter-spacing:1px;color:var(--text2);margin-top:2px;}
+.alert-badge{
+  margin-left:auto;padding:3px 10px;
+  border:1px solid rgba(255,215,0,.4);
+  font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;color:var(--yellow);
+  flex-shrink:0;
+}
+
+/* ── SECTION TITLE ── */
+.sec{display:flex;align-items:center;gap:10px;font-family:'Orbitron',monospace;font-size:9px;letter-spacing:3px;color:var(--orange);}
+.secl{flex:1;height:1px;background:rgba(255,107,0,.2);}
+
+/* ── BOTTOM STATUS ── */
+.botbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:200;height:26px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;background:rgba(0,6,15,.97);border-top:1px solid var(--bc);
+  font-size:8px;letter-spacing:2px;color:var(--text2);
+}
+
+/* ── SLIDE IN ── */
+@keyframes slin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.page>*{animation:slin .4s ease both;}
+.page>*:nth-child(2){animation-delay:.06s}
+.page>*:nth-child(3){animation-delay:.12s}
+.page>*:nth-child(4){animation-delay:.18s}
+.page>*:nth-child(5){animation-delay:.22s}
+.page>*:nth-child(6){animation-delay:.26s}
+.page>*:nth-child(7){animation-delay:.30s}
+
+@media(max-width:900px){
+  .hero-row{grid-template-columns:1fr;}.metrics-row{grid-template-columns:repeat(2,1fr);}
+  .forecast-grid{grid-template-columns:repeat(3,1fr);}
+}
+@media(max-width:550px){.forecast-grid{grid-template-columns:repeat(2,1fr);}.metrics-row{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<!-- STATUS BAR -->
+<div class="sbar">
+  <div class="sbar-l">
+    <span class="sb-logo">J.A.R.V.I.S.</span>
+    <span style="display:flex;align-items:center;gap:6px"><span class="sdot"></span><span style="color:var(--text2);font-size:9px;letter-spacing:2px">METEO HUD</span></span>
+  </div>
+  <div class="sbar-r">
+    <a class="back-btn" href="../home/index.html">← HOME</a>
+    <span>STARK v4.2</span>
+    <span class="sb-clock" id="clock">--:--:--</span>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ALERT BAR -->
+  <div class="alert-box">
+    <span class="alert-ico">⚠️</span>
+    <div>
+      <div class="alert-txt">ALLERTA METEO: Vento forte previsto stasera</div>
+      <div class="alert-sub">Raffiche fino a 65 km/h — PROTEZIONE CIVILE LOMBARDIA</div>
+    </div>
+    <div class="alert-badge">⚡ ATTIVA</div>
+  </div>
+
+  <!-- HERO ROW: current + radar + AQI -->
+  <div class="hero-row">
+
+    <!-- CURRENT -->
+    <div class="panel cur-weather">
+      <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
+      <div class="cur-loc">
+        <span>📍</span>
+        <span style="font-family:'Orbitron',monospace;font-size:9px;letter-spacing:3px;color:var(--text2)">POSIZIONE RILEVATA</span>
+      </div>
+      <div class="cur-city" id="cityName">MILANO, IT</div>
+      <div style="font-size:8px;letter-spacing:2px;color:var(--text2);margin-top:2px" id="lastUpdate">AGG. --:--:--</div>
+      <div class="cur-temp-row">
+        <div class="cur-icon" id="curIcon">⛅</div>
+        <div>
+          <div style="display:flex;align-items:flex-start;gap:4px">
+            <div class="cur-temp" id="curTemp">18</div>
+            <div class="cur-unit">°C</div>
+          </div>
+          <div class="cur-feels" id="curFeels">Percepita: 16°C</div>
+          <div class="cur-desc" id="curDesc">Parzialmente nuvoloso</div>
+        </div>
+      </div>
+      <div class="cur-meta">
+        <div class="cm-item">
+          <div class="cm-label">UMIDITÀ</div>
+          <div class="cm-val" id="metHum">62%</div>
+        </div>
+        <div class="cm-item">
+          <div class="cm-label">VENTO</div>
+          <div class="cm-val" id="metWind">22 km/h</div>
+        </div>
+        <div class="cm-item">
+          <div class="cm-label">PRESSIONE</div>
+          <div class="cm-val" id="metPres">1013 hPa</div>
+        </div>
+        <div class="cm-item">
+          <div class="cm-label">VISIBILITÀ</div>
+          <div class="cm-val" id="metVis">18 km</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RADAR -->
+    <div class="panel radar-wrap">
+      <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
+      <div class="ptitle" style="margin-bottom:8px">RADAR PRECIPITAZIONI</div>
+      <canvas id="radar" width="200" height="200"></canvas>
+      <div class="radar-label">SWEEP ATTIVO</div>
+      <div style="display:flex;gap:12px;font-size:8px;letter-spacing:1px;color:var(--text2);margin-top:4px">
+        <span>🟢 Leggere</span><span>🟡 Moderate</span><span>🔴 Intense</span>
+      </div>
+    </div>
+
+    <!-- AQI / ENV -->
+    <div class="panel env-panel">
+      <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
+      <div class="ptitle">QUALITÀ ARIA — IQA</div>
+      <div class="aqi-big mod" id="aqiVal">74</div>
+      <div class="aqi-label">MODERATA — ZONA ARANCIONE</div>
+      <div class="env-bars">
+        <div class="ebar">
+          <div class="ebar-name">PM2.5</div>
+          <div class="ebar-track"><div class="ebar-fill" id="ef1" style="width:0%;background:var(--yellow);box-shadow:0 0 4px var(--yellow)"></div></div>
+          <div class="ebar-val" style="color:var(--yellow)" id="ev1">18 μg</div>
+        </div>
+        <div class="ebar">
+          <div class="ebar-name">PM10</div>
+          <div class="ebar-track"><div class="ebar-fill" id="ef2" style="width:0%;background:var(--orange);box-shadow:0 0 4px var(--orange)"></div></div>
+          <div class="ebar-val" style="color:var(--orange)" id="ev2">34 μg</div>
+        </div>
+        <div class="ebar">
+          <div class="ebar-name">NO₂</div>
+          <div class="ebar-track"><div class="ebar-fill" id="ef3" style="width:0%;background:var(--cyan);box-shadow:0 0 4px var(--cyan)"></div></div>
+          <div class="ebar-val" style="color:var(--cyan)" id="ev3">28 μg</div>
+        </div>
+        <div class="ebar">
+          <div class="ebar-name">O₃</div>
+          <div class="ebar-track"><div class="ebar-fill" id="ef4" style="width:0%;background:var(--green);box-shadow:0 0 4px var(--green)"></div></div>
+          <div class="ebar-val" style="color:var(--green)" id="ev4">62 μg</div>
+        </div>
+        <div class="ebar">
+          <div class="ebar-name">CO</div>
+          <div class="ebar-track"><div class="ebar-fill" id="ef5" style="width:0%;background:var(--green);box-shadow:0 0 4px var(--green)"></div></div>
+          <div class="ebar-val" style="color:var(--green)" id="ev5">0.4 mg</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- HOURLY + UV ROW -->
+  <div style="display:grid;grid-template-columns:1fr 200px;gap:12px">
+
+    <div class="panel hourly-wrap">
+      <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
+      <div class="ptitle">TEMPERATURA — PROSSIME 12 ORE</div>
+      <canvas id="hourlyChart"></canvas>
+    </div>
+
+    <div class="panel uv-wrap">
+      <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
+      <div class="ptitle" style="margin-bottom:6px">INDICE UV</div>
+      <canvas id="uvGauge" width="150" height="80"></canvas>
+      <div class="uv-val">4</div>
+      <div class="uv-desc">MODERATO</div>
+      <div style="font-size:9px;letter-spacing:1px;color:var(--text2);margin-top:4px">Protezione consigliata</div>
+    </div>
+
+  </div>
+
+  <!-- METRICS ROW -->
+  <div class="metrics-row">
+    <div class="met-card">
+      <div class="met-label">ALBA / TRAMONTO</div>
+      <div class="met-val" style="color:var(--yellow);font-size:16px">06:14 / 20:38</div>
+      <div style="font-size:8px;letter-spacing:1px;color:var(--text2);margin-top:4px">☀️ 14h 24m di luce</div>
+      <div class="met-bar"><div class="met-fill" style="width:72%;background:var(--yellow);box-shadow:0 0 4px var(--yellow)"></div></div>
+    </div>
+    <div class="met-card">
+      <div class="met-label">LUNA</div>
+      <div class="met-val" style="color:var(--text);font-size:26px">🌖</div>
+      <div style="font-size:9px;letter-spacing:1px;color:var(--text2);margin-top:4px">GIBBOSA CALANTE — 78%</div>
+      <div class="met-bar"><div class="met-fill" style="width:78%;background:var(--text2)"></div></div>
+    </div>
+    <div class="met-card">
+      <div class="met-label">PRECIPITAZIONI OGGI</div>
+      <div class="met-val" style="color:var(--blue)">2.4<span class="met-unit">mm</span></div>
+      <div style="font-size:8px;letter-spacing:1px;color:var(--text2);margin-top:4px">Prob. pioggia: 35%</div>
+      <div class="met-bar"><div class="met-fill" style="width:35%;background:var(--blue);box-shadow:0 0 4px var(--blue)"></div></div>
+    </div>
+    <div class="met-card">
+      <div class="met-label">PUNTO RUGIADA</div>
+      <div class="met-val" style="color:var(--cyan)">11<span class="met-unit">°C</span></div>
+      <div style="font-size:8px;letter-spacing:1px;color:var(--text2);margin-top:4px">Condensa: improbabile</div>
+      <div class="met-bar"><div class="met-fill" style="width:45%;background:var(--cyan);box-shadow:0 0 4px var(--cyan)"></div></div>
+    </div>
+  </div>
+
+  <!-- FORECAST 5 DAYS -->
+  <div class="sec"><div class="secl"></div>PREVISIONI 5 GIORNI<div class="secl"></div></div>
+  <div class="panel" style="padding:0">
+    <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
+    <div class="forecast-grid" id="forecastGrid"></div>
+  </div>
+
+  <!-- LOG -->
+  <div class="sec"><div class="secl"></div>LOG SENSORI<div class="secl"></div></div>
+  <div class="panel" style="padding:12px 16px;max-height:120px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--cyan2) transparent">
+    <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
+    <div id="sensorLog" style="display:flex;flex-direction:column;gap:3px"></div>
+  </div>
+
+</div><!-- /page -->
+
+<div class="botbar">
+  <span>JARVIS METEO MODULE — MILANO MALPENSA WS</span>
+  <span id="bbmid" style="color:var(--cyan2)">DATI IN TEMPO REALE</span>
+  <span>SYS.INTEGRITY: 100%</span>
+</div>
+
+<script>
+// ── CLOCK ──
+setInterval(()=>{
+  const t=new Date().toTimeString().slice(0,8);
+  document.getElementById('clock').textContent=t;
+  document.getElementById('lastUpdate').textContent='AGG. '+t;
+},1000);
+const t0=new Date().toTimeString().slice(0,8);
+document.getElementById('clock').textContent=t0;
+document.getElementById('lastUpdate').textContent='AGG. '+t0;
+
+// ── AQI BARS ANIMATE ──
+setTimeout(()=>{
+  [[1,36],[2,68],[3,56],[4,31],[5,8]].forEach(([n,pct])=>{
+    document.getElementById('ef'+n).style.width=pct+'%';
+  });
+},400);
+
+// ── RADAR CANVAS ──
+(function radarAnim(){
+  const cv=document.getElementById('radar');
+  const ctx=cv.getContext('2d');
+  const W=200,H=200,CX=100,CY=100,R=92;
+  let angle=0;
+  const blobs=[
+    {x:60,y:70,r:18,color:'rgba(0,255,65,0.5)'},
+    {x:130,y:90,r:12,color:'rgba(255,215,0,0.5)'},
+    {x:80,y:140,r:22,color:'rgba(0,212,255,0.4)'},
+    {x:155,y:155,r:8,color:'rgba(255,107,0,0.6)'},
+  ];
+
+  function drawRadar(){
+    ctx.clearRect(0,0,W,H);
+
+    // dark bg circle
+    ctx.beginPath();ctx.arc(CX,CY,R,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,8,18,0.95)';ctx.fill();
+
+    // grid rings
+    [R*0.25,R*0.5,R*0.75,R].forEach(r=>{
+      ctx.beginPath();ctx.arc(CX,CY,r,0,Math.PI*2);
+      ctx.strokeStyle='rgba(0,212,255,0.12)';ctx.lineWidth=1;ctx.stroke();
+    });
+
+    // cross lines
+    ctx.strokeStyle='rgba(0,212,255,0.1)';ctx.lineWidth=1;
+    [[CX-R,CY,CX+R,CY],[CX,CY-R,CX,CY+R]].forEach(([x1,y1,x2,y2])=>{
+      ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+    });
+
+    // precipitation blobs (clip to circle)
+    ctx.save();
+    ctx.beginPath();ctx.arc(CX,CY,R,0,Math.PI*2);ctx.clip();
+    blobs.forEach(b=>{
+      const grad=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
+      grad.addColorStop(0,b.color);
+      grad.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+      ctx.fillStyle=grad;ctx.fill();
+    });
+    ctx.restore();
+
+    // sweep gradient
+    ctx.save();
+    ctx.beginPath();ctx.arc(CX,CY,R,0,Math.PI*2);ctx.clip();
+    const sweep=ctx.createConicalGradient
+      ? null // not widely supported
+      : null;
+    // fallback: draw sweep as sector
+    const sweepLen=Math.PI*0.55;
+    const grad2=ctx.createLinearGradient(CX,CY,
+      CX+R*Math.cos(angle),CY+R*Math.sin(angle));
+    grad2.addColorStop(0,'rgba(0,255,65,0.0)');
+    grad2.addColorStop(1,'rgba(0,255,65,0.18)');
+    ctx.beginPath();
+    ctx.moveTo(CX,CY);
+    ctx.arc(CX,CY,R,angle-sweepLen,angle);
+    ctx.closePath();
+    ctx.fillStyle=grad2;ctx.fill();
+
+    // sweep line
+    ctx.beginPath();
+    ctx.moveTo(CX,CY);
+    ctx.lineTo(CX+R*Math.cos(angle),CY+R*Math.sin(angle));
+    ctx.strokeStyle='rgba(0,255,65,0.9)';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.restore();
+
+    // center dot
+    ctx.beginPath();ctx.arc(CX,CY,3,0,Math.PI*2);
+    ctx.fillStyle='var(--green)';ctx.shadowColor='var(--green)';ctx.shadowBlur=8;
+    ctx.fill();ctx.shadowBlur=0;
+
+    // border
+    ctx.beginPath();ctx.arc(CX,CY,R,0,Math.PI*2);
+    ctx.strokeStyle='rgba(0,212,255,0.3)';ctx.lineWidth=1;ctx.stroke();
+
+    angle=(angle+0.025)%(Math.PI*2);
+    requestAnimationFrame(drawRadar);
+  }
+  drawRadar();
+})();
+
+// ── HOURLY CHART ──
+(function hourlyChart(){
+  const cv=document.getElementById('hourlyChart');
+  const W=cv.parentElement.offsetWidth-36||600;
+  const H=100;
+  cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');
+
+  const now=new Date().getHours();
+  const temps=[18,17,17,16,15,14,14,15,17,19,20,21];
+  const labels=Array.from({length:12},(_,i)=>((now+i)%24)+'h');
+
+  const PAD={l:8,r:8,t:10,b:20};
+  const W2=W-PAD.l-PAD.r, H2=H-PAD.t-PAD.b;
+  const minT=Math.min(...temps)-2, maxT=Math.max(...temps)+2;
+  const sx=i=>PAD.l+i*(W2/(temps.length-1));
+  const sy=v=>PAD.t+H2*(1-(v-minT)/(maxT-minT));
+
+  // gradient fill
+  const grad=ctx.createLinearGradient(0,PAD.t,0,PAD.t+H2);
+  grad.addColorStop(0,'rgba(0,212,255,0.2)');
+  grad.addColorStop(1,'rgba(0,212,255,0.0)');
+
+  ctx.beginPath();
+  ctx.moveTo(sx(0),sy(temps[0]));
+  temps.forEach((v,i)=>{ if(i>0) ctx.lineTo(sx(i),sy(v)); });
+  ctx.lineTo(sx(temps.length-1),PAD.t+H2);
+  ctx.lineTo(sx(0),PAD.t+H2);
+  ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+
+  // line
+  ctx.beginPath();
+  ctx.moveTo(sx(0),sy(temps[0]));
+  temps.forEach((v,i)=>{ if(i>0) ctx.lineTo(sx(i),sy(v)); });
+  ctx.strokeStyle='var(--cyan)';ctx.lineWidth=1.5;
+  ctx.shadowColor='var(--cyan)';ctx.shadowBlur=6;
+  ctx.stroke();ctx.shadowBlur=0;
+
+  // dots + labels
+  temps.forEach((v,i)=>{
+    // dot
+    ctx.beginPath();ctx.arc(sx(i),sy(v),3,0,Math.PI*2);
+    ctx.fillStyle=(i===0)?'var(--orange)':'var(--cyan)';
+    ctx.fill();
+    // temp label
+    ctx.fillStyle=(i===0)?'var(--orange)':'var(--text)';
+    ctx.font='bold 9px Orbitron,monospace';
+    ctx.textAlign='center';
+    ctx.fillText(v+'°',sx(i),sy(v)-6);
+    // hour label
+    ctx.fillStyle='rgba(74,122,138,0.8)';
+    ctx.font='8px Share Tech Mono,monospace';
+    ctx.fillText(labels[i],sx(i),H-4);
+  });
+})();
+
+// ── UV GAUGE ──
+(function uvGauge(){
+  const cv=document.getElementById('uvGauge');
+  const ctx=cv.getContext('2d');
+  const CX=75,CY=75,R=60,UV=4,MAX=11;
+  const startA=Math.PI,endA=2*Math.PI;
+  const pct=UV/MAX;
+
+  // track
+  ctx.beginPath();ctx.arc(CX,CY,R,startA,endA);
+  ctx.strokeStyle='rgba(0,212,255,0.1)';ctx.lineWidth=12;
+  ctx.lineCap='round';ctx.stroke();
+
+  // colored fill
+  const colors=['#00ff41','#00ff41','#aaff00','#ffd700','#ffd700','#ff8c00','#ff8c00','#ff2244','#ff2244','#cc00ff','#cc00ff'];
+  const fillA=startA+pct*(endA-startA);
+  ctx.beginPath();ctx.arc(CX,CY,R,startA,fillA);
+  ctx.strokeStyle=colors[UV]||'var(--yellow)';ctx.lineWidth=12;
+  ctx.shadowColor=colors[UV]||'var(--yellow)';ctx.shadowBlur=10;
+  ctx.lineCap='round';ctx.stroke();ctx.shadowBlur=0;
+})();
+
+// ── FORECAST DATA ──
+const DAYS=['LUN','MAR','MER','GIO','VEN'];
+const FDATA=[
+  {icon:'⛅',hi:18,lo:11,desc:'Nuvoloso',rain:20},
+  {icon:'🌧',hi:15,lo:10,desc:'Piogge',rain:75},
+  {icon:'🌧',hi:13,lo:9,desc:'Temporali',rain:90},
+  {icon:'🌤',hi:16,lo:8,desc:'Schiarite',rain:15},
+  {icon:'☀️',hi:20,lo:10,desc:'Soleggiato',rain:5},
+];
+const now2=new Date().getDay();
+const dnames=['DOM','LUN','MAR','MER','GIO','VEN','SAB'];
+const grid=document.getElementById('forecastGrid');
+FDATA.forEach((d,i)=>{
+  const name=i===0?'OGGI':dnames[(now2+i)%7];
+  const el=document.createElement('div');el.className='fc-card';
+  el.innerHTML=`
+    <div class="fc-day">${name}</div>
+    <div class="fc-icon">${d.icon}</div>
+    <div class="fc-hi">${d.hi}°</div>
+    <div class="fc-lo">${d.lo}°</div>
+    <div class="fc-desc">${d.desc}</div>
+    <div class="fc-rain">💧 ${d.rain}%</div>`;
+  grid.appendChild(el);
+});
+
+// ── SENSOR LOG ──
+const logEntries=[
+  {k:'TEMP', m:'18.3°C — stazione Malpensa WS-04',c:''},
+  {k:'HUM',  m:'62.1% — sensore relativo',c:''},
+  {k:'WIND', m:'22 km/h NW — raffica max 38 km/h',c:''},
+  {k:'PRES', m:'1013.2 hPa — stabile',c:'ok'},
+  {k:'AQI',  m:'PM2.5: 18μg/m³ — soglia 25μg OK',c:'ok'},
+  {k:'ALERT',m:'Allerta vento attiva — ARPA Lombardia',c:'warn'},
+  {k:'UV',   m:'Indice 4 — moderato — SPF 30 consigliato',c:''},
+  {k:'VIS',  m:'18 km — buona visibilità',c:'ok'},
+];
+const logEl=document.getElementById('sensorLog');
+const now3=new Date();
+logEntries.forEach((l,i)=>{
+  const ts=new Date(now3-(logEntries.length-i)*3000).toTimeString().slice(0,8);
+  const d=document.createElement('div');
+  d.style.cssText='display:flex;gap:10px;font-size:10px;padding:2px 0;border-bottom:1px solid rgba(0,212,255,0.05)';
+  const mc=l.c==='ok'?'var(--green)':l.c==='warn'?'var(--orange)':'var(--text2)';
+  d.innerHTML=`<span style="color:var(--cyan2);flex-shrink:0">${ts}</span><span style="color:var(--orange);flex-shrink:0">[${l.k}]</span><span style="color:${mc}">${l.m}</span>`;
+  logEl.appendChild(d);
+});
+logEl.scrollTop=logEl.scrollHeight;
+
+// ── BOTBAR CYCLE ──
+const bbs=['DATI IN TEMPO REALE','MILANO MALPENSA — WS04','STARK WEATHER MODULE','AES-256 ACTIVE'];
+let bi=0;setInterval(()=>{ document.getElementById('bbmid').textContent=bbs[++bi%bbs.length]; },5000);
+</script>
+</body>
+</html>

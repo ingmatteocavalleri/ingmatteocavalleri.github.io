@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J.A.R.V.I.S. — Voice Mode</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#00060f;--cyan:#00d4ff;--cyan2:#0088aa;
+  --orange:#ff6b00;--green:#00ff41;--green2:#00aa2a;
+  --red:#ff2244;--text:#c8eeff;--text2:#4a7a8a;
+  --bc:rgba(0,212,255,0.25);--bo:rgba(255,107,0,0.5);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Share Tech Mono',monospace;
+  min-height:100vh;overflow-x:hidden;cursor:crosshair;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,212,255,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,0.04) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+body::after{
+  content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);
+}
+
+/* ── STATUS BAR ── */
+.sbar{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:36px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;background:rgba(0,6,15,0.96);
+  border-bottom:1px solid var(--bc);backdrop-filter:blur(12px);
+  font-size:10px;letter-spacing:3px;
+}
+.sbar-l{display:flex;align-items:center;gap:8px;}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:dp 2s infinite;}
+@keyframes dp{0%,100%{opacity:1;box-shadow:0 0 7px var(--green)}50%{opacity:.4;box-shadow:none}}
+.sbar-logo{font-family:'Orbitron',monospace;font-weight:700;letter-spacing:4px;color:var(--cyan);text-shadow:0 0 12px rgba(0,212,255,.6);}
+.sbar-r{display:flex;align-items:center;gap:18px;font-size:9px;letter-spacing:2px;color:var(--text2);}
+.sbar-clock{font-family:'Orbitron',monospace;font-size:11px;color:var(--cyan);}
+.back-btn{
+  font-size:9px;letter-spacing:2px;color:var(--text2);
+  text-decoration:none;border:1px solid var(--bc);padding:3px 10px;transition:all .2s;
+}
+.back-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* ── MAIN COLUMN ── */
+.main{
+  position:relative;z-index:2;
+  max-width:560px;margin:0 auto;
+  padding:50px 20px 80px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+
+/* ── ARC REACTOR ── */
+.arc{position:relative;width:130px;height:130px;display:flex;align-items:center;justify-content:center;margin:14px 0 4px;}
+.ar{position:absolute;border-radius:50%;border:1.5px solid transparent;animation:rr linear infinite;}
+@keyframes rr{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.ar1{width:130px;height:130px;border-top-color:var(--cyan);border-right-color:var(--cyan2);animation-duration:8s;}
+.ar2{width:100px;height:100px;border-top-color:var(--orange);border-left-color:rgba(255,107,0,.3);animation-duration:5s;animation-direction:reverse;}
+.ar3{width:72px;height:72px;border-top-color:var(--cyan);animation-duration:3s;}
+.core{
+  width:28px;height:28px;border-radius:50%;z-index:1;
+  background:radial-gradient(circle,#fff 0%,var(--cyan) 40%,var(--cyan2) 100%);
+  box-shadow:0 0 20px var(--cyan),0 0 40px rgba(0,212,255,.5);
+  animation:cp 3s ease-in-out infinite;transition:all .5s;
+}
+.core.g{
+  background:radial-gradient(circle,#fff 0%,var(--green) 40%,var(--green2) 100%);
+  box-shadow:0 0 20px var(--green),0 0 40px rgba(0,255,65,.5),0 0 80px rgba(0,255,65,.3);
+}
+@keyframes cp{0%,100%{box-shadow:0 0 20px var(--cyan),0 0 40px rgba(0,212,255,.5)}50%{box-shadow:0 0 30px var(--cyan),0 0 60px rgba(0,212,255,.7)}}
+
+/* ── LOGO ── */
+.logo{font-family:'Orbitron',monospace;font-size:clamp(30px,8vw,52px);font-weight:900;
+  letter-spacing:12px;color:var(--cyan);text-align:center;
+  text-shadow:0 0 20px rgba(0,212,255,.8),0 0 60px rgba(0,212,255,.3);
+  animation:flk 8s infinite;}
+@keyframes flk{0%,95%,100%{opacity:1}96%{opacity:.7}97%{opacity:1}98%{opacity:.4}99%{opacity:1}}
+.logo-sub{font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:4px;color:var(--text2);text-align:center;}
+.logo-tag{font-size:11px;letter-spacing:2px;color:var(--text2);text-align:center;margin-top:4px;font-family:'Rajdhani',sans-serif;text-transform:uppercase;}
+
+/* ── CLAP BANNER ── */
+.clap-banner{
+  width:100%;border:1px solid var(--bo);background:rgba(255,107,0,.04);
+  padding:13px 16px;display:flex;align-items:center;gap:14px;
+}
+.clap-ico{font-size:28px;animation:wob 2s infinite;}
+@keyframes wob{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+.clap-title{font-size:13px;letter-spacing:2px;color:var(--cyan);}
+.clap-sub{font-size:9px;letter-spacing:1px;color:var(--text2);margin-top:3px;}
+
+/* ── STATE BOX ── */
+.state-box{
+  width:100%;
+  border:1px solid var(--green);background:rgba(0,255,65,.04);
+  padding:14px 16px;transition:all .3s;
+}
+.state-box.orange{border-color:var(--orange);background:rgba(255,107,0,.05);}
+.state-box.idle{border-color:var(--bc);background:rgba(0,18,36,.4);}
+.state-lbl{font-size:9px;letter-spacing:3px;color:var(--text2);margin-bottom:6px;}
+.state-title{
+  font-family:'Orbitron',monospace;font-size:22px;font-weight:700;
+  color:var(--green);letter-spacing:3px;text-shadow:0 0 16px rgba(0,255,65,.6);
+  transition:all .3s;
+}
+.state-title.o{color:var(--orange);text-shadow:0 0 16px rgba(255,107,0,.6);}
+.state-title.d{color:var(--text2);text-shadow:none;}
+.state-row{margin-top:6px;display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:1px;color:var(--text2);}
+
+/* ── WAVEFORM ── */
+.waveform{width:100%;height:42px;display:flex;align-items:center;gap:2px;padding:0 4px;}
+.wb{flex:1;background:var(--cyan2);border-radius:1px;height:4px;transition:height .08s;opacity:.5;}
+.wb.lit{background:var(--cyan);opacity:1;}
+
+/* ── CLAP METER ── */
+.cmeter-row{
+  width:100%;display:flex;align-items:center;gap:10px;
+  padding:8px 12px;border:1px solid var(--bc);background:rgba(0,0,0,.25);
+  font-size:9px;letter-spacing:2px;color:var(--text2);transition:all .3s;
+}
+.cmeter-row.on{border-color:var(--green);color:var(--green);background:rgba(0,255,65,.04);}
+.mbars{display:flex;gap:2px;align-items:flex-end;height:18px;}
+.mb{width:4px;background:var(--text2);border-radius:1px;transition:all .08s;}
+.ccount{margin-left:auto;font-family:'Orbitron',monospace;font-size:13px;color:var(--orange);}
+
+/* ── BUTTONS ── */
+.btn-row{display:flex;gap:8px;width:100%;}
+.hbtn{
+  flex:1;padding:11px 8px;background:transparent;border:1px solid;
+  font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;
+  cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.hbtn.cy{border-color:var(--bc);color:var(--cyan2);}
+.hbtn.cy:hover,.hbtn.cy.on{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.07);box-shadow:0 0 12px rgba(0,212,255,.2);}
+.hbtn.or{border-color:var(--bo);color:var(--orange);}
+.hbtn.or:hover{background:rgba(255,107,0,.08);box-shadow:0 0 12px rgba(255,107,0,.2);}
+.hbtn.gn{border-color:rgba(0,255,65,.4);color:var(--green);width:100%;}
+.hbtn.gn:hover{background:rgba(0,255,65,.07);box-shadow:0 0 12px rgba(0,255,65,.2);}
+.hbtn.rd{border-color:rgba(255,34,68,.4);color:var(--red);}
+.hbtn.rd:hover{background:rgba(255,34,68,.06);}
+
+/* ── OR divider ── */
+.or-div{width:100%;display:flex;align-items:center;gap:10px;font-size:9px;letter-spacing:3px;color:var(--text2);}
+.or-line{flex:1;height:1px;background:var(--bc);}
+
+/* ── VOICE TOGGLE ROW ── */
+.voice-row{
+  width:100%;border:1px solid var(--green);background:rgba(0,255,65,.03);
+  padding:12px 16px;display:flex;align-items:center;gap:12px;
+}
+.vr-ico{font-size:22px;}
+.vr-txt{flex:1;}
+.vr-title{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;letter-spacing:2px;color:var(--green);}
+.vr-sub{font-size:9px;letter-spacing:1px;color:var(--text2);margin-top:3px;}
+.toggle-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.tpill{
+  width:50px;height:26px;border-radius:13px;
+  border:1px solid var(--green);background:rgba(0,255,65,.15);
+  position:relative;cursor:pointer;transition:all .3s;
+  display:flex;align-items:center;padding:3px;
+}
+.tpill.off{border-color:var(--text2);background:rgba(255,255,255,.04);}
+.tknob{width:18px;height:18px;border-radius:50%;background:var(--green);transition:all .3s;box-shadow:0 0 8px var(--green);margin-left:auto;}
+.tpill.off .tknob{background:var(--text2);box-shadow:none;margin-left:0;}
+.tlabel{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:1px;}
+
+/* ── CHAT TERMINAL ── */
+.chat{
+  width:100%;border:1px solid var(--bc);background:rgba(0,8,18,.7);
+  display:flex;flex-direction:column;height:175px;
+}
+.chat-hdr{
+  padding:5px 10px;border-bottom:1px solid var(--bc);
+  font-size:8px;letter-spacing:2px;color:var(--text2);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.chat-live{display:flex;align-items:center;gap:5px;}
+.chat-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:dp 1.5s infinite;}
+.chat-body{
+  flex:1;overflow-y:auto;padding:8px 10px;
+  display:flex;flex-direction:column;gap:4px;
+  scrollbar-width:thin;scrollbar-color:var(--cyan2) transparent;
+}
+.cm{font-size:11px;line-height:1.5;animation:fu .25s ease;}
+@keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.cm.j{color:var(--cyan);}
+.cm.j::before{content:'[ JARVIS ] ';color:var(--cyan2);}
+.cm.u{color:var(--text);}
+.cm.u::before{content:'[ TO ] ';color:var(--text2);}
+.chat-inp-row{display:flex;border-top:1px solid var(--bc);}
+.cinp{flex:1;padding:8px 10px;background:transparent;border:none;outline:none;color:var(--cyan);font-family:'Share Tech Mono',monospace;font-size:11px;}
+.cinp::placeholder{color:var(--text2);}
+.csend{padding:8px 14px;background:transparent;border:none;border-left:1px solid var(--bc);color:var(--cyan2);cursor:pointer;font-size:12px;transition:color .2s;}
+.csend:hover{color:var(--cyan);}
+
+/* ── NON FUNZIONA ── */
+.nf{
+  position:fixed;bottom:30px;right:20px;z-index:300;
+  padding:10px 16px;background:rgba(255,34,68,.06);
+  border:1px solid rgba(255,34,68,.4);color:var(--red);
+  font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;
+  cursor:pointer;transition:all .25s;
+}
+.nf:hover{background:rgba(255,34,68,.14);box-shadow:0 0 14px rgba(255,34,68,.2);}
+
+/* ── NOTIF ── */
+.notif{
+  position:fixed;top:44px;left:50%;transform:translateX(-50%) translateY(-8px);
+  z-index:500;padding:10px 22px;opacity:0;transition:all .3s;pointer-events:none;
+  border:1px solid var(--cyan);background:rgba(0,18,36,.97);
+  font-size:10px;letter-spacing:2px;color:var(--cyan);white-space:nowrap;
+}
+.notif.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── RIPPLE ── */
+.rw{position:fixed;inset:0;z-index:400;pointer-events:none;display:flex;align-items:center;justify-content:center;}
+.rring{position:absolute;border-radius:50%;border:2px solid var(--cyan);opacity:0;}
+
+/* ── BOTBAR ── */
+.botbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  height:26px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;background:rgba(0,6,15,.96);border-top:1px solid var(--bc);
+  font-size:8px;letter-spacing:2px;color:var(--text2);
+}
+
+/* slide-in */
+@keyframes slin{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.main>*{animation:slin .35s ease both;}
+.main>*:nth-child(2){animation-delay:.04s}
+.main>*:nth-child(3){animation-delay:.08s}
+.main>*:nth-child(4){animation-delay:.12s}
+.main>*:nth-child(5){animation-delay:.16s}
+.main>*:nth-child(6){animation-delay:.20s}
+.main>*:nth-child(7){animation-delay:.24s}
+.main>*:nth-child(8){animation-delay:.27s}
+.main>*:nth-child(9){animation-delay:.30s}
+.main>*:nth-child(10){animation-delay:.33s}
+.main>*:nth-child(11){animation-delay:.36s}
+</style>
+</head>
+<body>
+
+<!-- STATUS BAR -->
+<div class="sbar">
+  <div class="sbar-l">
+    <span class="sdot"></span>
+    <span class="sbar-logo">J.A.R.V.I.S. ONLINE</span>
+  </div>
+  <div class="sbar-r">
+    <a class="back-btn" href="../home/index.html">← HOME</a>
+    <span>STARK v4.2</span>
+    <span class="sbar-clock" id="clock">--:--:--</span>
+  </div>
+</div>
+
+<!-- RIPPLE OVERLAY -->
+<div class="rw">
+  <div class="rring" id="r1" style="width:120px;height:120px"></div>
+  <div class="rring" id="r2" style="width:280px;height:280px"></div>
+  <div class="rring" id="r3" style="width:450px;height:450px"></div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif"></div>
+
+<div class="main">
+
+  <!-- ARC REACTOR -->
+  <div class="arc">
+    <div class="ar ar1"></div>
+    <div class="ar ar2"></div>
+    <div class="ar ar3"></div>
+    <div class="core" id="core"></div>
+  </div>
+
+  <!-- LOGO -->
+  <div class="logo">J.A.R.V.I.S.</div>
+  <div class="logo-sub">Just A Rather Very Intelligent System — Stark Industries v4.2</div>
+  <div class="logo-tag">MANI LIBERE. MENTE SVEGLIA. AGENTE PRO</div>
+
+  <!-- CLAP BANNER -->
+  <div class="clap-banner">
+    <div class="clap-ico">👏</div>
+    <div>
+      <div class="clap-title">Applaudi per attivare l'agente</div>
+      <div class="clap-sub">Un solo suono basta, Signore</div>
+    </div>
+  </div>
+
+  <!-- STATE BOX -->
+  <div class="state-box" id="stateBox">
+    <div class="state-lbl">[ STATO SISTEMA ]</div>
+    <div class="state-title" id="stateTitle">IN ASCOLTO</div>
+    <div class="state-row">
+      <span id="stateIcon">👏</span>
+      <span id="stateSub">Applaudi forte per attivare JARVIS!</span>
+    </div>
+  </div>
+
+  <!-- WAVEFORM -->
+  <div class="waveform" id="waveform"></div>
+
+  <!-- CLAP METER -->
+  <div class="cmeter-row" id="cmRow">
+    <span>🎵</span>
+    <span>CLAP DETECTION</span>
+    <div class="mbars" id="mBars"></div>
+    <span class="ccount" id="cCount">0</span>
+  </div>
+
+  <!-- CLAP MODE + SIMULA -->
+  <div class="btn-row">
+    <button class="hbtn cy" id="btnClap" onclick="toggleClap()">👏 CLAP MODE</button>
+    <button class="hbtn or" onclick="simulateClap()">▶ SIMULA APPLAUSO</button>
+  </div>
+
+  <!-- OR -->
+  <div class="or-div"><div class="or-line"></div>OR<div class="or-line"></div></div>
+
+  <!-- VOICE MODE ROW -->
+  <div class="voice-row">
+    <div class="vr-ico">🎙️</div>
+    <div class="vr-txt">
+      <div class="vr-title">VOICE MODE</div>
+      <div class="vr-sub">Di' "JARVIS" per parlare — clicca per fermare</div>
+    </div>
+    <div class="toggle-wrap">
+      <div class="tpill" id="tpill" onclick="toggleVoice()">
+        <div class="tknob"></div>
+      </div>
+      <div class="tlabel" id="tlabel" style="color:var(--green)">ON</div>
+    </div>
+  </div>
+
+  <!-- SIMULA VOCALE -->
+  <div class="btn-row">
+    <button class="hbtn gn" onclick="simulateVoice()">🎙 SIMULA APPLAUSO VOCALE</button>
+  </div>
+
+  <!-- CHAT TERMINAL -->
+  <div class="chat">
+    <div class="chat-hdr">
+      <span>[ TO ] TERMINALE</span>
+      <div class="chat-live"><span class="chat-dot"></span><span>4 JARVIS</span></div>
+    </div>
+    <div class="chat-body" id="chatBody">
+      <div class="cm u">Di' "JARVIS" per iniziare...</div>
+    </div>
+    <div class="chat-inp-row">
+      <input class="cinp" id="cinp" placeholder='Di" "JARVIS" per iniziare...' onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="csend" onclick="sendChat()">▶</button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- NON FUNZIONA -->
+<button class="nf" onclick="showNotif('Bug segnalato. Team tecnico allertato, Sir.')">
+  ⚠ I NON FUNZIONA
+</button>
+
+<!-- BOTBAR -->
+<div class="botbar">
+  <span>JARVIS VOICE MODULE</span>
+  <span id="bbmid" style="color:var(--cyan2)">IN ASCOLTO</span>
+  <span>SYS.INTEGRITY: 100%</span>
+</div>
+
+<script>
+// CLOCK
+setInterval(()=>{document.getElementById('clock').textContent=new Date().toTimeString().slice(0,8);},1000);
+document.getElementById('clock').textContent=new Date().toTimeString().slice(0,8);
+
+// WAVEFORM BUILD
+const wfEl=document.getElementById('waveform');
+const NBARS=36;const wbars=[];
+for(let i=0;i<NBARS;i++){const b=document.createElement('div');b.className='wb';wfEl.appendChild(b);wbars.push(b);}
+let waveOn=false;
+(function animW(){
+  wbars.forEach(b=>{
+    if(waveOn){const h=Math.random()*34+4;b.style.height=h+'px';b.classList.toggle('lit',h>16);}
+    else{b.style.height='4px';b.classList.remove('lit');}
+  });
+  requestAnimationFrame(animW);
+})();
+
+// METER BUILD
+const mbEl=document.getElementById('mBars');
+for(let i=0;i<10;i++){const b=document.createElement('div');b.className='mb';b.style.height=(i*2+4)+'px';b.id='mb'+i;mbEl.appendChild(b);}
+function setMeter(n){for(let i=0;i<10;i++){const el=document.getElementById('mb'+i);if(el)el.style.background=(n*10>i)?'var(--green)':'var(--text2)';}}
+
+// STATE MANAGER
+function setState(mode){
+  const box=document.getElementById('stateBox');
+  const ttl=document.getElementById('stateTitle');
+  const ico=document.getElementById('stateIcon');
+  const sub=document.getElementById('stateSub');
+  const core=document.getElementById('core');
+  const bb=document.getElementById('bbmid');
+  if(mode==='listening'){
+    box.className='state-box';ttl.className='state-title';
+    ttl.textContent='IN ASCOLTO';ico.textContent='👏';
+    sub.textContent='Applaudi forte per attivare JARVIS!';
+    core.classList.remove('g');bb.textContent='IN ASCOLTO';
+  }else if(mode==='active'){
+    box.className='state-box orange';ttl.className='state-title o';
+    ttl.textContent='ATTIVATO';ico.textContent='⚡';
+    sub.textContent='JARVIS operativo — a tua disposizione, Sir.';
+    core.classList.add('g');bb.textContent='JARVIS ATTIVATO';
+  }else{
+    box.className='state-box idle';ttl.className='state-title d';
+    ttl.textContent='STANDBY';ico.textContent='💤';
+    sub.textContent='Premi CLAP MODE per attivare';
+    core.classList.remove('g');bb.textContent='STANDBY';
+  }
+}
+
+// CLAP DETECTION
+let clapOn=false,audioCtx=null,analyser=null,micStream=null,clapN=0,clapTimer=null;
+const REPLIES=['Sistemi attivati. Benvenuto, Sir.','A tua disposizione.','Applauso rilevato. JARVIS online.',
+  'Protocollo avviato. Cosa posso fare per te?','Connessione stabilita. Pronto, Signore.'];
+
+async function toggleClap(){
+  const btn=document.getElementById('btnClap');
+  if(!clapOn){
+    try{
+      micStream=await navigator.mediaDevices.getUserMedia({audio:true});
+      audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+      analyser=audioCtx.createAnalyser();analyser.fftSize=256;
+      audioCtx.createMediaStreamSource(micStream).connect(analyser);
+      clapOn=true;waveOn=true;
+      btn.classList.add('on');btn.textContent='👏 CLAP MODE ON';
+      setState('listening');loopDetect();
+    }catch(e){showNotif('Microfono negato — usa SIMULA APPLAUSO.');}
+  }else{
+    clapOn=false;waveOn=false;
+    if(micStream)micStream.getTracks().forEach(t=>t.stop());
+    if(audioCtx)audioCtx.close();
+    btn.classList.remove('on');btn.textContent='👏 CLAP MODE';
+    setState('standby');setMeter(0);
+  }
+}
+
+function loopDetect(){
+  if(!clapOn)return;
+  const d=new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteTimeDomainData(d);
+  let mx=0;for(const v of d)mx=Math.max(mx,Math.abs(v-128));
+  const norm=mx/128;
+  setMeter(norm);
+  if(norm>0.6)triggerActivation();
+  setTimeout(loopDetect,50);
+}
+
+function triggerActivation(){
+  clapN++;
+  document.getElementById('cCount').textContent=clapN;
+  document.getElementById('cmRow').classList.add('on');
+  setState('active');ripple();
+  addChat('j',REPLIES[clapN%REPLIES.length]);
+  clearTimeout(clapTimer);
+  clapTimer=setTimeout(()=>{
+    document.getElementById('cmRow').classList.remove('on');
+    if(clapOn)setState('listening');else setState('standby');
+  },3000);
+}
+
+function simulateClap(){waveOn=true;setTimeout(()=>{if(!clapOn)waveOn=false;},1800);triggerActivation();}
+
+// VOICE RECOGNITION
+let voiceOn=true,recog=null;
+function toggleVoice(){
+  voiceOn=!voiceOn;
+  document.getElementById('tpill').classList.toggle('off',!voiceOn);
+  const lbl=document.getElementById('tlabel');
+  lbl.textContent=voiceOn?'ON':'OFF';
+  lbl.style.color=voiceOn?'var(--green)':'var(--text2)';
+  if(voiceOn)startRecog();else if(recog)recog.stop();
+}
+function startRecog(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR)return;
+  recog=new SR();recog.lang='it-IT';recog.continuous=true;recog.interimResults=false;
+  recog.onresult=e=>{
+    const t=e.results[e.results.length-1][0].transcript.trim().toLowerCase();
+    if(t.includes('jarvis')){addChat('u',t);triggerActivation();setTimeout(()=>addChat('j','Voce rilevata: "'+t+'" — elaborazione in corso...'),400);}
+  };
+  recog.onerror=()=>{};
+  recog.onend=()=>{if(voiceOn)try{recog.start();}catch(e){}};
+  try{recog.start();}catch(e){}
+}
+function simulateVoice(){addChat('u','JARVIS, attiva i sistemi');triggerActivation();setTimeout(()=>addChat('j','Voce rilevata. Sistemi in avvio, Sir.'),400);}
+startRecog();
+
+// CHAT
+const JMAP={
+  'ciao':'Salve, Sir. Come posso assisterla?',
+  'help':'Comandi: attiva, ferma, status, apri.',
+  'status':'Tutti i sistemi operativi. SYS.INTEGRITY: 100%.',
+  'grazie':'È un piacere, Signore.',
+  'apri':'Apertura in corso — un momento, Sir.',
+};
+function addChat(who,msg){
+  const body=document.getElementById('chatBody');
+  const d=document.createElement('div');d.className='cm '+who;d.textContent=msg;
+  body.appendChild(d);body.scrollTop=body.scrollHeight;
+}
+function sendChat(){
+  const inp=document.getElementById('cinp');const msg=inp.value.trim();if(!msg)return;
+  inp.value='';addChat('u',msg);
+  const k=Object.keys(JMAP).find(k=>msg.toLowerCase().includes(k));
+  setTimeout(()=>addChat('j',k?JMAP[k]:'Ricevuto, Sir. Elaborazione: "'+msg+'"'),350);
+}
+
+// RIPPLE
+function ripple(){
+  ['r1','r2','r3'].forEach((id,i)=>{
+    const r=document.getElementById(id);
+    r.style.transition='none';r.style.opacity='.7';r.style.transform='scale(0)';
+    setTimeout(()=>{r.style.transition='all .9s ease-out';r.style.opacity='0';r.style.transform='scale(3)';},i*140);
+  });
+}
+
+// NOTIF
+let ntimer;
+function showNotif(msg){
+  const n=document.getElementById('notif');n.textContent=msg;n.classList.add('show');
+  clearTimeout(ntimer);ntimer=setTimeout(()=>n.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>

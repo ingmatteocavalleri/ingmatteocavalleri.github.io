@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J.A.R.V.I.S. — Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:     #00060f;
+    --cyan:   #00d4ff;
+    --cyan2:  #0088aa;
+    --cglow:  rgba(0,212,255,0.15);
+    --orange: #ff6b00;
+    --oglow:  rgba(255,107,0,0.18);
+    --green:  #00ff41;
+    --gglow:  rgba(0,255,65,0.15);
+    --text:   #c8eeff;
+    --text2:  #4a7a8a;
+    --bc:     rgba(0,212,255,0.22);
+    --bo:     rgba(255,107,0,0.35);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Share Tech Mono',monospace; min-height:100vh; overflow-x:hidden; }
+  body::before {
+    content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image: linear-gradient(rgba(0,212,255,0.025) 1px,transparent 1px), linear-gradient(90deg,rgba(0,212,255,0.025) 1px,transparent 1px);
+    background-size:40px 40px;
+  }
+  body::after {
+    content:''; position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.055) 2px,rgba(0,0,0,0.055) 4px);
+  }
+
+  /* TOPBAR */
+  .topbar {
+    position:fixed; top:0; left:0; right:0; z-index:200;
+    height:40px; display:flex; align-items:center; justify-content:space-between;
+    padding:0 24px; background:rgba(0,6,15,0.96); border-bottom:1px solid var(--bc); backdrop-filter:blur(12px);
+  }
+  .tb-logo { font-family:'Orbitron',monospace; font-size:14px; font-weight:900; letter-spacing:5px; color:var(--cyan); text-shadow:0 0 14px rgba(0,212,255,0.65); }
+  .tb-mid  { display:flex; align-items:center; gap:6px; font-size:9px; letter-spacing:2px; color:var(--text2); }
+  .dot-on  { width:6px;height:6px;border-radius:50%;background:var(--green);animation:dp 2s infinite; }
+  @keyframes dp { 0%,100%{opacity:1;box-shadow:0 0 6px var(--green)} 50%{opacity:.4;box-shadow:none} }
+  .tb-right { display:flex; align-items:center; gap:20px; font-size:9px; letter-spacing:2px; color:var(--text2); }
+  .tb-clock { font-family:'Orbitron',monospace; font-size:12px; color:var(--cyan); }
+
+  /* PAGE */
+  .page { position:relative; z-index:2; max-width:1200px; margin:0 auto; padding:56px 20px 44px; display:flex; flex-direction:column; gap:16px; }
+
+  /* ARC REACTOR */
+  .arc { position:relative; display:flex; align-items:center; justify-content:center; }
+  .ar  { position:absolute; border-radius:50%; border:1.5px solid transparent; animation:rr linear infinite; }
+  @keyframes rr { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+  .arc-core { border-radius:50%; z-index:1; background:radial-gradient(circle,#fff 0%,var(--cyan) 45%,var(--cyan2) 100%); animation:cp 3s ease-in-out infinite; }
+  @keyframes cp { 0%,100%{box-shadow:0 0 14px var(--cyan),0 0 28px rgba(0,212,255,.5)} 50%{box-shadow:0 0 22px var(--cyan),0 0 44px rgba(0,212,255,.7)} }
+
+  /* HERO */
+  .hero { display:flex; align-items:center; gap:20px; padding:18px 22px; border:1px solid var(--bc); background:rgba(0,18,36,0.55); backdrop-filter:blur(8px); position:relative; }
+  .hero::before { content:''; position:absolute; top:-1px; left:28px; width:90px; height:2px; background:var(--orange); }
+  .hero::after  { content:''; position:absolute; bottom:-1px; right:28px; width:50px; height:2px; background:var(--cyan); }
+  .c { position:absolute; width:10px; height:10px; border-color:var(--orange); border-style:solid; }
+  .tl{top:-1px;left:-1px;border-width:2px 0 0 2px} .tr{top:-1px;right:-1px;border-width:2px 2px 0 0}
+  .bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px} .br{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+  .hero-text { flex:1; }
+  .hero-greeting { font-family:'Orbitron',monospace; font-size:clamp(15px,2.5vw,22px); font-weight:700; letter-spacing:3px; color:var(--cyan); text-shadow:0 0 16px rgba(0,212,255,.7); }
+  .hero-sub { font-size:10px; letter-spacing:3px; color:var(--text2); margin-top:4px; font-family:'Rajdhani',sans-serif; }
+  .hero-metrics { display:flex; gap:20px; }
+  .hm { text-align:right; }
+  .hm-val   { font-family:'Orbitron',monospace; font-size:16px; color:var(--orange); }
+  .hm-label { font-size:8px; letter-spacing:2px; color:var(--text2); }
+
+  /* STATS */
+  .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .stat-card { padding:12px 14px; border:1px solid var(--bc); background:rgba(0,18,36,.45); position:relative; }
+  .stat-card::before { content:''; position:absolute; top:-1px; left:12px; width:24px; height:2px; background:var(--orange); }
+  .slabel { font-size:8px; letter-spacing:2px; color:var(--text2); margin-bottom:6px; }
+  .sval   { font-family:'Orbitron',monospace; font-size:18px; }
+  .sval.cy { color:var(--cyan); } .sval.g { color:var(--green); } .sval.o { color:var(--orange); }
+  .sbar  { height:2px; background:rgba(0,212,255,.1); margin-top:8px; border-radius:1px; }
+  .sfill { height:100%; border-radius:1px; transition:width 1.2s ease; }
+
+  /* SECTION TITLE */
+  .sec { display:flex; align-items:center; gap:12px; font-family:'Orbitron',monospace; font-size:9px; letter-spacing:3px; color:var(--orange); margin-bottom:2px; }
+  .secl { flex:1; height:1px; background:rgba(255,107,0,.2); }
+
+  /* FEATURE GRID */
+  .feat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px; }
+  .feat {
+    padding:18px 16px; border:1px solid var(--bc); background:rgba(0,18,36,.5);
+    text-decoration:none; transition:all .25s; position:relative; overflow:hidden;
+    display:flex; flex-direction:column; gap:10px; cursor:pointer;
+  }
+  .feat::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,var(--cglow) 0%,transparent 60%); opacity:0; transition:opacity .3s; }
+  .feat::after  { content:''; position:absolute; top:-1px; left:12px; width:28px; height:2px; background:var(--cyan); opacity:0; transition:opacity .3s; }
+  .feat:not(.dim):hover { border-color:var(--cyan); box-shadow:0 0 20px rgba(0,212,255,.1); transform:translateY(-1px); }
+  .feat:not(.dim):hover::before,.feat:not(.dim):hover::after { opacity:1; }
+
+  .feat.or { border-color:var(--bo); background:rgba(255,107,0,.03); }
+  .feat.or::before { background:linear-gradient(135deg,var(--oglow) 0%,transparent 60%); }
+  .feat.or::after  { background:var(--orange); }
+  .feat.or:hover   { border-color:var(--orange); box-shadow:0 0 20px rgba(255,107,0,.12); }
+
+  .feat.gr { border-color:rgba(0,255,65,.2); background:rgba(0,255,65,.02); }
+  .feat.gr::before { background:linear-gradient(135deg,var(--gglow) 0%,transparent 60%); }
+  .feat.gr::after  { background:var(--green); }
+  .feat.gr:hover   { border-color:var(--green); box-shadow:0 0 20px rgba(0,255,65,.1); }
+
+  .feat.dim { opacity:.45; cursor:not-allowed; }
+  .feat.dim:hover { transform:none; }
+
+  .fi   { font-size:28px; }
+  .ft   { font-family:'Orbitron',monospace; font-size:11px; font-weight:700; letter-spacing:2px; color:var(--text); }
+  .fd   { font-family:'Rajdhani',sans-serif; font-size:12px; color:var(--text2); line-height:1.5; }
+  .fbadge { align-self:flex-start; padding:2px 8px; border:1px solid; font-size:8px; letter-spacing:2px; font-family:'Orbitron',monospace; }
+  .fbadge.live { border-color:var(--green);  color:var(--green); }
+  .fbadge.soon { border-color:var(--text2);  color:var(--text2); }
+  .fa   { position:absolute; bottom:14px; right:14px; font-size:10px; color:var(--cyan2); opacity:0; transition:opacity .2s; }
+  .feat:not(.dim):hover .fa { opacity:1; }
+
+  /* SITES STRIP */
+  .strip { display:flex; gap:8px; flex-wrap:wrap; }
+  .chip  { display:flex; align-items:center; gap:8px; padding:8px 14px; border:1px solid var(--bc); background:rgba(0,18,36,.4); text-decoration:none; transition:all .22s; }
+  .chip:hover { border-color:var(--cyan); background:rgba(0,212,255,.06); }
+  .chip-icon { font-size:14px; }
+  .chip-name { font-family:'Orbitron',monospace; font-size:9px; letter-spacing:1px; color:var(--text); }
+
+  /* LOG */
+  .log { padding:14px 16px; border:1px solid var(--bc); background:rgba(0,10,20,.5); max-height:130px; overflow-y:auto; position:relative; scrollbar-width:thin; scrollbar-color:var(--cyan2) transparent; }
+  .log::before { content:''; position:absolute; top:-1px; left:14px; width:34px; height:2px; background:var(--orange); }
+  .le  { display:flex; gap:10px; font-size:10px; padding:3px 0; border-bottom:1px solid rgba(0,212,255,.05); }
+  .lt  { color:var(--cyan2); flex-shrink:0; }
+  .lk  { color:var(--orange); flex-shrink:0; }
+  .lm  { color:var(--text2); }
+  .lm.ok   { color:var(--green); }
+  .lm.warn { color:var(--orange); }
+
+  /* BOTBAR */
+  .botbar { position:fixed; bottom:0; left:0; right:0; z-index:200; height:26px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; background:rgba(0,6,15,.96); border-top:1px solid var(--bc); font-size:8px; letter-spacing:2px; color:var(--text2); }
+
+  @media(max-width:700px) { .stats-row{grid-template-columns:repeat(2,1fr)} .hero-metrics{display:none} }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-logo">J.A.R.V.I.S.</div>
+  <div class="tb-mid"><span class="dot-on"></span>SISTEMA OPERATIVO</div>
+  <div class="tb-right">
+    <span>STARK v4.2</span><span>AES-256</span>
+    <span class="tb-clock" id="clock">--:--:--</span>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
+    <div class="arc" style="width:60px;height:60px;flex-shrink:0">
+      <div class="ar" style="width:60px;height:60px;border-top-color:var(--cyan);border-right-color:var(--cyan2);animation-duration:8s"></div>
+      <div class="ar" style="width:46px;height:46px;border-top-color:var(--orange);animation-duration:5s;animation-direction:reverse"></div>
+      <div class="ar" style="width:32px;height:32px;border-top-color:var(--cyan);animation-duration:3s"></div>
+      <div class="arc-core" style="width:14px;height:14px"></div>
+    </div>
+    <div class="hero-text">
+      <div class="hero-greeting" id="greeting">BENVENUTO, OPERATORE</div>
+      <div class="hero-sub">JARVIS — PORTALE PRINCIPALE — <span id="dateStr">--</span></div>
+    </div>
+    <div class="hero-metrics">
+      <div class="hm"><div class="hm-val" id="metSites">—</div><div class="hm-label">SITI ATTIVI</div></div>
+      <div class="hm"><div class="hm-val" id="metSess">1</div><div class="hm-label">SESSIONI</div></div>
+      <div class="hm"><div class="hm-val" style="color:var(--green)">100%</div><div class="hm-label">INTEGRITY</div></div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="slabel">CPU USAGE</div>
+      <div class="sval cy" id="sv1">—</div>
+      <div class="sbar"><div class="sfill" id="sf1" style="width:0%;background:var(--cyan);box-shadow:0 0 4px var(--cyan)"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="slabel">MEMORIA</div>
+      <div class="sval cy" id="sv2">—</div>
+      <div class="sbar"><div class="sfill" id="sf2" style="width:0%;background:var(--cyan);box-shadow:0 0 4px var(--cyan)"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="slabel">SITI CONFIGURATI</div>
+      <div class="sval o" id="sv3">—</div>
+      <div class="sbar"><div class="sfill" id="sf3" style="width:0%;background:var(--orange);box-shadow:0 0 4px var(--orange)"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="slabel">SICUREZZA</div>
+      <div class="sval g">AES-256</div>
+      <div class="sbar"><div class="sfill" style="width:100%;background:var(--green);box-shadow:0 0 4px var(--green)"></div></div>
+    </div>
+  </div>
+
+  <!-- MODULES -->
+  <div class="sec"><div class="secl"></div>MODULI JARVIS<div class="secl"></div></div>
+  <div class="feat-grid">
+
+    <a class="feat or" href="../voice/index.html">
+      <div class="fi">🎤</div>
+      <div class="ft">VOICE MODE</div>
+      <div class="fd">Clap detection, speech recognition, comandi vocali in tempo reale.</div>
+      <div class="fbadge live">● LIVE</div>
+      <div class="fa">↗</div>
+    </a>
+
+    <a class="feat" href="../sites/index.html">
+      <div class="fi">🔗</div>
+      <div class="ft">PORTALE SITI</div>
+      <div class="fd">Accesso rapido a tutti i siti organizzati per categoria.</div>
+      <div class="fbadge live">● LIVE</div>
+      <div class="fa">↗</div>
+    </a>
+
+    <a class="feat gr" href="../onboarding/index.html">
+      <div class="fi">⚙️</div>
+      <div class="ft">PROFILO</div>
+      <div class="fd">Modifica operatore, siti configurati e preferenze personali.</div>
+      <div class="fbadge live">● LIVE</div>
+      <div class="fa">↗</div>
+    </a>
+
+    <div class="feat dim">
+      <div class="fi">🗓️</div>
+      <div class="ft">AGENDA</div>
+      <div class="fd">Calendario integrato, promemoria e task manager JARVIS.</div>
+      <div class="fbadge soon">◌ COMING SOON</div>
+    </div>
+
+    <div class="feat dim">
+      <div class="fi">📊</div>
+      <div class="ft">ANALYTICS</div>
+      <div class="fd">Statistiche sessioni, siti più visitati, pattern di attività.</div>
+      <div class="fbadge soon">◌ COMING SOON</div>
+    </div>
+
+    <div class="feat dim">
+      <div class="fi">🤖</div>
+      <div class="ft">AI ASSISTANT</div>
+      <div class="fd">Chat AI integrata, comandi naturali, ricerche rapide.</div>
+      <div class="fbadge soon">◌ COMING SOON</div>
+    </div>
+
+    <div class="feat dim">
+      <div class="fi">🌡️</div>
+      <div class="ft">METEO HUD</div>
+      <div class="fd">Widget meteo JARVIS. Temperatura, previsioni, qualità aria.</div>
+      <div class="fbadge soon">◌ COMING SOON</div>
+    </div>
+
+    <div class="feat dim">
+      <div class="fi">🔔</div>
+      <div class="ft">NOTIFICHE</div>
+      <div class="fd">Hub notifiche centralizzato da più fonti in un pannello.</div>
+      <div class="fbadge soon">◌ COMING SOON</div>
+    </div>
+
+  </div>
+
+  <!-- PREFERITI -->
+  <div class="sec"><div class="secl"></div>SITI PREFERITI<div class="secl"></div></div>
+  <div class="strip" id="sitesStrip">
+    <div style="font-size:10px;letter-spacing:2px;color:var(--text2)">
+      Nessun sito. <a href="../onboarding/index.html" style="color:var(--cyan)">Completa onboarding →</a>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="sec"><div class="secl"></div>LOG DI SISTEMA<div class="secl"></div></div>
+  <div class="log" id="logPanel"></div>
+
+</div>
+
+<div class="botbar">
+  <span>JARVIS v4.2 — STARK INDUSTRIES</span>
+  <span id="bbmid">SISTEMA OPERATIVO</span>
+  <span>SYS.INTEGRITY: 100%</span>
+</div>
+
+<script>
+// Guard (abilitare in produzione):
+// if (!localStorage.getItem('jarvis_activated')) { window.location.href='../onboarding/index.html'; }
+
+const operator = localStorage.getItem('jarvis_operator') || 'OPERATORE';
+const sites    = JSON.parse(localStorage.getItem('jarvis_sites') || '[]');
+
+// Greeting
+const h = new Date().getHours();
+const gr = h<12?'BUONGIORNO':h<18?'BUON POMERIGGIO':'BUONASERA';
+document.getElementById('greeting').textContent = gr+', '+operator.toUpperCase();
+
+// Date
+document.getElementById('dateStr').textContent =
+  new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'}).toUpperCase();
+
+// Clock
+function tick(){ document.getElementById('clock').textContent=new Date().toTimeString().slice(0,8); }
+setInterval(tick,1000); tick();
+
+// Metrics
+document.getElementById('metSites').textContent = sites.length||'—';
+document.getElementById('sv3').textContent = sites.length;
+document.getElementById('sf3').style.width = Math.min(sites.length*50,100)+'%';
+
+// Fake stats
+setTimeout(()=>{
+  const cpu=Math.floor(Math.random()*40+18), ram=Math.floor(Math.random()*30+42);
+  document.getElementById('sv1').textContent=cpu+'%'; document.getElementById('sf1').style.width=cpu+'%';
+  document.getElementById('sv2').textContent=ram+'%'; document.getElementById('sf2').style.width=ram+'%';
+},500);
+
+// Sites strip
+if(sites.length){
+  const icons={'ChatGPT':'🤖','Claude AI':'🧠','Gmail':'📧','Google':'🔍','GitHub':'💻',
+    'YouTube':'▶️','Instagram':'📸','Discord':'🎮','LinkedIn':'💼','Netflix':'🎬',
+    'Spotify':'🎧','Notion':'📒','Wikipedia':'📚','WhatsApp':'📱','Reddit':'👽',
+    'X / Twitter':'✖️','Twitch':'🟣','TikTok':'🎵','Google Maps':'🗺️','Stack Overflow':'⚙️'};
+  const strip=document.getElementById('sitesStrip'); strip.innerHTML='';
+  sites.forEach(s=>{
+    const a=document.createElement('a'); a.className='chip'; a.href='https://'+s.url; a.target='_blank';
+    a.innerHTML=`<span class="chip-icon">${icons[s.name]||'🔗'}</span><span class="chip-name">${s.name.toUpperCase()}</span>`;
+    strip.appendChild(a);
+  });
+}
+
+// Log
+const logs=[
+  {k:'SYS',  m:'Avvio JARVIS completato.',                    c:'ok'},
+  {k:'AUTH', m:'Operatore '+operator+' autenticato.',          c:'ok'},
+  {k:'NET',  m:'Connessione stabilita. Latenza: 12ms.',        c:'ok'},
+  {k:'SEC',  m:'Crittografia AES-256 attiva.',                 c:'ok'},
+  {k:'CFG',  m:'Caricati '+sites.length+' siti configurati.',  c:''},
+  {k:'VOICE',m:'Modulo voice in standby.',                     c:''},
+  {k:'SYS',  m:'SYS.INTEGRITY: 100%',                         c:'ok'},
+];
+const panel=document.getElementById('logPanel');
+const now=new Date();
+logs.forEach((l,i)=>{
+  const t=new Date(now-(logs.length-i)*2000).toTimeString().slice(0,8);
+  const d=document.createElement('div'); d.className='le';
+  d.innerHTML=`<span class="lt">${t}</span><span class="lk">[${l.k}]</span><span class="lm ${l.c}">${l.m}</span>`;
+  panel.appendChild(d);
+});
+panel.scrollTop=panel.scrollHeight;
+
+// Botbar cycle
+const bb=['SISTEMA OPERATIVO','AES-256 ACTIVE','STARK INDUSTRIES v4.2','JARVIS PRONTO, SIR'];
+let bi=0; setInterval(()=>{ document.getElementById('bbmid').textContent=bb[++bi%bb.length]; },5000);
+</script>
+</body>
+</html>
