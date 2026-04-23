@@ -9,149 +9,156 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 <link rel="stylesheet" href="style.css">
 <style>
-/* ── Page-specific additions ── */
+/* ── Simulation-page HUD additions ── */
+
 .results-intro {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    border-radius: 4px;
+    background: var(--hud-cyan-dim);
+    border: 1px solid var(--hud-cyan-border);
+    border-left: 2px solid var(--hud-cyan);
     padding: 18px 22px;
     margin-bottom: 48px;
-    color: var(--muted);
-    font-size: .94rem;
-    line-height: 1.72;
+    color: var(--hud-text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .84rem;
+    line-height: 1.78;
+    letter-spacing: .03em;
+    position: relative;
 }
-.results-intro strong { color: var(--text); font-weight: 500; }
+.results-intro::before {
+    content: ''; position: absolute; top: -1px; left: -1px;
+    width: 7px; height: 7px;
+    border-top: 1px solid var(--hud-orange); border-left: 1px solid var(--hud-orange);
+}
+.results-intro strong { color: var(--hud-cyan); font-weight: 600; }
 
-/* Result block: label + image + caption */
+/* ── Result block ── */
 .result-block { margin-bottom: 64px; }
 .result-block:last-child { margin-bottom: 0; }
 
 .result-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--hud-cyan-border);
     flex-wrap: wrap;
 }
 .result-header h2 {
-    font-family: var(--display);
-    font-size: 1.35rem;
-    font-weight: 800;
-    border: none;
-    padding: 0;
-    margin: 0;
+    font-family: 'Orbitron', sans-serif; font-size: 1.1rem; font-weight: 900;
+    border: none; padding: 0; margin: 0;
+    text-transform: uppercase; letter-spacing: .06em; color: var(--hud-cyan);
+    display: flex; align-items: center; gap: 10px;
 }
-.result-badge {
-    font-family: var(--mono);
-    font-size: .68rem;
-    letter-spacing: .07em;
-    text-transform: uppercase;
-    padding: 3px 9px;
-    border-radius: 2px;
-    flex-shrink: 0;
-}
-.badge-ok   { background: rgba(63,185,80,.08);   color: var(--green);  border: 1px solid rgba(63,185,80,.25);  }
-.badge-sat  { background: rgba(0,212,255,.08);    color: var(--accent); border: 1px solid rgba(0,212,255,.22);  }
-.badge-fw   { background: rgba(227,179,65,.08);   color: var(--yellow); border: 1px solid rgba(227,179,65,.25); }
 
-/* Image frame */
+/* HUD badges */
+.result-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: .46rem; letter-spacing: .14em; text-transform: uppercase;
+    padding: 3px 10px; flex-shrink: 0;
+    border: 1px solid;
+}
+.badge-ok   { color: var(--hud-green);  border-color: rgba(0,255,136,.3);  background: rgba(0,255,136,.06); }
+.badge-sat  { color: var(--hud-cyan);   border-color: rgba(0,212,255,.3);  background: rgba(0,212,255,.07); }
+.badge-fw   { color: var(--hud-yellow); border-color: rgba(255,204,0,.3);  background: rgba(255,204,0,.06); }
+
+/* ── Image frame ── */
 .result-img-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 20px;
-    margin-bottom: 20px;
-    overflow: hidden;
+    background: var(--hud-surface);
+    border: 1px solid var(--hud-cyan-border);
+    padding: 20px; margin-bottom: 20px; overflow: hidden;
+    position: relative;
+}
+.result-img-wrap::before {
+    content: ''; position: absolute; top: -1px; left: -1px;
+    width: 7px; height: 7px;
+    border-top: 1px solid var(--hud-orange); border-left: 1px solid var(--hud-orange);
+}
+.result-img-wrap::after {
+    content: ''; position: absolute; bottom: -1px; right: -1px;
+    width: 7px; height: 7px;
+    border-bottom: 1px solid var(--hud-orange); border-right: 1px solid var(--hud-orange);
 }
 .result-img-wrap img {
-    width: 100%;
-    height: auto;
-    display: block;
-    border-radius: 3px;
+    width: 100%; height: auto; display: block;
 }
 .result-fig {
-    font-family: var(--mono);
-    font-size: .65rem;
-    color: var(--muted);
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    margin-top: 12px;
-    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .62rem; color: var(--hud-text-dim);
+    letter-spacing: .08em; text-transform: uppercase;
+    margin-top: 12px; text-align: center;
 }
 
-/* Observations list */
+/* ── Observations grid ── */
 .obs-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 14px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 6px; margin-top: 14px;
 }
 .obs-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 13px 15px;
+    background: var(--hud-cyan-dim);
+    border: 1px solid var(--hud-cyan-border);
+    padding: 13px 15px; position: relative;
+}
+.obs-card::before {
+    content: ''; position: absolute; top: -1px; left: -1px;
+    width: 5px; height: 5px;
+    border-top: 1px solid var(--hud-orange); border-left: 1px solid var(--hud-orange);
 }
 .obs-card .obs-title {
-    font-family: var(--mono);
-    font-size: .68rem;
-    font-weight: 600;
-    color: var(--accent);
-    margin-bottom: 5px;
-    letter-spacing: .04em;
+    font-family: 'Orbitron', sans-serif;
+    font-size: .5rem; color: var(--hud-cyan);
+    letter-spacing: .14em; text-transform: uppercase;
+    margin-bottom: 7px;
 }
 .obs-card p {
-    color: var(--muted) !important;
-    font-size: .85rem !important;
-    line-height: 1.6 !important;
-    margin: 0 !important;
+    color: var(--hud-text) !important;
+    font-family: 'Share Tech Mono', monospace !important;
+    font-size: .78rem !important; line-height: 1.65 !important; margin: 0 !important;
+    letter-spacing: .02em !important;
 }
 
-/* Diagrams section */
+/* ── Diagrams ── */
 .diagram-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin-top: 14px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-top: 8px;
 }
 .diagram-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 16px;
-    overflow: hidden;
+    background: var(--hud-surface);
+    border: 1px solid var(--hud-cyan-border);
+    padding: 14px; overflow: hidden; position: relative;
 }
-.diagram-card img { width: 100%; height: auto; display: block; border-radius: 3px; }
+.diagram-card::before {
+    content: ''; position: absolute; top: -1px; left: -1px;
+    width: 6px; height: 6px;
+    border-top: 1px solid var(--hud-orange); border-left: 1px solid var(--hud-orange);
+}
+.diagram-card img { width: 100%; height: auto; display: block; }
 .diagram-label {
-    font-family: var(--mono);
-    font-size: .62rem;
-    color: var(--muted);
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    margin-bottom: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .62rem; color: var(--hud-cyan);
+    letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px;
 }
 
-/* KPI table within results */
+/* ── KPI bar ── */
 .kpi-bar {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 2px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-    margin: 20px 0 0;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 2px; border: 1px solid var(--hud-cyan-border); overflow: hidden; margin: 20px 0 0;
 }
-.kpi-cell { background: var(--surface); padding: 12px 14px; }
-.kpi-label { font-family: var(--mono); font-size: .6rem; color: var(--muted); letter-spacing: .07em; text-transform: uppercase; margin-bottom: 3px; }
-.kpi-val { font-family: var(--display); font-size: 1.2rem; font-weight: 800; }
-.kpi-val .unit { font-size: .72rem; color: var(--accent); }
-.kpi-val .green { color: var(--green); }
+.kpi-cell {
+    background: var(--hud-cyan-dim); padding: 12px 14px;
+}
+.kpi-label {
+    font-family: 'Orbitron', sans-serif; font-size: .48rem;
+    color: var(--hud-text-dim); letter-spacing: .14em;
+    text-transform: uppercase; margin-bottom: 5px;
+}
+.kpi-val {
+    font-family: 'Orbitron', sans-serif; font-size: 1.15rem;
+    font-weight: 900; color: var(--hud-cyan);
+    text-shadow: 0 0 10px rgba(0,212,255,.3);
+}
+.kpi-val .unit  { font-size: .65rem; color: var(--hud-orange); }
+.kpi-val .green { color: var(--hud-green); }
 
 @media (max-width: 640px) {
-    .obs-grid { grid-template-columns: 1fr; }
+    .obs-grid    { grid-template-columns: 1fr; }
     .diagram-row { grid-template-columns: 1fr; }
 }
 </style>
@@ -187,7 +194,7 @@
         </p>
         <div class="specs-bar">
             <div class="spec-cell">
-                <div class="spec-val"><span class="green">0%</span></div>
+                <div class="spec-val"><span class="green">0<span class="unit">%</span></span></div>
                 <div class="spec-key">Overshoot</div>
             </div>
             <div class="spec-cell">
@@ -232,19 +239,20 @@
         <!-- CONTENT -->
         <article class="doc-content">
 
-            <!-- OVERVIEW -->
+            <!-- ══ 1 OVERVIEW ══ -->
             <div class="doc-section">
                 <span class="section-anchor" id="overview"></span>
                 <h2><span class="sec-num">01</span> Simulation Overview</h2>
+
                 <div class="results-intro">
-                    The Simulink model implements a <strong>three-loop cascade controller</strong> for the separately excited DC motor driving the Carelli 1928 tramway. The control hierarchy — from outermost to innermost — is: <strong>angular speed PI</strong> → <strong>armature current PI</strong> → <strong>excitation current PI</strong>. Each loop is tuned via pole-zero cancellation to achieve a 90° phase margin.
+                    Simulink model implements <strong>three-loop cascade controller</strong> for separately excited DC motor driving Carelli 1928 tramway. Control hierarchy — outermost to innermost: <strong>angular speed PI</strong> → <strong>armature current PI</strong> → <strong>excitation current PI</strong>. Each loop tuned via pole-zero cancellation → 90° phase margin.
                     <br><br>
-                    Additional features: <strong>back-EMF feedforward decoupling</strong> (cancels the coupling between electrical and mechanical dynamics), <strong>anti-windup back-calculation</strong> (prevents integrator windup during saturation), <strong>rate limiter</strong> on the speed reference (limits jerk to 1.0 m/s² for passenger comfort), and <strong>dynamic field-weakening</strong> above base speed (I<sub>e,ref</sub> = E<sub>n</sub> / (K<sub>s</sub>·ω)).
+                    Additional features: <strong>back-EMF feedforward decoupling</strong> (cancels coupling between electrical/mechanical dynamics), <strong>anti-windup back-calculation</strong> (prevents integrator windup during saturation), <strong>rate limiter</strong> on speed reference (limits jerk to 1.0 m/s² for passenger comfort), <strong>dynamic field-weakening</strong> above base speed (I<sub>e,ref</sub> = E<sub>n</sub> / (K<sub>s</sub>·ω)).
                 </div>
 
                 <div class="kpi-bar">
                     <div class="kpi-cell">
-                        <div class="kpi-label">Speed loops BW</div>
+                        <div class="kpi-label">Speed loop BW</div>
                         <div class="kpi-val">2<span class="unit"> rad/s</span></div>
                     </div>
                     <div class="kpi-cell">
@@ -262,7 +270,7 @@
                 </div>
             </div>
 
-            <!-- SPEED -->
+            <!-- ══ 2 SPEED ══ -->
             <div class="doc-section">
                 <span class="section-anchor" id="speed"></span>
                 <div class="result-block">
@@ -279,30 +287,30 @@
                         <div class="result-fig">// Figure 7 — Speed profile v(t) · Simulink · Carelli 1928 · PoliMi 2026</div>
                     </div>
 
-                    <p>The speed profile confirms correct tracking of the kinematic reference across all seven route segments. The rate limiter on ω<sub>ref</sub> produces the smooth linear ramps visible at each acceleration/deceleration phase, limiting jerk to 1.0 m/s² and ensuring passenger comfort.</p>
+                    <p>Speed profile confirms correct tracking of kinematic reference across all seven route segments. Rate limiter on ω<sub>ref</sub> produces smooth linear ramps at each acceleration/deceleration phase, limiting jerk to 1.0 m/s².</p>
 
                     <div class="obs-grid">
                         <div class="obs-card">
                             <div class="obs-title">Zero overshoot</div>
-                            <p>The PI speed loop, tuned with pole-zero cancellation and 90° phase margin, reaches each reference step without overshoot. This validates the bandwidth separation strategy (ω<sub>m</sub> = 2 rad/s).</p>
+                            <p>PI speed loop, tuned with pole-zero cancellation, PM = 90° → reaches each reference step without overshoot. Validates bandwidth separation strategy (ω<sub>m</sub> = 2 rad/s).</p>
                         </div>
                         <div class="obs-card">
                             <div class="obs-title">Zero steady-state error</div>
-                            <p>The integral action of the PI controller eliminates steady-state tracking error at constant speed, including in the presence of slope disturbances (±5% at km 3–4 and 8–9).</p>
+                            <p>Integral action of PI eliminates steady-state tracking error at constant speed, including in presence of slope disturbances (±5% at km 3–4 and 8–9).</p>
                         </div>
                         <div class="obs-card">
                             <div class="obs-title">Field-weakening region (km 4–6)</div>
-                            <p>At v<sub>max</sub> ≈ 11.67 m/s the motor operates above base speed. Speed tracking remains accurate despite the excitation current being dynamically reduced below nominal value.</p>
+                            <p>At v<sub>max</sub> ≈ 11.67 m/s motor operates above base speed. Speed tracking remains accurate despite excitation current dynamically reduced below nominal.</p>
                         </div>
                         <div class="obs-card">
                             <div class="obs-title">Slope disturbance rejection</div>
-                            <p>At km 3 (uphill +5%) and km 8 (downhill −5%), the integral action fully rejects the torque disturbance. No visible deviation from the speed reference is observed.</p>
+                            <p>At km 3 (uphill +5%) and km 8 (downhill −5%), integral action fully rejects torque disturbance. No visible deviation from speed reference observed.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ARMATURE CURRENT -->
+            <!-- ══ 3 ARMATURE ══ -->
             <div class="doc-section">
                 <span class="section-anchor" id="armature"></span>
                 <div class="result-block">
@@ -319,30 +327,30 @@
                         <div class="result-fig">// Figure 8 — Armature current i_a(t) · Simulink · Carelli 1928 · PoliMi 2026</div>
                     </div>
 
-                    <p>The armature current confirms that the inner PI loop correctly limits I<sub>a</sub> to the rated value of 156 A during all acceleration phases, protecting the motor windings from thermal overload. The back-calculation anti-windup scheme prevents current spikes at the transitions from saturation to unsaturated operation.</p>
+                    <p>Armature current confirms inner PI loop correctly limits I<sub>a</sub> to rated value 156 A during all acceleration phases. Back-calculation anti-windup (K<sub>b,a</sub> = 100) prevents current spikes at transitions from saturation to unsaturated operation.</p>
 
                     <div class="obs-grid">
                         <div class="obs-card">
                             <div class="obs-title">Saturation at rated current</div>
-                            <p>During acceleration ramps the speed PI demands maximum torque. The saturation block clamps I<sub>a</sub> at +156 A, maximising traction effort while protecting motor windings from thermal overload.</p>
+                            <p>During acceleration ramps speed PI demands max torque. Saturation block clamps I<sub>a</sub> at +156 A — max traction while protecting motor windings from thermal overload.</p>
                         </div>
                         <div class="obs-card">
                             <div class="obs-title">Anti-windup effectiveness</div>
-                            <p>The back-calculation scheme (K<sub>b,a</sub> = 100) prevents integrator windup. Transitions from saturated to unsaturated operation are smooth — no current spikes that would trip the electrical protection systems.</p>
+                            <p>Back-calculation (K<sub>b,a</sub> = 100) prevents integrator windup. Transitions saturated → unsaturated: smooth — no current spikes that would trip electrical protection.</p>
                         </div>
                         <div class="obs-card">
                             <div class="obs-title">Low steady-state current</div>
-                            <p>At constant speed the torque need only overcome viscous friction (β = 0.81 Nms) and slope disturbance. I<sub>a</sub> settles to a low value, confirming efficient operation outside ramp phases.</p>
+                            <p>At constant speed torque need only overcome viscous friction (β = 0.81 Nms) and slope disturbance. I<sub>a</sub> settles to low value → efficient operation outside ramp phases.</p>
                         </div>
                         <div class="obs-card">
                             <div class="obs-title">Regenerative braking</div>
-                            <p>During the deceleration at km 9–10 the armature current reverses, producing regenerative braking. The negative I<sub>a</sub> confirms the motor acts as a generator, feeding energy back to the DC line.</p>
+                            <p>During deceleration km 9–10 armature current reverses → regenerative braking. Negative I<sub>a</sub> confirms motor acts as generator, feeding energy back to DC line.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- EXCITATION CURRENT -->
+            <!-- ══ 4 EXCITATION ══ -->
             <div class="doc-section">
                 <span class="section-anchor" id="excitation"></span>
                 <div class="result-block">
@@ -359,36 +367,36 @@
                         <div class="result-fig">// Figure 9 — Excitation current i_e(t) · Simulink · Carelli 1928 · PoliMi 2026</div>
                     </div>
 
-                    <p>The excitation current plot validates the field-weakening strategy. The current holds at its nominal value of 5 A until base speed is reached. Beyond this point the controller dynamically reduces excitation following the 1/ω characteristic, keeping the back-EMF below the 600 V DC line voltage.</p>
+                    <p>Excitation current plot validates field-weakening strategy. Current holds at nominal 5 A until base speed reached. Beyond this point controller dynamically reduces excitation via 1/ω law — keeps back-EMF below 600 V DC supply.</p>
 
                     <div class="obs-grid">
                         <div class="obs-card">
                             <div class="obs-title">Constant excitation (km 0–3, 6–10)</div>
-                            <p>In the base-speed region I<sub>e</sub> is held at its nominal 5 A. The excitation PI controller (ω<sub>e</sub> = 40 rad/s, PM = 90°) tracks the constant reference without error.</p>
+                            <p>In base-speed region I<sub>e</sub> held at nominal 5 A. Excitation PI (ω<sub>e</sub> = 40 rad/s, PM = 90°) tracks constant reference without error.</p>
                         </div>
                         <div class="obs-card">
                             <div class="obs-title">Field-weakening activation</div>
-                            <p>As ω exceeds ω<sub>base</sub> = 101.6 rad/s, the block computes I<sub>e,ref</sub> = E<sub>n</sub> / (K<sub>s</sub>·ω). At v<sub>max</sub> the reference drops to I<sub>e,ref</sub> ≈ 2.6 A — tracked accurately by the PI without oscillation.</p>
+                            <p>As ω exceeds ω<sub>base</sub> = 101.6 rad/s: I<sub>e,ref</sub> = E<sub>n</sub>/(K<sub>s</sub>·ω). At v<sub>max</sub> reference drops to ≈ 2.6 A — tracked accurately, no oscillation.</p>
                         </div>
                         <div class="obs-card">
                             <div class="obs-title">Smooth transitions</div>
-                            <p>The transitions into and out of the field-weakening region are smooth, with no underdamped oscillations. This validates the 90° phase margin design for the excitation loop.</p>
+                            <p>Transitions into/out of field-weakening region smooth — no underdamped oscillations. Validates 90° phase margin design for excitation loop.</p>
                         </div>
                         <div class="obs-card">
                             <div class="obs-title">Restoration to nominal</div>
-                            <p>When the speed reference drops back below ω<sub>base</sub> at km 6, the field-weakening block restores I<sub>e,ref</sub> = 5 A. The excitation PI tracks this step without overshoot.</p>
+                            <p>When speed ref drops below ω<sub>base</sub> at km 6, FW block restores I<sub>e,ref</sub> = 5 A. Excitation PI tracks step without overshoot.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- DIAGRAMS -->
+            <!-- ══ 5 DIAGRAMS ══ -->
             <div class="doc-section">
                 <span class="section-anchor" id="diagrams"></span>
                 <h2><span class="sec-num">05</span> Key Control Diagrams</h2>
-                <p>The following Simulink diagrams illustrate the main control subsystems. The cascade architecture decouples the three control loops through bandwidth separation (factor ≥ 10× between adjacent loops).</p>
+                <p>Simulink diagrams illustrate main control subsystems. Cascade architecture decouples three loops via bandwidth separation (factor ≥ 10× between adjacent loops).</p>
 
-                <div class="diagram-card" style="margin-bottom:14px">
+                <div class="diagram-card" style="margin-bottom:8px">
                     <div class="diagram-label">// Speed control scheme — overall cascade architecture</div>
                     <img src="./img/scheme_control.png" alt="Speed control scheme of the DC machine showing the cascade PI architecture">
                 </div>
@@ -404,7 +412,7 @@
                     </div>
                 </div>
 
-                <div class="diagram-row" style="margin-top:14px">
+                <div class="diagram-row" style="margin-top:8px">
                     <div class="diagram-card">
                         <div class="diagram-label">// Mechanical control — kinematic profile &amp; rate limiter</div>
                         <img src="./img/simulink_mech.png" alt="Simulink mechanical control subsystem">
@@ -416,26 +424,26 @@
                 </div>
             </div>
 
-            <!-- CONCLUSIONS -->
+            <!-- ══ 6 CONCLUSIONS ══ -->
             <div class="doc-section">
                 <span class="section-anchor" id="conclusions"></span>
                 <h2><span class="sec-num">06</span> Conclusions</h2>
                 <p>
-                    The cascade PI architecture proves capable of controlling the Carelli 1928 tram drive across its full operating envelope — rated-speed traction, above-rated field-weakening and slope disturbances — while respecting every electrical and mechanical constraint.
+                    Cascade PI architecture proves capable of controlling Carelli 1928 tram drive across full operating envelope — rated-speed traction, above-rated field-weakening, slope disturbances — while respecting every electrical and mechanical constraint.
                 </p>
                 <p>
-                    Three design decisions proved essential: interpreting K<sub>t</sub> as the total machine constant K<sub>s</sub> (verified by the dual KVL/power-balance check), strict bandwidth separation (40/20/2 rad/s) for independent loop stability, and back-calculation anti-windup to prevent integrator saturation during the frequent current-limiting events typical of urban traction cycles.
+                    Three design decisions proved essential: interpreting K<sub>t</sub> as total machine constant K<sub>s</sub> (verified by dual KVL/power-balance check), strict bandwidth separation (40/20/2 rad/s) for independent loop stability, back-calculation anti-windup to prevent integrator saturation during frequent current-limiting events typical of urban traction cycles.
                 </p>
                 <div class="callout callout-purple">
                     <i class="fa-solid fa-graduation-cap"></i>
-                    <p>This project was submitted for the course <em>Dynamics of Electrical Machines and Drives</em> (10 CFU) — MSc in Automation and Control Engineering, Politecnico di Milano, under the supervision of Prof. Francesco Castelli Dezza.</p>
+                    <p>Project submitted for course <em>Dynamics of Electrical Machines and Drives</em> (10 CFU) — MSc Automation and Control Engineering, Politecnico di Milano, under supervision of Prof. Francesco Castelli Dezza.</p>
                 </div>
 
                 <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
-                    <a href="./" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.75rem;font-weight:600;background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:9px 18px;border-radius:3px;text-decoration:none;transition:border-color .2s">
+                    <a href="./" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.75rem;font-weight:600;background:var(--hud-cyan-dim);color:var(--hud-text);border:1px solid var(--hud-cyan-border);padding:9px 18px;text-decoration:none;transition:border-color .2s;position:relative;">
                         <i class="fa-solid fa-arrow-left"></i> Full Report
                     </a>
-                    <a href="https://github.com/ingmatteocavalleri/MachineControlSystem" target="_blank" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.75rem;font-weight:600;background:rgba(0,212,255,.08);color:var(--accent);border:1px solid rgba(0,212,255,.25);padding:9px 18px;border-radius:3px;text-decoration:none;transition:background .2s">
+                    <a href="https://github.com/ingmatteocavalleri/MachineControlSystem" target="_blank" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.75rem;font-weight:600;background:rgba(0,212,255,.07);color:var(--hud-cyan);border:1px solid rgba(0,212,255,.25);padding:9px 18px;text-decoration:none;transition:background .2s;">
                         <i class="fa-brands fa-github"></i> GitHub Repository
                     </a>
                 </div>
@@ -453,7 +461,7 @@
 
 <script>
     // Active TOC
-    const secs = document.querySelectorAll('.doc-section');
+    const secs  = document.querySelectorAll('.doc-section');
     const links = document.querySelectorAll('.toc-list a');
     const io = new IntersectionObserver(entries => {
         entries.forEach(e => {

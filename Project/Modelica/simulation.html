@@ -7,58 +7,126 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../../hud-project.css">
 <style>
-/* Simulation-specific styles */
-.sim-header { padding:56px 0 32px; }
-.sim-header h1 { font-family:var(--display); font-size:clamp(1.6rem,4vw,2.6rem); font-weight:800; margin-bottom:8px; }
-.sim-header h1 em { font-style:normal; color:var(--accent2); }
-.sim-header p { color:var(--muted); font-size:.95rem; max-width:660px; }
+/* ── Modelica simulation — HUD additions ── */
+.sim-header { padding: 44px 0 24px; }
+.sim-header h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.3rem,3.5vw,2rem); font-weight: 900;
+    letter-spacing: .04em; text-transform: uppercase;
+    color: var(--hud-cyan); text-shadow: 0 0 20px rgba(0,212,255,.25);
+    margin-bottom: 8px;
+}
+.sim-header h1 em { font-style: normal; color: var(--hud-orange); }
+.sim-header p {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--hud-text-dim); font-size: .82rem;
+    max-width: 660px; line-height: 1.7; letter-spacing: .03em;
+}
 
+/* ── CONTROLS ── */
 .ctrl-panel {
-  background:var(--surface); border:1px solid var(--border); border-radius:6px;
-  padding:14px 18px; margin-bottom:14px;
-  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    background: var(--hud-cyan-dim); border: 1px solid var(--hud-cyan-border);
+    padding: 12px 16px; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    position: relative;
 }
-.btn { display:inline-flex; align-items:center; gap:7px; font-family:var(--mono); font-size:.78rem; font-weight:600; padding:9px 20px; border-radius:3px; border:none; cursor:pointer; transition:opacity .15s,transform .1s; }
-.btn:active { transform:translateY(1px); }
-.btn-play  { background:var(--accent2); color:#080c10; }
-.btn-stop  { background:rgba(255,107,53,.12); color:var(--accent2); border:1px solid rgba(255,107,53,.3); }
-.btn-reset { background:var(--surface2); color:var(--muted); border:1px solid var(--border); }
-.ctrl-sep  { width:1px; height:24px; background:var(--border); }
-.ctrl-lbl  { font-family:var(--mono); font-size:.72rem; color:var(--muted); }
-.ctrl-sel  { font-family:var(--mono); font-size:.74rem; background:var(--surface2); color:var(--text); border:1px solid var(--border); padding:7px 10px; border-radius:3px; outline:none; }
-.ctrl-range { accent-color:var(--accent2); width:110px; }
-.ctrl-val  { font-family:var(--mono); font-size:.78rem; color:var(--accent2); min-width:48px; }
+.ctrl-panel::before {
+    content: ''; position: absolute; top: -1px; left: -1px;
+    width: 6px; height: 6px;
+    border-top: 1px solid var(--hud-orange); border-left: 1px solid var(--hud-orange);
+}
+.btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: 'Orbitron', sans-serif; font-size: .52rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    padding: 8px 18px; border: 1px solid; cursor: pointer;
+    transition: opacity .15s, transform .1s; position: relative;
+}
+.btn:active { transform: translateY(1px); }
+.btn::before {
+    content: ''; position: absolute; top: -1px; left: -1px;
+    width: 4px; height: 4px;
+    border-top: 1px solid var(--hud-orange); border-left: 1px solid var(--hud-orange);
+}
+.btn-play  { background: var(--hud-orange); color: var(--hud-bg); border-color: var(--hud-orange); }
+.btn-stop  { background: rgba(255,34,68,.08); color: var(--hud-red); border-color: rgba(255,34,68,.3); }
+.btn-reset { background: var(--hud-cyan-dim); color: var(--hud-text-dim); border-color: var(--hud-cyan-border); }
+.ctrl-sep  { width: 1px; height: 24px; background: var(--hud-cyan-border); }
+.ctrl-lbl  { font-family: 'Share Tech Mono', monospace; font-size: .7rem; color: var(--hud-text-dim); }
+.ctrl-sel  {
+    font-family: 'Share Tech Mono', monospace; font-size: .74rem;
+    background: var(--hud-surface); color: var(--hud-text);
+    border: 1px solid var(--hud-cyan-border); padding: 6px 10px;
+    outline: none; cursor: pointer; transition: border-color .2s;
+}
+.ctrl-sel:hover, .ctrl-sel:focus { border-color: var(--hud-orange); }
+.ctrl-range { accent-color: var(--hud-orange); width: 110px; }
+.ctrl-val   { font-family: 'Share Tech Mono', monospace; font-size: .78rem; color: var(--hud-orange); min-width: 48px; }
 
+/* ── STATS BAR ── */
 .stats-bar {
-  display:grid; grid-template-columns:repeat(6,1fr); gap:2px;
-  border:1px solid var(--border); border-radius:6px; overflow:hidden; margin-bottom:14px;
+    display: grid; grid-template-columns: repeat(6,1fr);
+    gap: 2px; border: 1px solid var(--hud-cyan-border); overflow: hidden; margin-bottom: 14px;
 }
-.sc { background:var(--surface); padding:10px 12px; }
-.sc-lbl { font-family:var(--mono); font-size:.57rem; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-bottom:3px; }
-.sc-val { font-family:var(--display); font-size:1.15rem; font-weight:800; }
-.sc-unit { font-size:.66rem; color:var(--accent2); }
+.sc {
+    background: var(--hud-cyan-dim); padding: 10px 12px;
+}
+.sc-lbl {
+    font-family: 'Orbitron', sans-serif; font-size: .45rem; color: var(--hud-text-dim);
+    text-transform: uppercase; letter-spacing: .12em; margin-bottom: 4px;
+}
+.sc-val {
+    font-family: 'Orbitron', sans-serif; font-size: 1.1rem; font-weight: 900;
+    color: var(--hud-cyan); text-shadow: 0 0 8px rgba(0,212,255,.3);
+}
+.sc-unit { font-size: .6rem; color: var(--hud-orange); }
 
-.plots { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
-.pc { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 14px; }
-.pc-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-.pc-title { font-family:var(--mono); font-size:.6rem; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; }
-.pc-cur { font-family:var(--mono); font-size:.78rem; font-weight:600; }
+/* ── PLOTS ── */
+.plots { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.pc {
+    background: var(--hud-surface); border: 1px solid var(--hud-cyan-border);
+    padding: 12px 14px; position: relative;
+}
+.pc::before {
+    content: ''; position: absolute; top: -1px; left: -1px;
+    width: 5px; height: 5px;
+    border-top: 1px solid var(--hud-orange); border-left: 1px solid var(--hud-orange);
+}
+.pc-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.pc-title { font-family: 'Share Tech Mono', monospace; font-size: .6rem; color: var(--hud-text-dim); text-transform: uppercase; letter-spacing: .07em; }
+.pc-cur   { font-family: 'Share Tech Mono', monospace; font-size: .78rem; font-weight: 600; }
 
-canvas { display:block; }
+canvas { display: block; }
 
-.legend { display:flex; gap:18px; flex-wrap:wrap; margin-top:6px; }
-.leg-item { display:flex; align-items:center; gap:5px; font-family:var(--mono); font-size:.62rem; color:var(--muted); }
-.leg-dot { width:10px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+.leg-item { display: flex; align-items: center; gap: 5px; font-family: 'Share Tech Mono', monospace; font-size: .6rem; color: var(--hud-text-dim); }
+.leg-dot  { width: 10px; height: 3px; flex-shrink: 0; }
 
-.info-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-.ic { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 14px; }
-.ic h4 { font-family:var(--mono); font-size:.62rem; color:var(--accent2); text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px; }
-.ir { display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px solid var(--border); }
-.ir:last-child { border-bottom:none; }
-.ik { font-family:var(--mono); font-size:.67rem; color:var(--muted); }
-.iv { font-family:var(--mono); font-size:.67rem; color:var(--text); }
+/* ── INFO ROW ── */
+.info-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.ic {
+    background: var(--hud-cyan-dim); border: 1px solid var(--hud-cyan-border);
+    padding: 12px 14px; position: relative;
+}
+.ic::before {
+    content: ''; position: absolute; top: -1px; left: -1px;
+    width: 5px; height: 5px;
+    border-top: 1px solid var(--hud-orange); border-left: 1px solid var(--hud-orange);
+}
+.ic h4 {
+    font-family: 'Orbitron', sans-serif; font-size: .5rem; color: var(--hud-orange);
+    text-transform: uppercase; letter-spacing: .12em; margin-bottom: 10px;
+}
+.ir {
+    display: flex; justify-content: space-between;
+    padding: 4px 0; border-bottom: 1px solid var(--hud-cyan-border);
+    font-family: 'Share Tech Mono', monospace; font-size: .67rem;
+}
+.ir:last-child { border-bottom: none; }
+.ik { color: var(--hud-text-dim); }
+.iv { color: var(--hud-cyan); }
 
 @media(max-width:800px){ .plots{grid-template-columns:1fr} .info-row{grid-template-columns:1fr} .stats-bar{grid-template-columns:repeat(3,1fr)} }
 @media(max-width:460px){ .stats-bar{grid-template-columns:repeat(2,1fr)} }
@@ -74,16 +142,16 @@ canvas { display:block; }
 <div class="corner corner-br"></div>
 
 <nav class="top-nav">
-  <a href="../../" class="nav-logo">mc.eng / modelica</a>
+  <a href="../../" class="nav-logo">mc.eng</a>
   <a href="./" class="nav-back"><i class="fa-solid fa-arrow-left"></i> Report</a>
 </nav>
 
 <div class="page-wrapper">
 
   <div class="sim-header">
-    <div style="font-family:var(--mono);font-size:.7rem;color:var(--accent2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px">// Interactive Simulation</div>
-    <h1>Building Thermal Simulation<br><em>PID HVAC Control — 24h Winter Day</em></h1>
-    <p>RC thermal network: 3 coupled zones, PI with anti-windup, realistic outdoor temperature profile. Adjust setpoint and outdoor temperature to explore the system response.</p>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--hud-orange);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px">// Interactive Simulation</div>
+    <h1>Building Thermal Simulation<br><em>PI HVAC Control — 24h Winter Day</em></h1>
+    <p>RC thermal network: 3 coupled zones, PI with anti-windup, realistic outdoor temperature profile. Adjust setpoint and outdoor temperature to explore system response.</p>
   </div>
 
   <!-- CONTROLS -->
@@ -92,12 +160,12 @@ canvas { display:block; }
     <button class="btn btn-stop" id="btnStop" disabled>&#9632; Stop</button>
     <button class="btn btn-reset" id="btnReset">&#8635; Reset</button>
     <div class="ctrl-sep"></div>
-    <span class="ctrl-lbl">Velocit&agrave; sim.</span>
+    <span class="ctrl-lbl">Velocità sim.</span>
     <select class="ctrl-sel" id="simSpeed">
-      <option value="60">60&times;</option>
-      <option value="120" selected>120&times;</option>
-      <option value="300">300&times;</option>
-      <option value="600">600&times;</option>
+      <option value="60">60×</option>
+      <option value="120" selected>120×</option>
+      <option value="300">300×</option>
+      <option value="600">600×</option>
     </select>
     <div class="ctrl-sep"></div>
     <span class="ctrl-lbl">T setpoint</span>
@@ -106,7 +174,7 @@ canvas { display:block; }
     <div class="ctrl-sep"></div>
     <span class="ctrl-lbl">T esterna min</span>
     <input type="range" class="ctrl-range" id="slTout" min="-20" max="5" step="1" value="-12">
-    <span class="ctrl-val" id="valTout">&minus;12 °C</span>
+    <span class="ctrl-val" id="valTout">−12 °C</span>
   </div>
 
   <!-- STATS -->
@@ -119,43 +187,43 @@ canvas { display:block; }
     <div class="sc"><div class="sc-lbl">Energia giornaliera</div><div class="sc-val"><span id="sv-E">0.00</span><span class="sc-unit"> kWh</span></div></div>
   </div>
 
-  <!-- PLOT GRID -->
+  <!-- PLOTS -->
   <div class="plots">
     <div class="pc" id="pcTemp">
       <div class="pc-hdr">
         <span class="pc-title">// Temperatura zone T(t)</span>
-        <span class="pc-cur" id="cur-T" style="color:var(--accent2)">12.0 °C</span>
+        <span class="pc-cur" id="cur-T" style="color:var(--hud-orange)">12.0 °C</span>
       </div>
       <canvas id="cTemp"></canvas>
       <div class="legend">
-        <div class="leg-item"><div class="leg-dot" style="background:#ff6b35"></div>Zona 1 (living)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#ff7700"></div>Zona 1 (living)</div>
         <div class="leg-item"><div class="leg-dot" style="background:#00d4ff"></div>Zona 2 (bedroom)</div>
-        <div class="leg-item"><div class="leg-dot" style="background:#3fb950"></div>Zona 3 (bathroom)</div>
-        <div class="leg-item"><div class="leg-dot" style="background:rgba(255,255,255,.25);"></div>Setpoint</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#00ff88"></div>Zona 3 (bathroom)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(255,255,255,.2)"></div>Setpoint</div>
       </div>
     </div>
     <div class="pc" id="pcQ">
       <div class="pc-hdr">
         <span class="pc-title">// Potenza HVAC u(t)</span>
-        <span class="pc-cur" id="cur-Q" style="color:var(--yellow)">0 W</span>
+        <span class="pc-cur" id="cur-Q" style="color:var(--hud-yellow)">0 W</span>
       </div>
       <canvas id="cQ"></canvas>
       <div class="legend">
-        <div class="leg-item"><div class="leg-dot" style="background:#e3b341"></div>Q_HVAC [W]</div>
-        <div class="leg-item"><div class="leg-dot" style="background:rgba(255,107,53,.4)"></div>Q_max = 1000 W</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#ffcc00"></div>Q_HVAC [W]</div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(255,34,68,.5)"></div>Q_max = 1000 W</div>
       </div>
     </div>
     <div class="pc" id="pcTout">
       <div class="pc-hdr">
         <span class="pc-title">// Temperatura esterna T_out(t)</span>
-        <span class="pc-cur" id="cur-Tout" style="color:var(--accent)">0.0 °C</span>
+        <span class="pc-cur" id="cur-Tout" style="color:var(--hud-purple)">0.0 °C</span>
       </div>
       <canvas id="cTout"></canvas>
     </div>
     <div class="pc" id="pcE">
       <div class="pc-hdr">
         <span class="pc-title">// Energia cumulata E(t)</span>
-        <span class="pc-cur" id="cur-E" style="color:var(--green)">0.00 kWh</span>
+        <span class="pc-cur" id="cur-E" style="color:var(--hud-green)">0.00 kWh</span>
       </div>
       <canvas id="cE"></canvas>
     </div>
@@ -200,298 +268,223 @@ canvas { display:block; }
 'use strict';
 // ──────────────────────────────────────────────────────────
 // PHYSICS — RC thermal model
+// Z1=living (40m²), Z2=bedroom (25m²), Z3=bathroom (9m²)
 // ──────────────────────────────────────────────────────────
-// Three zones: Z1=living (40m²), Z2=bedroom (25m²), Z3=bathroom (9m²)
-// Each zone: dT/dt = (Q_in - Q_loss) / C_air
-// Z1 has HVAC, Z2 and Z3 coupled to Z1 and to outdoor
+const C1=5040, C2=3360, C3=1260;
+const R_ext=0.12, R12=0.04, R23=0.06, Q_max=1000;
+const Kp=1579, Ti=3600, Kb=1/3600;
 
-const C1 = 5040,  C2 = 3360,  C3 = 1260;       // J/K air capacitance
-const R_ext = 0.12;   // K/W exterior wall resistance (per zone, scaled)
-const R12   = 0.04;   // K/W inter-zone wall Z1-Z2
-const R23   = 0.06;   // K/W inter-zone wall Z2-Z3
-const Q_max = 1000;   // W radiator max power
-
-// PI gains
-const Kp = 1579, Ti = 3600, Kb = 1/3600;
-
-// Outdoor temperature: sinusoidal 24h, min at t=6h, max at t=15h
-function T_out_profile(t_s, T_out_min) {
-  const T_out_avg = T_out_min + 7.5;
-  const amp = 7.5;
-  // peak min at 06:00 → phase offset
-  const phase = (6 / 24) * 2 * Math.PI;
-  return T_out_avg - amp * Math.cos(2 * Math.PI * t_s / 86400 - phase);
+function T_out_profile(t_s, T_out_min){
+  const T_out_avg=T_out_min+7.5, amp=7.5;
+  const phase=(6/24)*2*Math.PI;
+  return T_out_avg-amp*Math.cos(2*Math.PI*t_s/86400-phase);
+}
+function Q_int(t_s){
+  const h=(t_s%86400)/3600;
+  return (h>=7&&h<23)?200:0;
 }
 
-// Occupancy internal gain in zone 1
-function Q_int(t_s) {
-  const h = (t_s % 86400) / 3600;
-  return (h >= 7 && h < 23) ? 200 : 0;
-}
+let T1,T2,T3,integral,t_sim,E_total;
+let running=false, rafId=null;
+let T_sp=21, T_out_min=-12;
+const HMAX=1440;
+let h_T1=[],h_T2=[],h_T3=[],h_Q=[],h_Tout=[],h_E=[];
 
-// ──────────────────────────────────────────────────────────
-// STATE
-// ──────────────────────────────────────────────────────────
-let T1, T2, T3, integral, t_sim;
-let E_total;    // kWh cumulated
-let running = false, rafId = null;
-let T_sp = 21, T_out_min = -12;
+function resetSim(){ T1=T2=T3=12; integral=0; t_sim=0; E_total=0; h_T1=[];h_T2=[];h_T3=[];h_Q=[];h_Tout=[];h_E=[]; }
 
-// History arrays (one entry per minute of simulated time)
-const HMAX = 1440; // 24h × 60min
-let h_T1=[], h_T2=[], h_T3=[], h_Q=[], h_Tout=[], h_E=[];
-
-function resetSim() {
-  T1 = T2 = T3 = 12;  // cold start
-  integral = 0;
-  t_sim = 0;
-  E_total = 0;
-  h_T1=[]; h_T2=[]; h_T3=[]; h_Q=[]; h_Tout=[]; h_E=[];
+function step(dt){
+  const Tout=T_out_profile(t_sim,T_out_min);
+  const e=T_sp-T1;
+  const u_unsat=Kp*e+integral;
+  const u=Math.max(0,Math.min(Q_max,u_unsat));
+  integral+=(Kp/Ti*e+Kb*(u-u_unsat))*dt;
+  const Q_loss_1_ext=(T1-Tout)/(R_ext*1.2);
+  const Q_loss_12=(T1-T2)/R12;
+  const dT1=(u+Q_int(t_sim)-Q_loss_1_ext-Q_loss_12)/C1;
+  const Q_loss_2_ext=(T2-Tout)/(R_ext*2);
+  const Q_loss_23=(T2-T3)/R23;
+  const Q_gain_12=(T1-T2)/R12;
+  const dT2=(Q_gain_12-Q_loss_2_ext-Q_loss_23)/C2;
+  const Q_loss_3_ext=(T3-Tout)/(R_ext*4);
+  const Q_gain_23=(T2-T3)/R23;
+  const dT3=(Q_gain_23-Q_loss_3_ext)/C3;
+  T1+=dT1*dt; T2+=dT2*dt; T3+=dT3*dt;
+  t_sim+=dt; E_total+=u*dt/3600000;
+  return{Tout,u};
 }
 
 // ──────────────────────────────────────────────────────────
-// STEP — Euler, dt = 60s
+// CANVAS
 // ──────────────────────────────────────────────────────────
-function step(dt) {
-  const Tout = T_out_profile(t_sim, T_out_min);
-
-  // PI with anti-windup
-  const e = T_sp - T1;
-  const u_unsat = Kp * e + integral;
-  const u = Math.max(0, Math.min(Q_max, u_unsat));
-  // Integrator: back-calculation
-  integral += (Kp / Ti * e + Kb * (u - u_unsat)) * dt;
-
-  // Zone 1 — HVAC + internal gain + walls
-  const Q_loss_1_ext = (T1 - Tout) / (R_ext * 1.2);  // larger floor area
-  const Q_loss_12    = (T1 - T2)   / R12;
-  const dT1 = (u + Q_int(t_sim) - Q_loss_1_ext - Q_loss_12) / C1;
-
-  // Zone 2 — bedroom, coupled to Z1 and Z3 and outdoor
-  const Q_loss_2_ext = (T2 - Tout) / (R_ext * 2);
-  const Q_loss_23    = (T2 - T3)   / R23;
-  const Q_gain_12    = (T1 - T2)   / R12;
-  const dT2 = (Q_gain_12 - Q_loss_2_ext - Q_loss_23) / C2;
-
-  // Zone 3 — bathroom, coupled to Z2 and outdoor
-  const Q_loss_3_ext = (T3 - Tout) / (R_ext * 4);
-  const Q_gain_23    = (T2 - T3)   / R23;
-  const dT3 = (Q_gain_23 - Q_loss_3_ext) / C3;
-
-  T1 += dT1 * dt;
-  T2 += dT2 * dt;
-  T3 += dT3 * dt;
-  t_sim += dt;
-  E_total += u * dt / 3600000;  // J → kWh
-
-  return { Tout, u };
-}
-
-// ──────────────────────────────────────────────────────────
-// CANVAS — parent offsetWidth, explicit H
-// ──────────────────────────────────────────────────────────
-const CV = {};
-function setupCanvas(id, parentId, H) {
-  const par = document.getElementById(parentId);
-  const W   = par.offsetWidth - 28;   // subtract card padding (14px each side)
-  if (W <= 0) return false;
-  const c   = document.getElementById(id);
-  c.width   = W; c.height  = H;
-  c.style.width  = W + 'px';
-  c.style.height = H + 'px';
-  CV[id] = { ctx: c.getContext('2d'), W, H };
+const CV={};
+function setupCanvas(id,parentId,H){
+  const par=document.getElementById(parentId);
+  const W=par.offsetWidth-28;
+  if(W<=0) return false;
+  const c=document.getElementById(id);
+  c.width=W; c.height=H; c.style.width=W+'px'; c.style.height=H+'px';
+  CV[id]={ctx:c.getContext('2d'),W,H};
   return true;
 }
-function setupAll() {
-  setupCanvas('cTemp',  'pcTemp',  160);
-  setupCanvas('cQ',     'pcQ',     160);
-  setupCanvas('cTout',  'pcTout',  160);
-  setupCanvas('cE',     'pcE',     160);
+function setupAll(){ ['cTemp','cQ','cTout','cE'].forEach(id=>setupCanvas(id,id==='cTemp'?'pcTemp':id==='cQ'?'pcQ':id==='cTout'?'pcTout':'pcE',160)); }
+
+function bg(id){
+  const cv=CV[id]; if(!cv) return;
+  const{ctx,W,H}=cv;
+  ctx.fillStyle='#020810'; ctx.fillRect(0,0,W,H);
+  // HUD grid
+  ctx.strokeStyle='rgba(0,212,255,.04)'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for(let y=0;y<H;y+=40){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
 }
 
-// ──────────────────────────────────────────────────────────
-// DRAW
-// ──────────────────────────────────────────────────────────
-function bg(id) {
-  const cv = CV[id]; if (!cv) return;
-  const { ctx, W, H } = cv;
-  ctx.fillStyle = '#0d1117'; ctx.fillRect(0, 0, W, H);
-  ctx.strokeStyle = '#21262d'; ctx.lineWidth = 1;
-  for (let i = 0; i <= 4; i++) {
-    const y = i / 4 * H;
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-  }
-}
-
-function plotLines(id, datasets, yMin, yMax, satLine) {
-  const cv = CV[id]; if (!cv) return;
-  const { ctx, W, H } = cv;
+function plotLines(id,datasets,yMin,yMax,satLine){
+  const cv=CV[id]; if(!cv) return;
+  const{ctx,W,H}=cv;
   bg(id);
-  const cl = (v,a,b) => Math.max(a, Math.min(b, v));
-  const my = v => H - (cl(v, yMin, yMax) - yMin) / (yMax - yMin) * H;
-
-  // Y-axis labels
-  for (let i = 0; i <= 4; i++) {
-    const val = yMax - (yMax - yMin) * i / 4;
-    ctx.fillStyle = '#8b949e'; ctx.font = "9px 'IBM Plex Mono'"; ctx.textAlign = 'left';
-    const lbl = Math.abs(val) >= 100 ? val.toFixed(0) : val.toFixed(1);
-    const y = i / 4 * H;
-    ctx.fillText(lbl, 3, y > 8 ? y - 2 : 9);
+  const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const my=v=>H-(cl(v,yMin,yMax)-yMin)/(yMax-yMin)*H;
+  // axis labels
+  for(let i=0;i<=4;i++){
+    const val=yMax-(yMax-yMin)*i/4;
+    ctx.fillStyle='rgba(0,212,255,.35)';
+    ctx.font="9px 'Share Tech Mono'"; ctx.textAlign='left';
+    const lbl=Math.abs(val)>=100?val.toFixed(0):val.toFixed(1);
+    const y=i/4*H;
+    ctx.fillText(lbl,3,y>8?y-2:9);
+    // gridline
+    ctx.strokeStyle='rgba(0,212,255,.08)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
   }
-
-  // Saturation line
-  if (satLine != null) {
-    const sy = my(satLine);
-    ctx.strokeStyle = 'rgba(255,107,53,.4)'; ctx.lineWidth = 1; ctx.setLineDash([5, 4]);
-    ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(W, sy); ctx.stroke();
+  if(satLine!=null){
+    const sy=my(satLine);
+    ctx.strokeStyle='rgba(255,34,68,.45)'; ctx.lineWidth=1; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(0,sy); ctx.lineTo(W,sy); ctx.stroke();
     ctx.setLineDash([]);
   }
-
-  // Data lines
-  datasets.forEach(({ data, color, dash }) => {
-    if (data.length < 2) return;
-    ctx.strokeStyle = color; ctx.lineWidth = 2;
-    if (dash) ctx.setLineDash([5, 3]); else ctx.setLineDash([]);
+  datasets.forEach(({data,color,dash})=>{
+    if(data.length<2) return;
+    if(dash) ctx.setLineDash([5,3]); else ctx.setLineDash([]);
+    // glow
+    ctx.shadowColor=color; ctx.shadowBlur=dash?0:5;
+    ctx.strokeStyle=color; ctx.lineWidth=2;
     ctx.beginPath();
-    data.forEach((v, i) => {
-      const px = i / (data.length - 1) * W, py = my(v);
-      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    data.forEach((v,i)=>{
+      const px=i/(data.length-1)*W, py=my(v);
+      i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
     });
-    ctx.stroke(); ctx.setLineDash([]);
+    ctx.stroke(); ctx.setLineDash([]); ctx.shadowBlur=0;
   });
 }
 
-function drawAll(Tout, u) {
-  // Temperature (setpoint dashed white)
-  const spLine = Array(h_T1.length).fill(T_sp);
-  plotLines('cTemp', [
-    { data: h_T1,  color: '#ff6b35' },
-    { data: h_T2,  color: '#00d4ff' },
-    { data: h_T3,  color: '#3fb950' },
-    { data: spLine,color: 'rgba(255,255,255,.3)', dash: true },
-  ], -5, 30);
+function drawAll(Tout,u){
+  const spLine=Array(h_T1.length).fill(T_sp);
+  plotLines('cTemp',[
+    {data:h_T1, color:'#ff7700'},
+    {data:h_T2, color:'#00d4ff'},
+    {data:h_T3, color:'#00ff88'},
+    {data:spLine,color:'rgba(255,255,255,.25)',dash:true},
+  ],-5,30);
+  plotLines('cQ',   [{data:h_Q,    color:'#ffcc00'}],0,1100,Q_max);
+  plotLines('cTout',[{data:h_Tout, color:'#a371f7'}],T_out_min-5,10);
+  plotLines('cE',   [{data:h_E,    color:'#00ff88'}],0,10);
 
-  plotLines('cQ',    [{ data: h_Q,    color: '#e3b341' }], 0, 1100, Q_max);
-  plotLines('cTout', [{ data: h_Tout, color: '#a371f7' }], T_out_min - 5, 10);
-  plotLines('cE',    [{ data: h_E,    color: '#3fb950' }], 0, 10);
-
-  // Stats
-  const hh = String(Math.floor(t_sim / 3600)).padStart(2,'0');
-  const mm = String(Math.floor((t_sim % 3600) / 60)).padStart(2,'0');
-  document.getElementById('sv-time').textContent = hh + ':' + mm;
-  document.getElementById('sv-T1').textContent   = T1.toFixed(1);
-  document.getElementById('sv-T2').textContent   = T2.toFixed(1);
-  document.getElementById('sv-Tout').textContent  = Tout.toFixed(1);
-  document.getElementById('sv-Q').textContent    = Math.round(u);
-  document.getElementById('sv-E').textContent    = E_total.toFixed(2);
-  document.getElementById('cur-T').textContent   = T1.toFixed(1) + ' °C';
-  document.getElementById('cur-Q').textContent   = Math.round(u) + ' W';
-  document.getElementById('cur-Tout').textContent= Tout.toFixed(1) + ' °C';
-  document.getElementById('cur-E').textContent   = E_total.toFixed(2) + ' kWh';
-
-  // Highlight HVAC cell when saturated
-  document.getElementById('sc-Q').style.background =
-    u >= Q_max * 0.97 ? 'rgba(255,107,53,.06)' : '';
+  const hh=String(Math.floor(t_sim/3600)).padStart(2,'0');
+  const mm=String(Math.floor((t_sim%3600)/60)).padStart(2,'0');
+  document.getElementById('sv-time').textContent=hh+':'+mm;
+  document.getElementById('sv-T1').textContent=T1.toFixed(1);
+  document.getElementById('sv-T2').textContent=T2.toFixed(1);
+  document.getElementById('sv-Tout').textContent=Tout.toFixed(1);
+  document.getElementById('sv-Q').textContent=Math.round(u);
+  document.getElementById('sv-E').textContent=E_total.toFixed(2);
+  document.getElementById('cur-T').textContent=T1.toFixed(1)+' °C';
+  document.getElementById('cur-Q').textContent=Math.round(u)+' W';
+  document.getElementById('cur-Tout').textContent=Tout.toFixed(1)+' °C';
+  document.getElementById('cur-E').textContent=E_total.toFixed(2)+' kWh';
+  document.getElementById('sc-Q').style.background=u>=Q_max*0.97?'rgba(255,34,68,.06)':'';
 }
 
 // ──────────────────────────────────────────────────────────
 // ANIMATION LOOP
 // ──────────────────────────────────────────────────────────
-const SIM_DT  = 60;    // simulation seconds per tick
-const HIST_DT = 60;    // record every 60s
-let hist_timer = 0;
-
-function frame() {
-  if (!running) { rafId = null; return; }
-  const spd   = parseInt(document.getElementById('simSpeed').value);
-  // steps per frame: speed_factor × dt / 60s (approx 1 real frame = 1/60s)
-  const steps = Math.max(1, Math.round(spd / 60));
-  let Tout = 0, u = 0;
-  for (let i = 0; i < steps && t_sim < 86400; i++) {
-    const r = step(SIM_DT);
-    Tout = r.Tout; u = r.u;
-    hist_timer += SIM_DT;
-    if (hist_timer >= HIST_DT) {
-      h_T1.push(T1); h_T2.push(T2); h_T3.push(T3);
-      h_Q.push(u); h_Tout.push(Tout); h_E.push(E_total);
-      if (h_T1.length > HMAX) {
-        [h_T1,h_T2,h_T3,h_Q,h_Tout,h_E].forEach(a=>a.shift());
-      }
-      hist_timer = 0;
+const SIM_DT=60, HIST_DT=60;
+let hist_timer=0;
+function frame(){
+  if(!running){rafId=null;return;}
+  const spd=parseInt(document.getElementById('simSpeed').value);
+  const steps=Math.max(1,Math.round(spd/60));
+  let Tout=0, u=0;
+  for(let i=0;i<steps&&t_sim<86400;i++){
+    const r=step(SIM_DT); Tout=r.Tout; u=r.u;
+    hist_timer+=SIM_DT;
+    if(hist_timer>=HIST_DT){
+      h_T1.push(T1);h_T2.push(T2);h_T3.push(T3);
+      h_Q.push(u);h_Tout.push(Tout);h_E.push(E_total);
+      if(h_T1.length>HMAX)[h_T1,h_T2,h_T3,h_Q,h_Tout,h_E].forEach(a=>a.shift());
+      hist_timer=0;
     }
   }
-  drawAll(Tout, u);
-
-  if (t_sim >= 86400) {
-    running = false; rafId = null;
-    const bp = document.getElementById('btnPlay');
-    bp.textContent = '✓ 24h Completate'; bp.style.background = '#3fb950'; bp.disabled = true;
-    document.getElementById('btnStop').disabled = true;
+  drawAll(Tout,u);
+  if(t_sim>=86400){
+    running=false; rafId=null;
+    const bp=document.getElementById('btnPlay');
+    bp.textContent='✓ 24h Completate'; bp.style.background='var(--hud-green)';
+    bp.style.color='var(--hud-bg)'; bp.disabled=true;
+    document.getElementById('btnStop').disabled=true;
     return;
   }
-  rafId = requestAnimationFrame(frame);
+  rafId=requestAnimationFrame(frame);
 }
 
-// ──────────────────────────────────────────────────────────
-// BUTTONS
-// ──────────────────────────────────────────────────────────
-function uiReset() {
-  running = false; cancelAnimationFrame(rafId); rafId = null;
+function uiReset(){
+  running=false; cancelAnimationFrame(rafId); rafId=null;
   resetSim();
-  const bp = document.getElementById('btnPlay');
-  bp.textContent = '▶ Start'; bp.style.background = 'var(--accent2)'; bp.style.color = '#080c10'; bp.disabled = false;
-  document.getElementById('btnStop').disabled = true;
-  // Clear stats
-  ['sv-time','sv-T1','sv-T2','sv-Tout','sv-Q'].forEach(id => document.getElementById(id).textContent = '—');
-  document.getElementById('sv-E').textContent = '0.00';
-  document.getElementById('sc-Q').style.background = '';
-  setupAll();
-  ['cTemp','cQ','cTout','cE'].forEach(id => bg(id));
+  const bp=document.getElementById('btnPlay');
+  bp.textContent='▶ Start'; bp.style.background='var(--hud-orange)';
+  bp.style.color='var(--hud-bg)'; bp.disabled=false;
+  document.getElementById('btnStop').disabled=true;
+  ['sv-time','sv-T1','sv-T2','sv-Tout','sv-Q'].forEach(id=>document.getElementById(id).textContent='—');
+  document.getElementById('sv-E').textContent='0.00';
+  document.getElementById('sc-Q').style.background='';
+  setupAll(); ['cTemp','cQ','cTout','cE'].forEach(id=>bg(id));
 }
 
-document.getElementById('btnPlay').addEventListener('click', () => {
-  if (!running) {
-    running = true;
-    const bp = document.getElementById('btnPlay');
-    bp.textContent = '⏸ Pausa'; bp.style.background = '#e3b341'; bp.style.color = '#080c10';
-    document.getElementById('btnStop').disabled = false;
-    if (!rafId) rafId = requestAnimationFrame(frame);
+document.getElementById('btnPlay').addEventListener('click',()=>{
+  if(!running){
+    running=true;
+    const bp=document.getElementById('btnPlay');
+    bp.textContent='⏸ Pausa'; bp.style.background='var(--hud-yellow)'; bp.style.color='var(--hud-bg)';
+    document.getElementById('btnStop').disabled=false;
+    if(!rafId) rafId=requestAnimationFrame(frame);
   } else {
-    running = false;
-    document.getElementById('btnPlay').textContent = '▶ Riprendi';
-    document.getElementById('btnPlay').style.background = 'var(--accent2)';
+    running=false;
+    document.getElementById('btnPlay').textContent='▶ Riprendi';
+    document.getElementById('btnPlay').style.background='var(--hud-orange)';
   }
 });
-document.getElementById('btnStop').addEventListener('click', uiReset);
-document.getElementById('btnReset').addEventListener('click', uiReset);
+document.getElementById('btnStop').addEventListener('click',uiReset);
+document.getElementById('btnReset').addEventListener('click',uiReset);
 
-// Sliders
-document.getElementById('slTsp').addEventListener('input', e => {
-  T_sp = parseFloat(e.target.value);
-  document.getElementById('valTsp').textContent = T_sp.toFixed(1) + ' °C';
+document.getElementById('slTsp').addEventListener('input',e=>{
+  T_sp=parseFloat(e.target.value);
+  document.getElementById('valTsp').textContent=T_sp.toFixed(1)+' °C';
 });
-document.getElementById('slTout').addEventListener('input', e => {
-  T_out_min = parseFloat(e.target.value);
-  document.getElementById('valTout').textContent = (T_out_min < 0 ? '−' : '') + Math.abs(T_out_min) + ' °C';
+document.getElementById('slTout').addEventListener('input',e=>{
+  T_out_min=parseFloat(e.target.value);
+  document.getElementById('valTout').textContent=(T_out_min<0?'−':'')+Math.abs(T_out_min)+' °C';
 });
 
-window.addEventListener('resize', () => {
-  setupAll();
-  ['cTemp','cQ','cTout','cE'].forEach(id => bg(id));
-  if (h_T1.length > 1) {
-    const Tout = T_out_profile(t_sim, T_out_min);
-    const u = Math.max(0, Math.min(Q_max, Kp * (T_sp - T1) + integral));
-    drawAll(Tout, u);
+window.addEventListener('resize',()=>{
+  setupAll(); ['cTemp','cQ','cTout','cE'].forEach(id=>bg(id));
+  if(h_T1.length>1){
+    const Tout=T_out_profile(t_sim,T_out_min);
+    const u=Math.max(0,Math.min(Q_max,Kp*(T_sp-T1)+integral));
+    drawAll(Tout,u);
   }
 });
 
-// ──────────────────────────────────────────────────────────
-// INIT — DOMContentLoaded guarantees offsetWidth > 0
-// ──────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  resetSim();
-  setupAll();
-  ['cTemp','cQ','cTout','cE'].forEach(id => bg(id));
+document.addEventListener('DOMContentLoaded',()=>{
+  resetSim(); setupAll(); ['cTemp','cQ','cTout','cE'].forEach(id=>bg(id));
 });
 </script>
 </body>
