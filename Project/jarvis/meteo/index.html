@@ -7,18 +7,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#00060f;--cyan:#00d4ff;--cyan2:#0088aa;--cyan3:rgba(0,212,255,0.08);
+  --bg:#001525;--cyan:#00d4ff;--cyan2:#0088aa;--cyan3:rgba(0,212,255,0.08);
   --orange:#ff6b00;--green:#00ff41;--green2:#00aa2a;
   --yellow:#ffd700;--blue:#1e90ff;--red:#ff2244;
-  --text:#c8eeff;--text2:#4a7a8a;--text3:#2a4a5a;
-  --bc:rgba(0,212,255,0.22);--bo:rgba(255,107,0,0.35);--bg2:rgba(0,18,36,0.6);
+  --text:#c8eeff;--text2:#6a9aaa;--text3:#2a4a5a;
+  --bc:rgba(0,212,255,0.22);--bo:rgba(255,107,0,0.35);--bg2:rgba(0,35,60,0.6);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden;}
 body::before{
   content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:linear-gradient(rgba(0,212,255,0.025) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,212,255,0.025) 1px,transparent 1px);
+  background-image:linear-gradient(rgba(0,212,255,0.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,0.07) 1px,transparent 1px);
   background-size:40px 40px;
 }
 body::after{
@@ -30,7 +30,7 @@ body::after{
 .sbar{
   position:fixed;top:0;left:0;right:0;z-index:200;height:38px;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 22px;background:rgba(0,6,15,0.97);
+  padding:0 22px;background:rgba(0,21,37,0.97);
   border-bottom:1px solid var(--bc);backdrop-filter:blur(12px);
   font-size:9px;letter-spacing:2px;
 }
@@ -108,7 +108,7 @@ body::after{
 
 /* ── METRICS BOTTOM ROW ── */
 .metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-.met-card{padding:14px 16px;border:1px solid var(--bc);background:rgba(0,18,36,.5);position:relative;}
+.met-card{padding:14px 16px;border:1px solid var(--bc);background:rgba(0,35,60,.5);position:relative;}
 .met-card::before{content:'';position:absolute;top:-1px;left:12px;width:24px;height:2px;background:var(--orange);}
 .met-label{font-size:8px;letter-spacing:2px;color:var(--text2);margin-bottom:8px;}
 .met-val{font-family:'Orbitron',monospace;font-size:22px;}
@@ -150,7 +150,7 @@ body::after{
 .botbar{
   position:fixed;bottom:0;left:0;right:0;z-index:200;height:26px;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 20px;background:rgba(0,6,15,.97);border-top:1px solid var(--bc);
+  padding:0 20px;background:rgba(0,21,37,.97);border-top:1px solid var(--bc);
   font-size:8px;letter-spacing:2px;color:var(--text2);
 }
 

@@ -7,9 +7,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#00060f;--cyan:#00d4ff;--cyan2:#0088aa;
+  --bg:#001525;--cyan:#00d4ff;--cyan2:#0088aa;
   --orange:#ff6b00;--green:#00ff41;--green2:#00aa2a;
-  --red:#ff2244;--text:#c8eeff;--text2:#4a7a8a;
+  --red:#ff2244;--text:#c8eeff;--text2:#6a9aaa;
   --bc:rgba(0,212,255,0.25);--bo:rgba(255,107,0,0.5);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -20,8 +20,8 @@ body{
 }
 body::before{
   content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:linear-gradient(rgba(0,212,255,0.04) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,212,255,0.04) 1px,transparent 1px);
+  background-image:linear-gradient(rgba(0,212,255,0.09) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,0.09) 1px,transparent 1px);
   background-size:40px 40px;
 }
 body::after{
@@ -33,7 +33,7 @@ body::after{
 .sbar{
   position:fixed;top:0;left:0;right:0;z-index:200;
   height:36px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 20px;background:rgba(0,6,15,0.96);
+  padding:0 20px;background:rgba(0,21,37,0.96);
   border-bottom:1px solid var(--bc);backdrop-filter:blur(12px);
   font-size:10px;letter-spacing:3px;
 }
@@ -102,7 +102,7 @@ body::after{
   padding:14px 16px;transition:all .3s;
 }
 .state-box.orange{border-color:var(--orange);background:rgba(255,107,0,.05);}
-.state-box.idle{border-color:var(--bc);background:rgba(0,18,36,.4);}
+.state-box.idle{border-color:var(--bc);background:rgba(0,35,60,.4);}
 .state-lbl{font-size:9px;letter-spacing:3px;color:var(--text2);margin-bottom:6px;}
 .state-title{
   font-family:'Orbitron',monospace;font-size:22px;font-weight:700;
@@ -213,7 +213,7 @@ body::after{
 .notif{
   position:fixed;top:44px;left:50%;transform:translateX(-50%) translateY(-8px);
   z-index:500;padding:10px 22px;opacity:0;transition:all .3s;pointer-events:none;
-  border:1px solid var(--cyan);background:rgba(0,18,36,.97);
+  border:1px solid var(--cyan);background:rgba(0,35,60,.97);
   font-size:10px;letter-spacing:2px;color:var(--cyan);white-space:nowrap;
 }
 .notif.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -226,7 +226,7 @@ body::after{
 .botbar{
   position:fixed;bottom:0;left:0;right:0;z-index:200;
   height:26px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 20px;background:rgba(0,6,15,.96);border-top:1px solid var(--bc);
+  padding:0 20px;background:rgba(0,21,37,.96);border-top:1px solid var(--bc);
   font-size:8px;letter-spacing:2px;color:var(--text2);
 }
 

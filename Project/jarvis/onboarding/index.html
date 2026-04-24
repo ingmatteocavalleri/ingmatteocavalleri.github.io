@@ -7,8 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg-primary: #00060f;
-    --bg-secondary: #000d1a;
+    --bg-primary: #001525;
+    --bg-secondary: #002035;
     --cyan: #00d4ff;
     --cyan-dim: #0088aa;
     --cyan-glow: rgba(0, 212, 255, 0.15);
@@ -17,11 +17,11 @@
     --green: #00ff41;
     --green-dim: #00aa2a;
     --text-primary: #c8eeff;
-    --text-secondary: #4a7a8a;
+    --text-secondary: #6a9aaa;
     --text-mono: #7ecfdf;
     --border-cyan: rgba(0, 212, 255, 0.3);
     --border-orange: rgba(255, 107, 0, 0.5);
-    --grid-color: rgba(0, 212, 255, 0.04);
+    --grid-color: rgba(0, 212, 255, 0.09);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -67,7 +67,7 @@
     position: fixed; top: 0; left: 0; right: 0;
     display: flex; align-items: center; justify-content: space-between;
     padding: 8px 24px;
-    background: rgba(0, 6, 15, 0.9);
+    background: rgba(0, 21, 37, 0.9);
     border-bottom: 1px solid var(--border-cyan);
     font-size: 10px; letter-spacing: 3px;
     color: var(--text-secondary); z-index: 100;
@@ -1011,7 +1011,7 @@
 
     // Redirect to home after short delay
     setTimeout(() => {
-      window.location.href = './home/index.html';
+      window.location.href = '../home/index.html';
     }, 1200);
   }
 
