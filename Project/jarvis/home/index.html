@@ -138,6 +138,20 @@
   /* BOTBAR */
   .botbar { position:fixed; bottom:0; left:0; right:0; z-index:200; height:26px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; background:rgba(0,21,37,.96); border-top:1px solid var(--bc); font-size:8px; letter-spacing:2px; color:var(--text2); }
 
+  /* SHUTDOWN BUTTON */
+  .shutdown-btn {
+    position:fixed; bottom:40px; right:20px; z-index:150;
+    padding:12px 18px; background:#c41e3a; border:1px solid #ff4455;
+    font-family:'Orbitron',monospace; font-size:11px; letter-spacing:2px; color:#fff;
+    cursor:pointer; transition:all .25s; text-decoration:none;
+    box-shadow:0 0 16px rgba(196,30,58,0.4);
+  }
+  .shutdown-btn:hover {
+    background:#d42a4a; box-shadow:0 0 24px rgba(196,30,58,0.7), inset 0 0 12px rgba(255,68,85,0.2);
+    transform:translateY(-2px);
+  }
+  .shutdown-btn:active { transform:translateY(0); }
+
   @media(max-width:700px) { .stats-row{grid-template-columns:repeat(2,1fr)} .hero-metrics{display:none} }
 </style>
 </head>
@@ -293,6 +307,8 @@
   <div class="log" id="logPanel"></div>
 
 </div>
+
+<a href="../../" class="shutdown-btn">◉ SPEGNI SISTEMA</a>
 
 <div class="botbar">
   <span>JARVIS v4.2 — STARK INDUSTRIES</span>
