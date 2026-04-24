@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPI TRACKER // JARVIS</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --hud-bg: #020810;
+  --hud-cyan: #00d4ff;
+  --hud-cyan-dim: rgba(0, 212, 255, 0.08);
+  --hud-cyan-border: rgba(0, 212, 255, 0.2);
+  --hud-orange: #ff7700;
+  --hud-green: #00ff88;
+  --hud-red: #ff2244;
+  --hud-yellow: #ffcc00;
+  --hud-text: rgba(200, 230, 255, 0.7);
+  --hud-text-dim: rgba(0, 212, 255, 0.35);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--hud-bg);
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--hud-cyan);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 998;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.13) 2px, rgba(0,0,0,0.13) 4px);
+}
+
+.hud-grid {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.corner {
+  position: fixed;
+  width: 70px; height: 70px;
+  z-index: 10; pointer-events: none;
+}
+.corner::before {
+  content: '';
+  position: absolute;
+  width: 5px; height: 5px;
+  background: var(--hud-cyan);
+  box-shadow: 0 0 6px var(--hud-cyan);
+}
+.corner-tl { top:14px;left:14px;border-top:1px solid var(--hud-cyan);border-left:1px solid var(--hud-cyan); }
+.corner-tr { top:14px;right:14px;border-top:1px solid var(--hud-cyan);border-right:1px solid var(--hud-cyan); }
+.corner-bl { bottom:14px;left:14px;border-bottom:1px solid var(--hud-cyan);border-left:1px solid var(--hud-cyan); }
+.corner-br { bottom:14px;right:14px;border-bottom:1px solid var(--hud-cyan);border-right:1px solid var(--hud-cyan); }
+.corner-tl::before { top:-1px;left:-1px; }
+.corner-tr::before { top:-1px;right:-1px; }
+.corner-bl::before { bottom:-1px;left:-1px; }
+.corner-br::before { bottom:-1px;right:-1px; }
+
+/* HEADER */
+header {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px;
+  border-bottom: 1px solid var(--hud-cyan-border);
+  background: rgba(0,10,20,0.8);
+  backdrop-filter: blur(4px);
+}
+
+.header-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--hud-cyan);
+  text-shadow: 0 0 20px rgba(0,212,255,0.6);
+}
+
+.header-subtitle {
+  font-size: 0.55rem;
+  color: var(--hud-text-dim);
+  letter-spacing: 0.2em;
+  margin-top: 3px;
+}
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.6rem;
+  color: var(--hud-text-dim);
+  letter-spacing: 0.1em;
+}
+
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--hud-green);
+  box-shadow: 0 0 8px var(--hud-green);
+  animation: hud-blink 1.6s ease-in-out infinite;
+}
+
+@keyframes hud-blink { 0%,100%{opacity:1;} 50%{opacity:0.15;} }
+@keyframes hud-pulse {
+  0%,100%{box-shadow:0 0 18px rgba(0,212,255,0.5);}
+  50%{box-shadow:0 0 28px rgba(0,212,255,0.8);}
+}
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:none;} }
+
+/* ADD KPI BUTTON */
+.btn-new-kpi {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border: 1px solid var(--hud-cyan-border);
+  background: var(--hud-cyan-dim);
+  color: var(--hud-cyan);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s;
+}
+.btn-new-kpi::before {
+  content:'';position:absolute;top:-1px;left:-1px;
+  width:8px;height:8px;
+  border-top:1px solid var(--hud-orange);border-left:1px solid var(--hud-orange);
+}
+.btn-new-kpi::after {
+  content:'';position:absolute;bottom:-1px;right:-1px;
+  width:8px;height:8px;
+  border-bottom:1px solid var(--hud-orange);border-right:1px solid var(--hud-orange);
+}
+.btn-new-kpi:hover {
+  background: rgba(0,212,255,0.12);
+  border-color: var(--hud-cyan);
+  box-shadow: 0 0 20px rgba(0,212,255,0.15);
+  color: #fff;
+}
+
+/* MAIN */
+main {
+  position: relative;
+  z-index: 5;
+  padding: 28px 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+  header { padding: 14px 16px; }
+  main { padding: 16px; }
+}
+
+/* KPI CARD */
+.kpi-card {
+  border: 1px solid var(--hud-cyan-border);
+  background: var(--hud-cyan-dim);
+  position: relative;
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  animation: fadeIn 0.4s ease both;
+}
+
+.kpi-card::before {
+  content:'';position:absolute;top:-1px;left:-1px;
+  width:10px;height:10px;
+  border-top:1px solid var(--hud-orange);border-left:1px solid var(--hud-orange);
+}
+.kpi-card::after {
+  content:'';position:absolute;bottom:-1px;right:-1px;
+  width:10px;height:10px;
+  border-bottom:1px solid var(--hud-orange);border-right:1px solid var(--hud-orange);
+}
+
+.kpi-card:hover {
+  border-color: rgba(0,212,255,0.4);
+  box-shadow: 0 0 20px rgba(0,212,255,0.08);
+}
+
+.kpi-card.expanded {
+  border-color: var(--hud-cyan);
+  box-shadow: 0 0 30px rgba(0,212,255,0.12);
+  cursor: default;
+}
+
+/* CARD HEADER */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 0;
+}
+
+.card-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.card-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--hud-cyan);
+}
+
+.card-category {
+  font-size: 0.5rem;
+  color: var(--hud-text-dim);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.card-actions {
+  display: none;
+  gap: 8px;
+}
+
+.kpi-card.expanded .card-actions { display: flex; }
+
+.btn-action {
+  padding: 4px 10px;
+  border: 1px solid var(--hud-cyan-border);
+  background: transparent;
+  color: var(--hud-text-dim);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-action:hover { color: var(--hud-cyan); border-color: var(--hud-cyan); }
+.btn-action.delete:hover { color: var(--hud-red); border-color: var(--hud-red); }
+
+/* CARD BODY */
+.card-body {
+  padding: 12px 16px 14px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.gauge-wrap { flex-shrink: 0; }
+
+.card-data {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kpi-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.kpi-value-big {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.kpi-detail {
+  font-size: 0.55rem;
+  color: var(--hud-text-dim);
+  letter-spacing: 0.08em;
+}
+
+.trend-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+}
+
+.trend-arrow { font-size: 0.75rem; }
+.trend-up { color: var(--hud-green); }
+.trend-down { color: var(--hud-red); }
+.trend-neutral { color: var(--hud-text-dim); }
+
+.sparkline-wrap {
+  width: 100%;
+  height: 36px;
+}
+
+/* EXPANDED CHART */
+.expanded-chart {
+  display: none;
+  padding: 0 16px 12px;
+}
+.kpi-card.expanded .expanded-chart { display: block; }
+
+/* INPUT ROW */
+.card-input-row {
+  padding: 0 16px 14px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  border-top: 1px solid rgba(0,212,255,0.07);
+  padding-top: 10px;
+}
+
+.hud-input {
+  flex: 1;
+  background: rgba(0,212,255,0.06);
+  border: 1px solid var(--hud-cyan-border);
+  color: var(--hud-cyan);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  letter-spacing: 0.08em;
+  outline: none;
+  transition: all 0.2s;
+}
+.hud-input:focus {
+  border-color: var(--hud-orange);
+  box-shadow: 0 0 10px rgba(255,119,0,0.2);
+}
+.hud-input::placeholder { color: rgba(0,212,255,0.25); }
+
+.btn-add {
+  padding: 7px 14px;
+  border: 1px solid var(--hud-cyan-border);
+  background: var(--hud-cyan-dim);
+  color: var(--hud-cyan);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+.btn-add:hover {
+  background: rgba(0,212,255,0.15);
+  border-color: var(--hud-cyan);
+  box-shadow: 0 0 12px rgba(0,212,255,0.2);
+}
+
+/* FOOTER */
+footer {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 32px;
+  border-top: 1px solid var(--hud-cyan-border);
+  background: rgba(0,10,20,0.8);
+  margin-top: 20px;
+}
+
+.overall-score {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
+
+.overall-score span {
+  font-size: 1.1rem;
+  color: var(--hud-cyan);
+  text-shadow: 0 0 15px rgba(0,212,255,0.5);
+}
+
+.footer-meta {
+  font-size: 0.55rem;
+  color: var(--hud-text-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* MODAL OVERLAY */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,5,15,0.85);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+
+.modal {
+  background: #030e1a;
+  border: 1px solid var(--hud-cyan-border);
+  padding: 28px 32px;
+  min-width: 340px;
+  max-width: 480px;
+  width: 90%;
+  position: relative;
+  animation: fadeIn 0.25s ease;
+}
+.modal::before {
+  content:'';position:absolute;top:-1px;left:-1px;
+  width:14px;height:14px;
+  border-top:2px solid var(--hud-orange);border-left:2px solid var(--hud-orange);
+}
+.modal::after {
+  content:'';position:absolute;bottom:-1px;right:-1px;
+  width:14px;height:14px;
+  border-bottom:2px solid var(--hud-orange);border-right:2px solid var(--hud-orange);
+}
+
+.modal-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+  color: var(--hud-cyan);
+  text-shadow: 0 0 15px rgba(0,212,255,0.4);
+}
+
+.form-field {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.5rem;
+  color: var(--hud-text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.form-input {
+  width: 100%;
+  background: rgba(0,212,255,0.06);
+  border: 1px solid var(--hud-cyan-border);
+  color: var(--hud-cyan);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  padding: 8px 12px;
+  letter-spacing: 0.08em;
+  outline: none;
+  transition: all 0.2s;
+}
+.form-input:focus {
+  border-color: var(--hud-orange);
+  box-shadow: 0 0 10px rgba(255,119,0,0.15);
+}
+.form-input option { background: #030e1a; }
+
+.form-row { display: flex; gap: 12px; }
+.form-row .form-field { flex: 1; }
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  justify-content: flex-end;
+}
+
+.btn-cancel {
+  padding: 8px 16px;
+  border: 1px solid rgba(0,212,255,0.15);
+  background: transparent;
+  color: var(--hud-text-dim);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-cancel:hover { color: var(--hud-cyan); border-color: var(--hud-cyan-border); }
+
+.btn-confirm {
+  padding: 8px 20px;
+  border: 1px solid var(--hud-cyan-border);
+  background: var(--hud-cyan-dim);
+  color: var(--hud-cyan);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.btn-confirm:hover {
+  background: rgba(0,212,255,0.15);
+  box-shadow: 0 0 15px rgba(0,212,255,0.2);
+}
+
+/* RECAP MODAL */
+.recap-kpi-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(0,212,255,0.07);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+}
+.recap-kpi-row.best { color: var(--hud-green); }
+.recap-kpi-row.worst { color: var(--hud-red); }
+.recap-score-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.recap-overall {
+  margin-top: 18px;
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+}
+.recap-overall-score {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--hud-cyan);
+  text-shadow: 0 0 20px rgba(0,212,255,0.6);
+}
+.recap-msg {
+  margin-top: 10px;
+  font-size: 0.6rem;
+  color: var(--hud-text);
+  letter-spacing: 0.08em;
+  font-style: italic;
+}
+
+/* DIVIDER */
+.hud-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--hud-cyan), transparent);
+  opacity: 0.15;
+  margin: 12px 0;
+}
+
+/* EMPTY STATE */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--hud-text-dim);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.empty-state-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+  color: rgba(0,212,255,0.2);
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 60px;
+  right: 32px;
+  z-index: 200;
+  padding: 10px 18px;
+  background: rgba(0,10,20,0.95);
+  border: 1px solid var(--hud-cyan-border);
+  color: var(--hud-cyan);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  animation: fadeIn 0.3s ease;
+  pointer-events: none;
+}
+
+.section-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.5rem;
+  color: var(--hud-text-dim);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--hud-cyan-border), transparent);
+}
+</style>
+</head>
+<body>
+
+<div class="hud-grid"></div>
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<!-- HEADER -->
+<header>
+  <div>
+    <div class="header-title">KPI TRACKER</div>
+    <div class="header-subtitle">PERSONAL PERFORMANCE MONITOR // JARVIS v2.0</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:20px;">
+    <div class="header-status">
+      <div class="status-dot"></div>
+      <span id="headerWeek">W17 · 2026</span>
+    </div>
+    <button class="btn-new-kpi" onclick="openNewKpiModal()">+ NEW KPI</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main>
+  <div class="section-label" id="weekLabel">THIS WEEK</div>
+  <div class="kpi-grid" id="kpiGrid"></div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="overall-score">
+    OVERALL SCORE: <span id="overallScore">—</span>/100
+  </div>
+  <div class="footer-meta" id="footerMeta">LAST UPDATE: —</div>
+  <button class="btn-action" onclick="openRecap()" style="font-size:0.6rem;padding:6px 14px;border-color:var(--hud-orange);color:var(--hud-orange);">⟳ WEEKLY RECAP</button>
+</footer>
+
+<!-- NEW/EDIT KPI MODAL -->
+<div class="modal-overlay" id="kpiModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">NEW KPI</div>
+    <div class="form-field">
+      <label class="form-label">Name *</label>
+      <input class="form-input" id="fName" type="text" placeholder="Ore lavoro..." maxlength="40">
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Category</label>
+        <select class="form-input" id="fCategory">
+          <option value="work">Work</option>
+          <option value="health">Health</option>
+          <option value="learning">Learning</option>
+          <option value="personal">Personal</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Unit</label>
+        <select class="form-input" id="fUnit">
+          <option value="h">h</option>
+          <option value="km">km</option>
+          <option value="count">count</option>
+          <option value="€">€</option>
+          <option value="min">min</option>
+          <option value="×">×</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Weekly Target</label>
+      <input class="form-input" id="fTarget" type="number" min="0.1" step="0.5" placeholder="40">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('kpiModal')">CANCEL</button>
+      <button class="btn-confirm" onclick="saveKpi()">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECAP MODAL -->
+<div class="modal-overlay" id="recapModal">
+  <div class="modal">
+    <div class="modal-title">WEEKLY RECAP</div>
+    <div id="recapContent"></div>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="closeModal('recapModal')">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ──────────────────────────────────────────────────────────────────
+const LS_KEY = 'jarvis_kpis_v1';
+let data = loadData();
+let editingId = null;
+let expandedId = null;
+
+const MOTIVATIONAL = [
+  "SYSTEMS NOMINAL. MAINTAIN TRAJECTORY.",
+  "PERFORMANCE METRICS WITHIN ACCEPTABLE RANGE.",
+  "KEEP PUSHING. STARK WOULD BE IMPRESSED.",
+  "CONSISTENCY IS THE MARK OF A CHAMPION.",
+  "TARGETS ARE WITHIN REACH. RECALIBRATE AND ADVANCE.",
+  "GOOD WEEK. BETTER WEEK AHEAD.",
+  "DATA DOES NOT LIE. NEITHER DOES YOUR EFFORT.",
+  "SUIT UP. NEXT WEEK AWAITS.",
+];
+
+// ─── STORAGE ────────────────────────────────────────────────────────────────
+function loadData() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { kpis: defaultKPIs() };
+}
+
+function saveData() {
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+}
+
+function defaultKPIs() {
+  const today = getDateStr(new Date());
+  const weekDates = getLast7Days();
+  return [
+    {
+      id: uuid(), name: 'Ore lavoro', category: 'work', unit: 'h',
+      target_weekly: 40,
+      data_points: [
+        {date: weekDates[0], value: 8}, {date: weekDates[1], value: 8},
+        {date: weekDates[2], value: 8}, {date: weekDates[3], value: 8},
+      ]
+    },
+    {
+      id: uuid(), name: 'Capitoli letti', category: 'learning', unit: 'count',
+      target_weekly: 5,
+      data_points: [
+        {date: weekDates[0], value: 2}, {date: weekDates[2], value: 2},
+      ]
+    },
+    {
+      id: uuid(), name: 'Km corsa', category: 'health', unit: 'km',
+      target_weekly: 20,
+      data_points: [
+        {date: weekDates[1], value: 6}, {date: weekDates[3], value: 6},
+        {date: weekDates[5], value: 6},
+      ]
+    },
+    {
+      id: uuid(), name: 'Meditazione', category: 'personal', unit: '×',
+      target_weekly: 7,
+      data_points: [
+        {date: weekDates[0], value: 1},{date: weekDates[1], value: 1},
+        {date: weekDates[2], value: 1},{date: weekDates[3], value: 1},
+        {date: weekDates[4], value: 1},
+      ]
+    }
+  ];
+}
+
+// ─── UTILS ──────────────────────────────────────────────────────────────────
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random()*16|0;
+    return (c === 'x' ? r : (r&0x3|0x8)).toString(16);
+  });
+}
+
+function getDateStr(d) {
+  return d.toISOString().slice(0,10);
+}
+
+function getLast7Days() {
+  const days = [];
+  for (let i=6; i>=0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(getDateStr(d));
+  }
+  return days;
+}
+
+function getWeekStart(d) {
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const mon = new Date(d.setDate(diff));
+  return getDateStr(mon);
+}
+
+function getWeekDates(offset = 0) {
+  const now = new Date();
+  now.setDate(now.getDate() + offset * 7);
+  const start = new Date(now);
+  const day = start.getDay();
+  start.setDate(start.getDate() - day + (day === 0 ? -6 : 1));
+  const dates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    dates.push(getDateStr(d));
+  }
+  return dates;
+}
+
+function sumInDates(kpi, dates) {
+  return kpi.data_points
+    .filter(p => dates.includes(p.date))
+    .reduce((s, p) => s + p.value, 0);
+}
+
+function getCurrentWeekSum(kpi) {
+  return sumInDates(kpi, getWeekDates(0));
+}
+
+function getPrevWeekSum(kpi) {
+  return sumInDates(kpi, getWeekDates(-1));
+}
+
+function getLast30Days() {
+  const days = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(getDateStr(d));
+  }
+  return days;
+}
+
+function getGaugeColor(pct) {
+  if (pct >= 0.9) return 'var(--hud-green)';
+  if (pct >= 0.7) return 'var(--hud-yellow)';
+  return 'var(--hud-red)';
+}
+
+function getWeekNumber(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay()||7));
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  return Math.ceil((((date - yearStart) / 86400000) + 1)/7);
+}
+
+// ─── SVG GAUGE ──────────────────────────────────────────────────────────────
+function buildGauge(pct, size = 64) {
+  const clamped = Math.min(pct, 1);
+  const r = (size / 2) - 8;
+  const cx = size / 2, cy = size / 2;
+  const startAngle = -210;
+  const sweepAngle = 240;
+  const endAngle = startAngle + sweepAngle * clamped;
+  const color = getGaugeColor(pct);
+
+  function polar(cx, cy, r, angleDeg) {
+    const rad = (angleDeg - 90) * Math.PI / 180;
+    return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
+  }
+
+  function arcPath(cx, cy, r, aStart, aSweep) {
+    if (Math.abs(aSweep) < 0.1) return '';
+    const [x1, y1] = polar(cx, cy, r, aStart);
+    const [x2, y2] = polar(cx, cy, r, aStart + aSweep);
+    const large = aSweep > 180 ? 1 : 0;
+    return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
+  }
+
+  const trackPath = arcPath(cx, cy, r, startAngle, sweepAngle);
+  const fillPath = arcPath(cx, cy, r, startAngle, sweepAngle * clamped);
+  const pctInt = Math.round(pct * 100);
+
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <path d="${trackPath}" fill="none" stroke="rgba(0,212,255,0.1)" stroke-width="5" stroke-linecap="round"/>
+    ${fillPath ? `<path d="${fillPath}" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round" style="filter:drop-shadow(0 0 4px ${color})"/>` : ''}
+    <text x="${cx}" y="${cy+4}" text-anchor="middle" fill="${color}"
+      font-family="Orbitron,sans-serif" font-size="${size < 60 ? 9 : 11}" font-weight="700">${pctInt}%</text>
+  </svg>`;
+}
+
+// ─── SPARKLINE ──────────────────────────────────────────────────────────────
+function buildSparkline(kpi, days, width = 120, height = 36) {
+  const vals = days.map(d => {
+    const pts = kpi.data_points.filter(p => p.date === d);
+    return pts.reduce((s, p) => s + p.value, 0);
+  });
+
+  const maxVal = Math.max(...vals, 0.01);
+  const pct = getCurrentWeekSum(kpi) / kpi.target_weekly;
+  const lineColor = pct >= 0.7 ? 'var(--hud-green)' : 'var(--hud-orange)';
+
+  if (vals.every(v => v === 0)) {
+    return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+      <text x="${width/2}" y="${height/2+4}" text-anchor="middle" fill="rgba(0,212,255,0.2)"
+        font-family="Share Tech Mono" font-size="9">NO DATA</text></svg>`;
+  }
+
+  const n = vals.length;
+  const pad = 4;
+  const xs = vals.map((_, i) => pad + (i / (n-1)) * (width - 2*pad));
+  const ys = vals.map(v => height - pad - (v / maxVal) * (height - 2*pad));
+
+  const points = xs.map((x, i) => `${x},${ys[i]}`).join(' ');
+
+  // area fill
+  const areaPoints = `${xs[0]},${height} ${points} ${xs[n-1]},${height}`;
+
+  const dotX = xs[n-1], dotY = ys[n-1];
+
+  return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+    <defs>
+      <linearGradient id="sparkGrad_${kpi.id.slice(0,8)}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${lineColor}" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="${lineColor}" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <polygon points="${areaPoints}" fill="url(#sparkGrad_${kpi.id.slice(0,8)})" opacity="0.5"/>
+    <polyline points="${points}" fill="none" stroke="${lineColor}" stroke-width="1.5"
+      stroke-linejoin="round" stroke-linecap="round"
+      style="filter:drop-shadow(0 0 3px ${lineColor})"/>
+    <circle cx="${dotX}" cy="${dotY}" r="2.5" fill="${lineColor}"
+      style="filter:drop-shadow(0 0 4px ${lineColor})"/>
+  </svg>`;
+}
+
+// ─── CHART 30gg ──────────────────────────────────────────────────────────────
+function buildChart30(kpi) {
+  const days = getLast30Days();
+  return buildSparkline(kpi, days, 340, 80);
+}
+
+// ─── RENDER ─────────────────────────────────────────────────────────────────
+function render() {
+  const grid = document.getElementById('kpiGrid');
+  const now = new Date();
+  const weekNum = getWeekNumber(now);
+  document.getElementById('headerWeek').textContent = `W${weekNum} · ${now.getFullYear()}`;
+  document.getElementById('weekLabel').textContent = `THIS WEEK — W${weekNum}`;
+
+  if (data.kpis.length === 0) {
+    grid.innerHTML = `<div class="empty-state">
+      <div class="empty-state-title">NO KPIs TRACKED</div>
+      <div>Click "+ NEW KPI" to begin tracking your performance</div>
+    </div>`;
+    document.getElementById('overallScore').textContent = '—';
+    return;
+  }
+
+  // overall score
+  const scores = data.kpis.map(k => Math.min(getCurrentWeekSum(k) / k.target_weekly, 1));
+  const overall = Math.round((scores.reduce((s,v) => s+v, 0) / scores.length) * 100);
+  document.getElementById('overallScore').textContent = overall;
+  document.getElementById('overallScore').style.color =
+    overall >= 90 ? 'var(--hud-green)' : overall >= 70 ? 'var(--hud-yellow)' : 'var(--hud-red)';
+
+  // footer
+  document.getElementById('footerMeta').textContent = `LAST UPDATE: ${new Date().toLocaleTimeString()}`;
+
+  // cards
+  grid.innerHTML = '';
+  data.kpis.forEach((kpi, idx) => {
+    const card = document.createElement('div');
+    card.className = 'kpi-card' + (kpi.id === expandedId ? ' expanded' : '');
+    card.style.animationDelay = `${idx * 0.06}s`;
+    card.innerHTML = buildCard(kpi);
+    grid.appendChild(card);
+
+    // click card (not on inputs/buttons)
+    card.addEventListener('click', e => {
+      if (e.target.closest('.card-input-row') || e.target.closest('.card-actions') || e.target.closest('.expanded-chart')) return;
+      expandedId = (expandedId === kpi.id) ? null : kpi.id;
+      render();
+    });
+  });
+}
+
+function buildCard(kpi) {
+  const cur = getCurrentWeekSum(kpi);
+  const prev = getPrevWeekSum(kpi);
+  const pct = cur / kpi.target_weekly;
+  const gaugeColor = getGaugeColor(pct);
+  const days7 = getLast7Days();
+  const sparkSvg = buildSparkline(kpi, days7, 140, 36);
+  const chart30Svg = buildChart30(kpi);
+
+  let trendHtml = '';
+  if (prev === 0 && cur === 0) {
+    trendHtml = `<span class="trend-neutral">— NO PREV DATA</span>`;
+  } else if (prev === 0) {
+    trendHtml = `<span class="trend-arrow trend-up">↑</span><span class="trend-up">NEW</span>`;
+  } else {
+    const diff = ((cur - prev) / prev * 100).toFixed(0);
+    const cls = diff >= 0 ? 'up' : 'down';
+    const arrow = diff >= 0 ? '↑' : '↓';
+    trendHtml = `<span class="trend-arrow trend-${cls}">${arrow}</span>
+      <span class="trend-${cls}">${Math.abs(diff)}% vs last week</span>`;
+  }
+
+  const categoryColors = {work:'var(--hud-cyan)',health:'var(--hud-green)',learning:'var(--hud-orange)',personal:'#cc88ff'};
+  const catColor = categoryColors[kpi.category] || 'var(--hud-cyan)';
+
+  return `
+  <div class="card-header">
+    <div class="card-title-wrap">
+      <div class="card-title">${escHtml(kpi.name)}</div>
+      <div class="card-category" style="color:${catColor};">${kpi.category.toUpperCase()} · TGT ${kpi.target_weekly}${kpi.unit}/WK</div>
+    </div>
+    <div class="card-actions">
+      <button class="btn-action" onclick="openEditModal('${kpi.id}')">EDIT</button>
+      <button class="btn-action delete" onclick="deleteKpi('${kpi.id}')">DELETE</button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="gauge-wrap">${buildGauge(pct)}</div>
+    <div class="card-data">
+      <div class="kpi-value-row">
+        <div class="kpi-value-big" style="color:${gaugeColor};text-shadow:0 0 15px ${gaugeColor};">
+          ${cur % 1 === 0 ? cur : cur.toFixed(1)}
+        </div>
+        <div class="kpi-detail">${kpi.unit}</div>
+      </div>
+      <div class="kpi-detail">${cur}/${kpi.target_weekly}${kpi.unit} (${Math.round(pct*100)}%)</div>
+      <div class="trend-row">${trendHtml}</div>
+      <div class="sparkline-wrap">${sparkSvg}</div>
+    </div>
+  </div>
+
+  <div class="expanded-chart">
+    <div class="hud-divider"></div>
+    <div style="font-size:0.5rem;color:var(--hud-text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;font-family:'Orbitron',sans-serif;">LAST 30 DAYS</div>
+    ${chart30Svg}
+  </div>
+
+  <div class="card-input-row">
+    <input class="hud-input" type="number" step="0.5" min="0"
+      placeholder="Oggi +${kpi.unit === 'h' ? '8' : kpi.unit === 'km' ? '5' : '1'}"
+      id="inp_${kpi.id}" onkeydown="if(event.key==='Enter')addValue('${kpi.id}')">
+    <button class="btn-add" onclick="addValue('${kpi.id}')">ADD</button>
+  </div>`;
+}
+
+// ─── ADD VALUE ──────────────────────────────────────────────────────────────
+function addValue(id) {
+  const inp = document.getElementById(`inp_${id}`);
+  const val = parseFloat(inp.value);
+  if (isNaN(val) || val <= 0) { showToast('INVALID VALUE'); return; }
+  const kpi = data.kpis.find(k => k.id === id);
+  if (!kpi) return;
+  const today = getDateStr(new Date());
+  const existing = kpi.data_points.find(p => p.date === today);
+  if (existing) {
+    existing.value += val;
+  } else {
+    kpi.data_points.push({ date: today, value: val });
+  }
+  saveData();
+  inp.value = '';
+  showToast(`+${val}${kpi.unit} LOGGED → ${kpi.name.toUpperCase()}`);
+  render();
+}
+
+// ─── MODAL ──────────────────────────────────────────────────────────────────
+function openNewKpiModal() {
+  editingId = null;
+  document.getElementById('modalTitle').textContent = 'NEW KPI';
+  document.getElementById('fName').value = '';
+  document.getElementById('fCategory').value = 'work';
+  document.getElementById('fUnit').value = 'h';
+  document.getElementById('fTarget').value = '';
+  openModal('kpiModal');
+}
+
+function openEditModal(id) {
+  const kpi = data.kpis.find(k => k.id === id);
+  if (!kpi) return;
+  editingId = id;
+  document.getElementById('modalTitle').textContent = 'EDIT KPI';
+  document.getElementById('fName').value = kpi.name;
+  document.getElementById('fCategory').value = kpi.category;
+  document.getElementById('fUnit').value = kpi.unit;
+  document.getElementById('fTarget').value = kpi.target_weekly;
+  openModal('kpiModal');
+}
+
+function saveKpi() {
+  const name = document.getElementById('fName').value.trim();
+  if (!name) { showToast('NAME REQUIRED'); return; }
+  const target = parseFloat(document.getElementById('fTarget').value);
+  if (isNaN(target) || target <= 0) { showToast('INVALID TARGET'); return; }
+
+  if (editingId) {
+    const kpi = data.kpis.find(k => k.id === editingId);
+    if (kpi) {
+      kpi.name = name;
+      kpi.category = document.getElementById('fCategory').value;
+      kpi.unit = document.getElementById('fUnit').value;
+      kpi.target_weekly = target;
+    }
+  } else {
+    data.kpis.push({
+      id: uuid(),
+      name,
+      category: document.getElementById('fCategory').value,
+      unit: document.getElementById('fUnit').value,
+      target_weekly: target,
+      data_points: []
+    });
+  }
+  saveData();
+  closeModal('kpiModal');
+  render();
+  showToast(editingId ? 'KPI UPDATED' : 'KPI ADDED');
+}
+
+function deleteKpi(id) {
+  if (!confirm('Delete this KPI and all its data?')) return;
+  data.kpis = data.kpis.filter(k => k.id !== id);
+  if (expandedId === id) expandedId = null;
+  saveData();
+  render();
+  showToast('KPI DELETED');
+}
+
+function openRecap() {
+  const content = document.getElementById('recapContent');
+  const scores = data.kpis.map(k => ({
+    kpi: k,
+    cur: getCurrentWeekSum(k),
+    pct: Math.min(getCurrentWeekSum(k) / k.target_weekly, 1)
+  })).sort((a,b) => b.pct - a.pct);
+
+  if (scores.length === 0) {
+    content.innerHTML = '<div style="text-align:center;color:var(--hud-text-dim);font-size:0.7rem;">NO KPIs TRACKED</div>';
+    openModal('recapModal');
+    return;
+  }
+
+  const best = scores[0];
+  const worst = scores[scores.length - 1];
+  const overall = Math.round(scores.reduce((s,v) => s + v.pct, 0) / scores.length * 100);
+  const msg = MOTIVATIONAL[Math.floor(Math.random() * MOTIVATIONAL.length)];
+
+  let html = '';
+  scores.forEach(({kpi, cur, pct}, i) => {
+    const cls = (kpi.id === best.kpi.id && scores.length > 1) ? 'best' :
+                (kpi.id === worst.kpi.id && scores.length > 1) ? 'worst' : '';
+    const badge = kpi.id === best.kpi.id && scores.length > 1 ? ' ★ BEST' :
+                  kpi.id === worst.kpi.id && scores.length > 1 ? ' ▼ WORST' : '';
+    html += `<div class="recap-kpi-row ${cls}">
+      <span>${escHtml(kpi.name)}${badge}</span>
+      <span class="recap-score-val">${Math.round(pct*100)}%</span>
+    </div>`;
+  });
+
+  const scoreColor = overall >= 90 ? 'var(--hud-green)' : overall >= 70 ? 'var(--hud-yellow)' : 'var(--hud-red)';
+  html += `<div class="recap-overall">
+    <div class="hud-divider" style="margin:16px 0;"></div>
+    <div style="font-size:0.5rem;color:var(--hud-text-dim);letter-spacing:0.2em;font-family:'Orbitron',sans-serif;">OVERALL SCORE</div>
+    <div class="recap-overall-score" style="color:${scoreColor};text-shadow:0 0 20px ${scoreColor};">${overall}/100</div>
+    <div class="recap-msg">"${msg}"</div>
+  </div>`;
+
+  content.innerHTML = html;
+  openModal('recapModal');
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+// close modal on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+});
+
+// ─── TOAST ──────────────────────────────────────────────────────────────────
+let toastTimer = null;
+function showToast(msg) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.id = 'toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = `> ${msg}`;
+  toast.style.display = 'block';
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.style.display = 'none'; }, 2000);
+}
+
+// ─── ESCAPE ──────────────────────────────────────────────────────────────────
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── SUNDAY RECAP CHECK ─────────────────────────────────────────────────────
+function checkSundayRecap() {
+  const now = new Date();
+  if (now.getDay() === 0 && now.getHours() >= 20) {
+    const key = `recap_shown_${getWeekNumber(now)}_${now.getFullYear()}`;
+    if (!localStorage.getItem(key)) {
+      localStorage.setItem(key, '1');
+      setTimeout(() => openRecap(), 1500);
+    }
+  }
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+render();
+checkSundayRecap();
+</script>
+</body>
+</html>
