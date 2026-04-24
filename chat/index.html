@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS AI ASSISTANT</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --hud-bg: #020810;
+    --hud-cyan: #00d4ff;
+    --hud-cyan-dim: rgba(0, 212, 255, 0.08);
+    --hud-cyan-border: rgba(0, 212, 255, 0.2);
+    --hud-orange: #ff7700;
+    --hud-green: #00ff88;
+    --hud-red: #ff2244;
+    --hud-text: rgba(200, 230, 255, 0.7);
+    --hud-text-dim: rgba(0, 212, 255, 0.35);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--hud-bg);
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--hud-cyan);
+    overflow: hidden;
+  }
+
+  /* Scanlines */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 998;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.13) 2px,
+      rgba(0, 0, 0, 0.13) 4px
+    );
+  }
+
+  /* Grid bg */
+  .hud-grid {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(rgba(0, 212, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 212, 255, 0.035) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  /* Corner brackets */
+  .corner {
+    position: fixed;
+    width: 70px;
+    height: 70px;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .corner::before {
+    content: '';
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: var(--hud-cyan);
+    box-shadow: 0 0 6px var(--hud-cyan);
+  }
+  .corner-tl { top: 14px; left: 14px; border-top: 1px solid var(--hud-cyan); border-left: 1px solid var(--hud-cyan); }
+  .corner-tl::before { top: -1px; left: -1px; }
+  .corner-tr { top: 14px; right: 14px; border-top: 1px solid var(--hud-cyan); border-right: 1px solid var(--hud-cyan); }
+  .corner-tr::before { top: -1px; right: -1px; }
+  .corner-bl { bottom: 14px; left: 14px; border-bottom: 1px solid var(--hud-cyan); border-left: 1px solid var(--hud-cyan); }
+  .corner-bl::before { bottom: -1px; left: -1px; }
+  .corner-br { bottom: 14px; right: 14px; border-bottom: 1px solid var(--hud-cyan); border-right: 1px solid var(--hud-cyan); }
+  .corner-br::before { bottom: -1px; right: -1px; }
+
+  /* Layout */
+  #app {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* Header */
+  #header {
+    flex-shrink: 0;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--hud-cyan-border);
+    background: rgba(2, 8, 16, 0.95);
+    position: relative;
+  }
+  #header::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--hud-cyan), transparent);
+    opacity: 0.4;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .arc-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--hud-cyan);
+    box-shadow: 0 0 12px var(--hud-cyan), 0 0 30px rgba(0,212,255,0.4);
+    animation: hud-blink 1.6s ease-in-out infinite;
+  }
+
+  .header-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 900;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--hud-cyan);
+    text-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
+  }
+
+  .header-sub {
+    font-size: 0.5rem;
+    letter-spacing: 0.18em;
+    color: var(--hud-text-dim);
+    text-transform: uppercase;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .voice-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border: 1px solid var(--hud-cyan-border);
+    background: var(--hud-cyan-dim);
+    position: relative;
+    user-select: none;
+    transition: all 0.2s;
+  }
+  .voice-toggle::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 6px; height: 6px;
+    border-top: 1px solid var(--hud-orange);
+    border-left: 1px solid var(--hud-orange);
+  }
+  .voice-toggle::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; right: -1px;
+    width: 6px; height: 6px;
+    border-bottom: 1px solid var(--hud-orange);
+    border-right: 1px solid var(--hud-orange);
+  }
+  .voice-toggle:hover { background: rgba(0,212,255,0.12); }
+  .voice-toggle.active { border-color: var(--hud-cyan); }
+  .voice-toggle.active .vt-label { color: var(--hud-cyan); }
+  .vt-icon { font-size: 0.7rem; }
+  .vt-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.45rem;
+    letter-spacing: 0.12em;
+    color: var(--hud-text-dim);
+    text-transform: uppercase;
+  }
+
+  .export-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border: 1px solid var(--hud-cyan-border);
+    background: var(--hud-cyan-dim);
+    position: relative;
+    user-select: none;
+    transition: all 0.2s;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.45rem;
+    letter-spacing: 0.12em;
+    color: var(--hud-text-dim);
+    text-transform: uppercase;
+  }
+  .export-btn::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 6px; height: 6px;
+    border-top: 1px solid var(--hud-orange);
+    border-left: 1px solid var(--hud-orange);
+  }
+  .export-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; right: -1px;
+    width: 6px; height: 6px;
+    border-bottom: 1px solid var(--hud-orange);
+    border-right: 1px solid var(--hud-orange);
+  }
+  .export-btn:hover { background: rgba(0,212,255,0.12); color: var(--hud-cyan); }
+
+  /* Status bar */
+  #status-bar {
+    flex-shrink: 0;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+    background: rgba(0,212,255,0.025);
+    border-bottom: 1px solid rgba(0,212,255,0.07);
+  }
+  .sb-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.45rem;
+    letter-spacing: 0.1em;
+    color: var(--hud-text-dim);
+    text-transform: uppercase;
+  }
+  .sb-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--hud-green);
+    box-shadow: 0 0 5px var(--hud-green);
+    animation: hud-blink 2s ease-in-out infinite;
+  }
+
+  /* Chat area */
+  #chat-wrap {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  #chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+
+  #chat-messages::-webkit-scrollbar {
+    width: 4px;
+  }
+  #chat-messages::-webkit-scrollbar-track {
+    background: rgba(0,212,255,0.04);
+  }
+  #chat-messages::-webkit-scrollbar-thumb {
+    background: rgba(0,212,255,0.2);
+  }
+
+  /* Message bubbles */
+  .msg-row {
+    display: flex;
+    flex-direction: column;
+    max-width: 75%;
+    position: relative;
+  }
+  .msg-row.user { align-self: flex-end; align-items: flex-end; }
+  .msg-row.jarvis { align-self: flex-start; align-items: flex-start; }
+
+  .msg-meta {
+    font-size: 0.42rem;
+    letter-spacing: 0.1em;
+    color: var(--hud-text-dim);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+
+  .msg-bubble {
+    padding: 10px 14px;
+    position: relative;
+    font-size: 0.75rem;
+    line-height: 1.55;
+    letter-spacing: 0.05em;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .msg-row.user .msg-bubble {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.25);
+    color: rgba(200, 230, 255, 0.9);
+    border-radius: 0;
+  }
+  .msg-row.user .msg-bubble::before {
+    content: '';
+    position: absolute;
+    top: -1px; right: -1px;
+    width: 8px; height: 8px;
+    border-top: 1px solid var(--hud-orange);
+    border-right: 1px solid var(--hud-orange);
+  }
+  .msg-row.user .msg-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: -1px;
+    width: 8px; height: 8px;
+    border-bottom: 1px solid var(--hud-orange);
+    border-left: 1px solid var(--hud-orange);
+  }
+
+  .msg-row.jarvis .msg-bubble {
+    background: rgba(255, 119, 0, 0.08);
+    border: 1px solid rgba(255, 119, 0, 0.22);
+    color: rgba(255, 200, 140, 0.9);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .msg-row.jarvis .msg-bubble:hover {
+    background: rgba(255, 119, 0, 0.13);
+    border-color: rgba(255, 119, 0, 0.4);
+  }
+  .msg-row.jarvis .msg-bubble::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 8px; height: 8px;
+    border-top: 1px solid var(--hud-orange);
+    border-left: 1px solid var(--hud-orange);
+  }
+  .msg-row.jarvis .msg-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; right: -1px;
+    width: 8px; height: 8px;
+    border-bottom: 1px solid var(--hud-orange);
+    border-right: 1px solid var(--hud-orange);
+  }
+
+  /* Copy tooltip */
+  .copy-tooltip {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,212,255,0.9);
+    color: #020810;
+    font-size: 0.4rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    pointer-events: none;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-family: 'Orbitron', sans-serif;
+  }
+  .msg-row.jarvis .msg-bubble:hover .copy-tooltip { opacity: 1; }
+
+  /* Typing indicator */
+  #typing-indicator {
+    align-self: flex-start;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(255, 119, 0, 0.06);
+    border: 1px solid rgba(255, 119, 0, 0.18);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: rgba(255, 180, 100, 0.7);
+    text-transform: uppercase;
+  }
+  #typing-indicator.show { display: flex; }
+  .typing-dots { display: flex; gap: 4px; }
+  .typing-dots span {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--hud-orange);
+    animation: typing-bounce 1.2s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typing-bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  /* Input area */
+  #input-area {
+    flex-shrink: 0;
+    padding: 12px 24px;
+    background: rgba(2, 8, 16, 0.97);
+    border-top: 1px solid var(--hud-cyan-border);
+    position: relative;
+  }
+  #input-area::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--hud-cyan), transparent);
+    opacity: 0.25;
+  }
+
+  /* Autocomplete dropdown */
+  #autocomplete {
+    position: absolute;
+    bottom: 100%;
+    left: 24px;
+    right: 24px;
+    background: rgba(2, 8, 16, 0.98);
+    border: 1px solid var(--hud-cyan-border);
+    max-height: 180px;
+    overflow-y: auto;
+    display: none;
+    z-index: 100;
+  }
+  #autocomplete.show { display: block; }
+  .ac-item {
+    padding: 7px 14px;
+    font-size: 0.65rem;
+    letter-spacing: 0.07em;
+    color: var(--hud-text);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0,212,255,0.05);
+    transition: background 0.15s;
+  }
+  .ac-item:hover, .ac-item.active {
+    background: rgba(0,212,255,0.1);
+    color: var(--hud-cyan);
+  }
+  .ac-desc {
+    font-size: 0.45rem;
+    color: var(--hud-text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  #msg-input {
+    flex: 1;
+    background: rgba(0, 212, 255, 0.06);
+    border: 1px solid var(--hud-cyan-border);
+    color: var(--hud-cyan);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    padding: 10px 14px;
+    letter-spacing: 0.08em;
+    outline: none;
+    resize: none;
+    min-height: 40px;
+    max-height: 120px;
+    overflow-y: auto;
+    line-height: 1.4;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  #msg-input:focus {
+    border-color: var(--hud-cyan);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.12);
+  }
+  #msg-input::placeholder { color: rgba(0, 212, 255, 0.25); }
+
+  #send-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: 1px solid var(--hud-cyan-border);
+    background: var(--hud-cyan-dim);
+    color: var(--hud-cyan);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.25s;
+    height: 40px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  #send-btn::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 8px; height: 8px;
+    border-top: 2px solid var(--hud-orange);
+    border-left: 2px solid var(--hud-orange);
+  }
+  #send-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; right: -1px;
+    width: 8px; height: 8px;
+    border-bottom: 2px solid var(--hud-orange);
+    border-right: 2px solid var(--hud-orange);
+  }
+  #send-btn:hover {
+    background: rgba(0, 212, 255, 0.14);
+    border-color: var(--hud-cyan);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+    color: #fff;
+  }
+
+  /* Context menu */
+  #ctx-menu {
+    position: fixed;
+    background: rgba(2, 8, 16, 0.98);
+    border: 1px solid var(--hud-cyan-border);
+    min-width: 140px;
+    z-index: 500;
+    display: none;
+  }
+  #ctx-menu.show { display: block; }
+  .ctx-item {
+    padding: 8px 14px;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: var(--hud-text);
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0,212,255,0.05);
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ctx-item:last-child { border-bottom: none; }
+  .ctx-item:hover { background: rgba(0,212,255,0.1); color: var(--hud-cyan); }
+  .ctx-item.danger:hover { background: rgba(255,34,68,0.1); color: var(--hud-red); }
+
+  /* Toast */
+  #toast-wrap {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .toast {
+    padding: 8px 16px;
+    border: 1px solid;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-family: 'Orbitron', sans-serif;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: all 0.3s;
+    position: relative;
+  }
+  .toast.show { opacity: 1; transform: translateX(0); }
+  .toast.success {
+    background: rgba(0, 255, 136, 0.08);
+    border-color: rgba(0, 255, 136, 0.3);
+    color: var(--hud-green);
+  }
+  .toast.error {
+    background: rgba(255, 34, 68, 0.08);
+    border-color: rgba(255, 34, 68, 0.3);
+    color: var(--hud-red);
+  }
+
+  /* Animations */
+  @keyframes hud-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.1; }
+  }
+  @keyframes hud-pulse {
+    0%, 100% { box-shadow: 0 0 18px rgba(0, 212, 255, 0.5), 0 0 55px rgba(0, 100, 255, 0.2); }
+    50% { box-shadow: 0 0 28px rgba(0, 212, 255, 0.8), 0 0 85px rgba(0, 150, 255, 0.4); }
+  }
+
+  /* Welcome message */
+  .welcome-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    align-self: center;
+    margin: 8px 0;
+  }
+  .welcome-divider::before,
+  .welcome-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,212,255,0.2), transparent);
+    width: 60px;
+  }
+  .welcome-divider span {
+    font-size: 0.45rem;
+    letter-spacing: 0.18em;
+    color: var(--hud-text-dim);
+    text-transform: uppercase;
+    font-family: 'Orbitron', sans-serif;
+  }
+</style>
+</head>
+<body>
+<div class="hud-grid"></div>
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<div id="app">
+  <!-- Header -->
+  <div id="header">
+    <div class="header-left">
+      <div class="arc-dot"></div>
+      <div>
+        <div class="header-title">JARVIS AI ASSISTANT</div>
+        <div class="header-sub">Just A Rather Very Intelligent System · v4.1.2</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="voice-toggle" id="voice-toggle" title="Toggle voice response">
+        <span class="vt-icon">🔊</span>
+        <span class="vt-label">Read Response</span>
+      </div>
+      <div class="export-btn" id="export-btn" title="Export chat history">
+        ⬇ Export Chat
+      </div>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div id="status-bar">
+    <div class="sb-item"><div class="sb-dot"></div> ONLINE</div>
+    <div class="sb-item" id="sb-time">SYS TIME: --:--</div>
+    <div class="sb-item" id="sb-msgs">MSGS: 0</div>
+    <div class="sb-item">PARSER: REGEX v2.0</div>
+    <div class="sb-item">STORAGE: LOCAL</div>
+  </div>
+
+  <!-- Chat -->
+  <div id="chat-wrap">
+    <div id="chat-messages">
+      <!-- messages injected here -->
+    </div>
+    <div id="typing-indicator">
+      <span>JARVIS IS PROCESSING</span>
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <!-- Input area -->
+  <div id="input-area">
+    <div id="autocomplete"></div>
+    <div class="input-row">
+      <textarea id="msg-input" rows="1" placeholder="Enter command... (type 'help' for list)"></textarea>
+      <button id="send-btn">SEND ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- Context menu -->
+<div id="ctx-menu">
+  <div class="ctx-item" id="ctx-copy">📋 Copy</div>
+  <div class="ctx-item" id="ctx-react">😀 React</div>
+  <div class="ctx-item danger" id="ctx-delete">✕ Delete</div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const CHAT_KEY = 'jarvis_ai_chat_history';
+const MAX_HISTORY = 100;
+const USER_EMAIL = 'mattecava02@gmail.com';
+const USER_NAME = 'Matteo Cavalleri';
+const USER_ROLE = 'Automation & Control Engineer';
+
+// ─── COMMAND CATALOG (for autocomplete) ──────────────────────────────────────
+const COMMANDS = [
+  { cmd: 'help',        desc: 'Show all commands' },
+  { cmd: 'weather',     desc: 'Weather in Milano' },
+  { cmd: 'meteo',       desc: 'Meteo Milano' },
+  { cmd: 'tasks',       desc: 'Task in scadenza' },
+  { cmd: 'energy',      desc: 'Consumo energetico' },
+  { cmd: 'consumo',     desc: 'Consumo energetico' },
+  { cmd: 'kpi',         desc: 'Weekly KPI score' },
+  { cmd: 'network',     desc: 'Stato rete' },
+  { cmd: 'connessione', desc: 'Stato rete' },
+  { cmd: 'time',        desc: 'Ora corrente' },
+  { cmd: 'ora',         desc: 'Ora corrente' },
+  { cmd: 'date',        desc: 'Data corrente' },
+  { cmd: 'data',        desc: 'Data corrente' },
+  { cmd: 'lights on',   desc: 'Accendi luci [device]' },
+  { cmd: 'lights off',  desc: 'Spegni luci [device]' },
+  { cmd: 'luci on',     desc: 'Accendi luci [device]' },
+  { cmd: 'luci off',    desc: 'Spegni luci [device]' },
+  { cmd: 'temperature', desc: 'Imposta temperatura [°C]' },
+  { cmd: 'scene',       desc: 'Attiva scena [nome]' },
+  { cmd: 'profile',     desc: 'Profilo utente' },
+  { cmd: 'who are you', desc: 'Presentazione JARVIS' },
+  { cmd: 'chi sei',     desc: 'Presentazione JARVIS' },
+  { cmd: 'clear',       desc: 'Pulisci chat' },
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let chatHistory = [];
+let voiceEnabled = false;
+let ctxTargetId = null;
+let acSelectedIdx = -1;
+
+// ─── DOM REFS ─────────────────────────────────────────────────────────────────
+const $msgs    = document.getElementById('chat-messages');
+const $input   = document.getElementById('msg-input');
+const $sendBtn = document.getElementById('send-btn');
+const $typing  = document.getElementById('typing-indicator');
+const $ac      = document.getElementById('autocomplete');
+const $ctxMenu = document.getElementById('ctx-menu');
+const $voiceToggle = document.getElementById('voice-toggle');
+const $exportBtn   = document.getElementById('export-btn');
+const $sbTime  = document.getElementById('sb-time');
+const $sbMsgs  = document.getElementById('sb-msgs');
+
+// ─── UTILITIES ────────────────────────────────────────────────────────────────
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+function fmtTime(ts) {
+  const d = new Date(ts);
+  return d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+function fmtTimestamp(ts) {
+  const d = new Date(ts);
+  return d.toLocaleString('it-IT', {
+    hour: '2-digit', minute: '2-digit',
+    day: '2-digit', month: '2-digit'
+  });
+}
+
+function getWeekday(d) {
+  const days = ['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+  const months = ['gennaio','febbraio','marzo','aprile','maggio','giugno',
+                  'luglio','agosto','settembre','ottobre','novembre','dicembre'];
+  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function toast(msg, type = 'success') {
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  wrap.appendChild(el);
+  requestAnimationFrame(() => {
+    el.classList.add('show');
+    setTimeout(() => {
+      el.classList.remove('show');
+      setTimeout(() => el.remove(), 300);
+    }, 2500);
+  });
+}
+
+function getLSJson(key) {
+  try {
+    const v = localStorage.getItem(key);
+    return v ? JSON.parse(v) : null;
+  } catch { return null; }
+}
+
+// ─── STATUS BAR UPDATE ────────────────────────────────────────────────────────
+function updateStatusBar() {
+  const now = new Date();
+  $sbTime.textContent = 'SYS TIME: ' + now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  $sbMsgs.textContent = 'MSGS: ' + chatHistory.length;
+}
+setInterval(updateStatusBar, 1000);
+updateStatusBar();
+
+// ─── INTENT PARSER ────────────────────────────────────────────────────────────
+function parseIntent(input) {
+  const s = input.toLowerCase().trim();
+
+  // CLEAR
+  if (/^clear$/.test(s)) return { intent: 'clear' };
+
+  // HELP
+  if (/^(help|commands|comandi)$/.test(s)) return { intent: 'help' };
+
+  // TIME
+  if (/^(time|ora|che ore sono|orario)/.test(s)) return { intent: 'time' };
+
+  // DATE
+  if (/^(date|data|che giorno è|giorno)/.test(s)) return { intent: 'date' };
+
+  // WEATHER / METEO
+  if (/(weather|meteo|pioggia|temperatura esterna|clima)/.test(s)) return { intent: 'weather' };
+
+  // LIGHTS ON
+  const lightsOn = s.match(/^(lights on|luci on|accendi)(?: (.+))?$/);
+  if (lightsOn) return { intent: 'lights_on', device: lightsOn[2] || 'all' };
+
+  // LIGHTS OFF
+  const lightsOff = s.match(/^(lights off|luci off|spegni)(?: (.+))?$/);
+  if (lightsOff) return { intent: 'lights_off', device: lightsOff[2] || 'all' };
+
+  // TEMPERATURE SET
+  const tempMatch = s.match(/^(temperature|temperatura)(?: (.+))?$/);
+  if (tempMatch) return { intent: 'temperature', value: tempMatch[2] || null };
+
+  // SCENE
+  const sceneMatch = s.match(/^(scene|scena)(?: (.+))?$/);
+  if (sceneMatch) return { intent: 'scene', name: sceneMatch[2] || null };
+
+  // TASKS
+  if (/^(tasks?|to-?do|scadenze)/.test(s)) return { intent: 'tasks' };
+
+  // ENERGY
+  if (/(energy|energia|consumo|watt|kwh)/.test(s)) return { intent: 'energy' };
+
+  // KPI
+  if (/^(kpi|kpis|performance|metrics)/.test(s)) return { intent: 'kpi' };
+
+  // NETWORK
+  if (/(network|rete|connessione|ping|internet|wifi)/.test(s)) return { intent: 'network' };
+
+  // WHO ARE YOU
+  if (/(who are you|chi sei|presentati|chi sei tu)/.test(s)) return { intent: 'identity' };
+
+  // PROFILE
+  if (/^(profile|profilo|chi sono)/.test(s)) return { intent: 'profile' };
+
+  return { intent: 'unknown' };
+}
+
+// ─── RESPONSE GENERATOR ──────────────────────────────────────────────────────
+function generateResponse(parsed) {
+  const now = new Date();
+
+  switch (parsed.intent) {
+    case 'time':
+      return `⏱ ${now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} — ${getWeekday(now)}`;
+
+    case 'date':
+      return `📅 ${getWeekday(now)}`;
+
+    case 'weather': {
+      const data = getLSJson('jarvis_weather_data');
+      if (data) {
+        return `🌤 Weather in ${data.city || 'Milano'}: ${data.temp || '--'}°C, ${data.condition || '--'}
+  Humidity: ${data.humidity || '--'}% · Wind: ${data.wind || '--'} km/h`;
+      }
+      return `🌤 Weather in Milano: 18°C, parzialmente nuvoloso
+  Humidity: 62% · Wind: 12 km/h
+  ─ [mock data — connect jarvis_weather_data in localStorage]`;
+    }
+
+    case 'lights_on': {
+      const dev = parsed.device === 'all' ? 'all lights' : parsed.device;
+      const devices = getLSJson('jarvis_devices');
+      if (devices) {
+        return `💡 Turning ON: ${dev}
+  Status updated in home controller.`;
+      }
+      return `💡 Turning on ${dev}
+  ─ [mock — no jarvis_devices in localStorage]`;
+    }
+
+    case 'lights_off': {
+      const dev = parsed.device === 'all' ? 'all lights' : parsed.device;
+      return `🔴 Turning off ${dev}
+  ─ [mock — no jarvis_devices in localStorage]`;
+    }
+
+    case 'temperature': {
+      const val = parsed.value ? parsed.value.replace(/[^0-9.]/g, '') : '21';
+      return `🌡 Setting temperature to ${val}°C
+  Thermostat command sent to home controller.
+  ─ [mock — connect jarvis_devices]`;
+    }
+
+    case 'scene': {
+      const name = parsed.name || 'default';
+      return `🎬 Activating scene: "${name.charAt(0).toUpperCase() + name.slice(1)}"
+  Scene parameters applied.
+  ─ [mock — connect jarvis_devices]`;
+    }
+
+    case 'tasks': {
+      const data = getLSJson('jarvis_tasks_data');
+      if (data && Array.isArray(data.tasks) && data.tasks.length > 0) {
+        const overdue = data.tasks.filter(t => t.overdue || t.dueToday);
+        if (overdue.length === 0) return `✅ No tasks due today or overdue.`;
+        return `📋 Task in scadenza (${overdue.length}):\n` + overdue.map(t =>
+          `  · ${t.title} — ${t.due || 'oggi'}`).join('\n');
+      }
+      return `📋 Task in scadenza:
+  · Calibrate PID controller  [scade domani]
+  · Submit lab report          [scade dopodomani]
+  · Review Simulink model      [questa settimana]
+  ─ [mock — connect jarvis_tasks_data]`;
+    }
+
+    case 'energy': {
+      const data = getLSJson('jarvis_energy_data');
+      if (data) {
+        return `⚡ Energy report:
+  Today: ${data.today_kwh || '--'} kWh  |  Cost: €${data.today_cost || '--'}
+  Peak: ${data.peak_time || '--'} (${data.peak_watts || '--'} W)
+  Monthly avg: ${data.monthly_avg || '--'} kWh`;
+      }
+      return `⚡ Energy report:
+  Today: 45 kWh  |  Cost: €12.50
+  Peak: 18:30 (680 W)
+  Monthly avg: 38 kWh/day
+  ─ [mock — connect jarvis_energy_data]`;
+    }
+
+    case 'kpi': {
+      const data = getLSJson('jarvis_kpi_data');
+      if (data) {
+        return `📊 KPI Weekly Score: ${data.score || '--'}/100
+  Best:  ${data.best_metric || '--'} (${data.best_pct || '--'}%)
+  Worst: ${data.worst_metric || '--'} (${data.worst_pct || '--'}%)`;
+      }
+      return `📊 KPI Weekly Score: 85/100
+  Best:  Ore di lavoro    (92%)
+  Worst: Ore di lettura   (68%)
+  Focus: Simulazioni       (78%)
+  ─ [mock — connect jarvis_kpi_data]`;
+    }
+
+    case 'network': {
+      const data = getLSJson('jarvis_network');
+      if (data) {
+        return `🌐 Network status:
+  Ping: ${data.ping || '--'} ms  |  DL: ${data.dl || '--'} Mbps  |  UL: ${data.ul || '--'} Mbps
+  ISP: ${data.isp || '--'}  |  IP: ${data.ip || '--'}`;
+      }
+      return `🌐 Network status:
+  Ping: 18 ms  |  DL: 450 Mbps  |  UL: 120 Mbps
+  ISP: Fastweb  |  Status: ONLINE
+  ─ [mock — connect jarvis_network]`;
+    }
+
+    case 'identity':
+      return `🤖 Sono JARVIS — Just A Rather Very Intelligent System.
+  Assistente AI della tua casa intelligente e workstation.
+  Versione: 4.1.2  |  Core: intent-parser v2.0
+  Operational since: 2026-01-01`;
+
+    case 'profile':
+      return `👤 Profilo utente:
+  Name:  ${USER_NAME}
+  Email: ${USER_EMAIL}
+  Role:  ${USER_ROLE}
+  Session: ${new Date().toLocaleDateString('it-IT')}`;
+
+    case 'help':
+      return `📖 COMANDI DISPONIBILI:
+─────────────────────────────────
+  SISTEMA
+    time / ora            → Ora corrente
+    date / data           → Data corrente
+    clear                 → Pulisci chat
+
+  METEO
+    weather / meteo       → Meteo Milano
+
+  SMART HOME
+    lights on [device]    → Accendi luci
+    lights off [device]   → Spegni luci
+    temperature [val]     → Imposta °C
+    scene [nome]          → Attiva scena
+
+  DATI APP
+    tasks                 → Task in scadenza
+    energy / consumo      → Consumo energetico
+    kpi / kpis            → KPI settimanali
+    network / connessione → Stato rete
+
+  INFO
+    who are you / chi sei → Presentazione
+    profile               → Profilo utente
+    help / commands       → Questa lista
+─────────────────────────────────
+  💡 Tip: click JARVIS msg to copy`;
+
+    case 'clear':
+      return '__CLEAR__';
+
+    case 'unknown':
+    default:
+      return `⚠ Command not recognized.\nType 'help' to see available commands.\n\nInput: "${arguments[0]?.raw || ''}"`;
+  }
+}
+
+// ─── RENDER MESSAGE ──────────────────────────────────────────────────────────
+function renderMessage(entry) {
+  const row = document.createElement('div');
+  row.className = `msg-row ${entry.role}`;
+  row.dataset.id = entry.id;
+
+  const meta = document.createElement('div');
+  meta.className = 'msg-meta';
+  meta.textContent = (entry.role === 'user' ? 'YOU' : 'JARVIS') + ' · ' + fmtTimestamp(entry.timestamp);
+  row.appendChild(meta);
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.textContent = entry.message;
+
+  if (entry.role === 'jarvis') {
+    const tooltip = document.createElement('div');
+    tooltip.className = 'copy-tooltip';
+    tooltip.textContent = 'Click to copy';
+    bubble.appendChild(tooltip);
+
+    bubble.addEventListener('click', () => {
+      navigator.clipboard.writeText(entry.message).then(() => {
+        toast('Copied to clipboard', 'success');
+      }).catch(() => toast('Copy failed', 'error'));
+    });
+
+    bubble.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      showCtxMenu(e.clientX, e.clientY, entry.id);
+    });
+  }
+
+  row.appendChild(bubble);
+
+  // React display
+  if (entry.reaction) {
+    const react = document.createElement('div');
+    react.className = 'msg-meta';
+    react.style.marginTop = '3px';
+    react.textContent = entry.reaction;
+    row.appendChild(react);
+  }
+
+  return row;
+}
+
+function scrollBottom() {
+  $msgs.scrollTop = $msgs.scrollHeight;
+}
+
+function addMessageToDOM(entry) {
+  const el = renderMessage(entry);
+  $msgs.appendChild(el);
+  scrollBottom();
+}
+
+// ─── CHAT HISTORY PERSISTENCE ────────────────────────────────────────────────
+function loadHistory() {
+  const saved = getLSJson(CHAT_KEY);
+  if (saved && Array.isArray(saved.chat_history)) {
+    chatHistory = saved.chat_history;
+    chatHistory.forEach(entry => addMessageToDOM(entry));
+  } else {
+    // Welcome msg
+    appendJarvis('JARVIS ONLINE. All systems nominal.\n\nBenvenuto, ' + USER_NAME + '.\nType \'help\' to see available commands or start with a query.');
+  }
+  updateStatusBar();
+}
+
+function saveHistory() {
+  if (chatHistory.length > MAX_HISTORY) {
+    chatHistory = chatHistory.slice(-MAX_HISTORY);
+  }
+  localStorage.setItem(CHAT_KEY, JSON.stringify({ chat_history: chatHistory }));
+  updateStatusBar();
+}
+
+// ─── MESSAGE APPEND HELPERS ───────────────────────────────────────────────────
+function appendUser(text) {
+  const entry = {
+    id: uuid(),
+    timestamp: new Date().toISOString(),
+    role: 'user',
+    message: text
+  };
+  chatHistory.push(entry);
+  addMessageToDOM(entry);
+  saveHistory();
+  return entry;
+}
+
+function appendJarvis(text) {
+  const entry = {
+    id: uuid(),
+    timestamp: new Date().toISOString(),
+    role: 'jarvis',
+    message: text
+  };
+  chatHistory.push(entry);
+  addMessageToDOM(entry);
+  saveHistory();
+  if (voiceEnabled) speak(text);
+  return entry;
+}
+
+// ─── SEND FLOW ────────────────────────────────────────────────────────────────
+function sendMessage() {
+  const text = $input.value.trim();
+  if (!text) return;
+  $input.value = '';
+  autoResizeInput();
+  hideAutocomplete();
+
+  appendUser(text);
+
+  // Parse + typing delay
+  const parsed = parseIntent(text);
+  parsed.raw = text;
+
+  $typing.classList.add('show');
+  scrollBottom();
+
+  const delay = 400 + Math.random() * 400;
+  setTimeout(() => {
+    $typing.classList.remove('show');
+
+    const resp = generateResponse(parsed);
+
+    if (resp === '__CLEAR__') {
+      clearChat();
+      return;
+    }
+
+    appendJarvis(resp);
+  }, delay);
+}
+
+function clearChat() {
+  chatHistory = [];
+  $msgs.innerHTML = '';
+  saveHistory();
+  setTimeout(() => appendJarvis('Chat cleared. JARVIS ready.'), 300);
+}
+
+// ─── VOICE ────────────────────────────────────────────────────────────────────
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  const clean = text.replace(/[─·▶⚡📋⏱📅🌤💡🔴🌡🎬📊🌐🤖👤📖⚠]/gu, '').trim();
+  const utt = new SpeechSynthesisUtterance(clean);
+  utt.lang = 'it-IT';
+  utt.rate = 0.95;
+  utt.pitch = 0.85;
+  window.speechSynthesis.speak(utt);
+}
+
+$voiceToggle.addEventListener('click', () => {
+  voiceEnabled = !voiceEnabled;
+  $voiceToggle.classList.toggle('active', voiceEnabled);
+  toast(voiceEnabled ? 'Voice ON' : 'Voice OFF', 'success');
+});
+
+// ─── EXPORT ───────────────────────────────────────────────────────────────────
+$exportBtn.addEventListener('click', () => {
+  const data = JSON.stringify({ chat_history: chatHistory }, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `jarvis_chat_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Chat exported', 'success');
+});
+
+// ─── AUTOCOMPLETE ─────────────────────────────────────────────────────────────
+function showAutocomplete(query) {
+  const q = query.toLowerCase();
+  if (!q) { hideAutocomplete(); return; }
+
+  const matches = COMMANDS.filter(c => c.cmd.startsWith(q) || c.cmd.includes(q));
+  if (matches.length === 0) { hideAutocomplete(); return; }
+
+  acSelectedIdx = -1;
+  $ac.innerHTML = '';
+  matches.slice(0, 7).forEach((m, i) => {
+    const item = document.createElement('div');
+    item.className = 'ac-item';
+    item.dataset.idx = i;
+    item.innerHTML = `<span>${m.cmd}</span><span class="ac-desc">${m.desc}</span>`;
+    item.addEventListener('click', () => {
+      $input.value = m.cmd;
+      $input.focus();
+      hideAutocomplete();
+    });
+    $ac.appendChild(item);
+  });
+  $ac.classList.add('show');
+}
+
+function hideAutocomplete() {
+  $ac.classList.remove('show');
+  acSelectedIdx = -1;
+}
+
+function navigateAC(dir) {
+  const items = $ac.querySelectorAll('.ac-item');
+  if (!items.length) return;
+  items[acSelectedIdx]?.classList.remove('active');
+  acSelectedIdx = (acSelectedIdx + dir + items.length) % items.length;
+  const active = items[acSelectedIdx];
+  active.classList.add('active');
+  $input.value = active.querySelector('span').textContent;
+}
+
+// ─── CONTEXT MENU ─────────────────────────────────────────────────────────────
+function showCtxMenu(x, y, id) {
+  ctxTargetId = id;
+  $ctxMenu.style.left = x + 'px';
+  $ctxMenu.style.top  = y + 'px';
+  $ctxMenu.classList.add('show');
+}
+
+document.addEventListener('click', () => $ctxMenu.classList.remove('show'));
+
+document.getElementById('ctx-copy').addEventListener('click', () => {
+  const entry = chatHistory.find(e => e.id === ctxTargetId);
+  if (entry) {
+    navigator.clipboard.writeText(entry.message)
+      .then(() => toast('Copied', 'success'))
+      .catch(() => toast('Copy failed', 'error'));
+  }
+});
+
+document.getElementById('ctx-delete').addEventListener('click', () => {
+  chatHistory = chatHistory.filter(e => e.id !== ctxTargetId);
+  document.querySelector(`[data-id="${ctxTargetId}"]`)?.remove();
+  saveHistory();
+  toast('Message deleted', 'success');
+});
+
+const REACTIONS = ['👍','⭐','🔥','✅','🤖','⚡'];
+let reactIdx = 0;
+document.getElementById('ctx-react').addEventListener('click', () => {
+  const entry = chatHistory.find(e => e.id === ctxTargetId);
+  if (!entry) return;
+  const reaction = REACTIONS[reactIdx++ % REACTIONS.length];
+  entry.reaction = reaction;
+  saveHistory();
+  // Update DOM
+  const row = document.querySelector(`[data-id="${ctxTargetId}"]`);
+  if (row) {
+    let reactEl = row.querySelector('.msg-meta:last-child');
+    if (reactEl && reactEl !== row.querySelector('.msg-meta:first-child')) {
+      reactEl.textContent = reaction;
+    } else {
+      const r = document.createElement('div');
+      r.className = 'msg-meta';
+      r.style.marginTop = '3px';
+      r.textContent = reaction;
+      row.appendChild(r);
+    }
+  }
+  toast('Reaction added ' + reaction, 'success');
+});
+
+// ─── INPUT EVENTS ─────────────────────────────────────────────────────────────
+function autoResizeInput() {
+  $input.style.height = 'auto';
+  $input.style.height = Math.min($input.scrollHeight, 120) + 'px';
+}
+
+$input.addEventListener('input', () => {
+  autoResizeInput();
+  showAutocomplete($input.value.trim());
+});
+
+$input.addEventListener('keydown', e => {
+  if ($ac.classList.contains('show')) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); navigateAC(1); return; }
+    if (e.key === 'ArrowUp')   { e.preventDefault(); navigateAC(-1); return; }
+    if (e.key === 'Escape')    { hideAutocomplete(); return; }
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const items = $ac.querySelectorAll('.ac-item');
+      if (items.length > 0) {
+        const idx = acSelectedIdx >= 0 ? acSelectedIdx : 0;
+        $input.value = items[idx].querySelector('span').textContent;
+        hideAutocomplete();
+      }
+      return;
+    }
+  }
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+$sendBtn.addEventListener('click', sendMessage);
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+loadHistory();
+scrollBottom();
+$input.focus();
+</script>
+</body>
+</html>
