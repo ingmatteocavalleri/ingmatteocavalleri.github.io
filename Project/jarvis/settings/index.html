@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS // ADMIN SETTINGS</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cyan: #00e5ff;
+    --cyan-dim: #00a8bb;
+    --orange: #ff6b00;
+    --orange-dim: #cc5500;
+    --bg: #050a0f;
+    --bg2: #080f17;
+    --bg3: #0a1520;
+    --card-bg: #0c1a26;
+    --card-border: #00e5ff33;
+    --card-border-hover: #00e5ff88;
+    --text: #c8e8f0;
+    --text-dim: #607080;
+    --green: #00ff88;
+    --red: #ff2244;
+    --yellow: #ffcc00;
+    --admin-warn-bg: #2a1a00;
+    --admin-warn-border: #ff6b0055;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,229,255,0.01) 2px, rgba(0,229,255,0.01) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,229,255,0.01) 2px, rgba(0,229,255,0.01) 4px);
+  }
+
+  /* SCANLINES */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 3px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(180deg, #0a1f2e 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--card-border);
+    padding: 20px 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .breadcrumb {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+
+  .breadcrumb span { color: var(--cyan); }
+
+  .header-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--cyan);
+    text-shadow: 0 0 20px rgba(0,229,255,0.6);
+    letter-spacing: 4px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-title::before {
+    content: '⬡';
+    color: var(--orange);
+    font-size: 20px;
+    text-shadow: 0 0 15px rgba(255,107,0,0.8);
+  }
+
+  .header-badge {
+    font-size: 10px;
+    background: var(--orange);
+    color: #000;
+    padding: 2px 8px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  /* LAYOUT */
+  .main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 28px;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+
+  .card:hover { border-color: var(--card-border-hover); }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  }
+
+  .card-admin-warn {
+    background: var(--admin-warn-bg);
+    border-color: var(--admin-warn-border);
+  }
+
+  .card-admin-warn::before {
+    background: linear-gradient(90deg, transparent, var(--orange), transparent);
+  }
+
+  .section-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--cyan-dim), transparent);
+  }
+
+  /* READONLY INFO GRID */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .info-field {
+    background: var(--bg3);
+    border: 1px solid var(--card-border);
+    padding: 12px 16px;
+  }
+
+  .info-field-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .info-field-value {
+    font-size: 14px;
+    color: var(--cyan);
+  }
+
+  .role-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
+  .role-admin { background: rgba(255,107,0,0.2); color: var(--orange); border: 1px solid var(--orange); }
+  .role-user { background: rgba(0,229,255,0.1); color: var(--cyan); border: 1px solid var(--cyan-dim); }
+
+  /* AVATAR */
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .avatar-container {
+    width: 72px;
+    height: 72px;
+    border: 2px solid var(--cyan);
+    background: var(--bg3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--cyan);
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0,229,255,0.3);
+  }
+
+  .avatar-container img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* INPUTS */
+  .input-group { margin-bottom: 16px; }
+
+  .input-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="url"],
+  input[type="number"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--cyan-dim);
+    color: var(--text);
+    padding: 10px 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  input:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 10px rgba(255,107,0,0.3);
+  }
+
+  input[type="number"] { width: 120px; }
+
+  .input-error {
+    font-size: 10px;
+    color: var(--red);
+    margin-top: 4px;
+    letter-spacing: 1px;
+  }
+
+  /* BUTTONS */
+  .btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 10px 24px;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    transform: translate(-50%,-50%);
+    transition: width 0.4s, height 0.4s;
+  }
+
+  .btn:active::before { width: 300px; height: 300px; }
+
+  .btn-orange { background: var(--orange); color: #000; }
+  .btn-orange:hover { background: #ff8c00; box-shadow: 0 0 20px rgba(255,107,0,0.5); }
+
+  .btn-cyan { background: transparent; color: var(--cyan); border: 1px solid var(--cyan); }
+  .btn-cyan:hover { background: rgba(0,229,255,0.1); box-shadow: 0 0 15px rgba(0,229,255,0.3); }
+
+  .btn-gray { background: #1a2530; color: var(--text-dim); border: 1px solid #2a3540; }
+  .btn-gray:hover { background: #1e2d3a; }
+
+  .btn-red { background: var(--red); color: #fff; }
+  .btn-red:hover { background: #ff3355; box-shadow: 0 0 20px rgba(255,34,68,0.5); }
+
+  .btn-sm { padding: 7px 16px; font-size: 10px; }
+
+  .btn-full { width: 100%; }
+
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  /* TOGGLE */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(0,229,255,0.08);
+  }
+
+  .toggle-row:last-child { border-bottom: none; }
+
+  .toggle-info { flex: 1; }
+  .toggle-title { font-size: 13px; color: var(--text); margin-bottom: 3px; }
+  .toggle-desc { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
+
+  .toggle-switch {
+    position: relative;
+    width: 48px;
+    height: 24px;
+    flex-shrink: 0;
+    margin-left: 16px;
+  }
+
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #1a2530;
+    border: 1px solid #2a3540;
+    transition: 0.3s;
+  }
+
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 2px; top: 2px;
+    background: var(--text-dim);
+    transition: 0.3s;
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background: rgba(0,229,255,0.15);
+    border-color: var(--cyan);
+    box-shadow: 0 0 10px rgba(0,229,255,0.3);
+  }
+
+  .toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(24px);
+    background: var(--cyan);
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--card-border), transparent);
+    margin: 20px 0;
+  }
+
+  /* PASSWORD SECTION */
+  .pwd-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--card-bg);
+    border: 1px solid var(--cyan);
+    width: 480px;
+    max-width: 95vw;
+    padding: 32px;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,229,255,0.2);
+  }
+
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  }
+
+  .modal-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    color: var(--cyan);
+    letter-spacing: 3px;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: none;
+    border: 1px solid var(--text-dim);
+    color: var(--text-dim);
+    width: 28px; height: 28px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .modal-close:hover { border-color: var(--red); color: var(--red); }
+
+  /* CONFIRM DIALOG */
+  .confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+  }
+
+  .confirm-overlay.active { display: flex; }
+
+  .confirm-box {
+    background: var(--card-bg);
+    border: 1px solid var(--red);
+    padding: 32px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(255,34,68,0.2);
+  }
+
+  .confirm-box::before {
+    content: '';
+    display: block;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--red), transparent);
+    margin-bottom: 24px;
+  }
+
+  .confirm-text {
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  .confirm-sub {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+  }
+
+  /* TOAST */
+  .toast-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .toast {
+    padding: 12px 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    border-left: 3px solid;
+    animation: slideIn 0.3s ease;
+    max-width: 350px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+
+  .toast-success { background: rgba(0,255,136,0.1); border-color: var(--green); color: var(--green); }
+  .toast-error { background: rgba(255,34,68,0.1); border-color: var(--red); color: var(--red); }
+  .toast-info { background: rgba(0,229,255,0.1); border-color: var(--cyan); color: var(--cyan); }
+
+  @keyframes slideIn {
+    from { transform: translateX(100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* GAUGE */
+  .gauge-row {
+    display: flex;
+    gap: 24px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+  }
+
+  .gauge-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .gauge-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+
+  .gauge-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--cyan);
+    text-shadow: 0 0 10px rgba(0,229,255,0.5);
+    text-align: center;
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar-wrap {
+    width: 100%;
+    height: 6px;
+    background: var(--bg3);
+    border: 1px solid var(--card-border);
+    margin: 12px 0;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan-dim), var(--cyan));
+    box-shadow: 0 0 8px rgba(0,229,255,0.5);
+    transition: width 0.1s linear;
+    width: 0%;
+  }
+
+  /* SPEED TEST */
+  .speed-test-ts {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+
+  /* PING */
+  .ping-result {
+    font-size: 13px;
+    margin: 10px 0;
+    padding: 8px 14px;
+    background: var(--bg3);
+    border-left: 3px solid var(--cyan);
+  }
+
+  .ping-result.ok { border-color: var(--green); color: var(--green); }
+  .ping-result.timeout { border-color: var(--red); color: var(--red); }
+
+  .ping-history { margin-top: 12px; }
+
+  .ping-history-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(0,229,255,0.06);
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .ping-history-item .ms { color: var(--cyan); }
+
+  .icmp-details {
+    display: none;
+    margin-top: 10px;
+    padding: 10px;
+    background: var(--bg3);
+    border: 1px solid var(--card-border);
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  .icmp-details.visible { display: block; }
+
+  /* DEVICES TABLE */
+  .devices-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .devices-table th {
+    text-align: left;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--card-border);
+    background: var(--bg3);
+  }
+
+  .devices-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(0,229,255,0.05);
+  }
+
+  .devices-scroll { max-height: 200px; overflow-y: auto; }
+
+  .status-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+
+  .status-online { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-offline { background: var(--text-dim); }
+
+  /* CHART */
+  .chart-wrap {
+    position: relative;
+    margin: 16px 0;
+  }
+
+  #speedChart {
+    width: 100%;
+    height: 120px;
+    display: block;
+  }
+
+  .chart-tooltip {
+    position: absolute;
+    background: var(--card-bg);
+    border: 1px solid var(--cyan);
+    padding: 6px 10px;
+    font-size: 11px;
+    pointer-events: none;
+    display: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  }
+
+  .chart-legend {
+    display: flex;
+    gap: 20px;
+    font-size: 11px;
+    margin-top: 6px;
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 6px; color: var(--text-dim); }
+  .legend-dot { width: 12px; height: 3px; }
+
+  .avg-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+    border: 1px solid var(--cyan-dim);
+    color: var(--cyan);
+    background: rgba(0,229,255,0.05);
+    margin-right: 10px;
+  }
+
+  /* UPTIME */
+  .uptime-bars {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    height: 80px;
+    margin: 16px 0;
+  }
+
+  .uptime-day {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+
+  .uptime-bar {
+    width: 100%;
+    min-height: 4px;
+    position: relative;
+    transition: all 0.3s;
+  }
+
+  .uptime-pct {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0;
+  }
+
+  .uptime-day-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .uptime-avg-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--green);
+    text-shadow: 0 0 20px rgba(0,255,136,0.5);
+    letter-spacing: 2px;
+    margin: 8px 0;
+  }
+
+  /* PING INPUT ROW */
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  .input-row .input-group { flex: 1; margin-bottom: 0; }
+
+  /* API HEALTH */
+  .health-result {
+    display: inline-block;
+    padding: 6px 16px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    margin-left: 12px;
+    border: 1px solid;
+  }
+
+  .health-ok { color: var(--green); border-color: var(--green); background: rgba(0,255,136,0.05); }
+  .health-err { color: var(--red); border-color: var(--red); background: rgba(255,34,68,0.05); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg3); }
+  ::-webkit-scrollbar-thumb { background: var(--cyan-dim); }
+
+  /* MISC */
+  .text-dim { color: var(--text-dim); font-size: 12px; }
+  .text-warn { color: var(--orange); font-size: 12px; letter-spacing: 1px; }
+  .mt8 { margin-top: 8px; }
+  .mt16 { margin-top: 16px; }
+  .mt20 { margin-top: 20px; }
+
+  .admin-only-msg {
+    padding: 16px;
+    border: 1px dashed var(--admin-warn-border);
+    color: var(--orange);
+    font-size: 12px;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logout-section {
+    background: rgba(255,34,68,0.03);
+    border-color: rgba(255,34,68,0.2);
+  }
+
+  .logout-section::before {
+    background: linear-gradient(90deg, transparent, var(--red), transparent);
+  }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="breadcrumb">HOME &gt; <span>SETTINGS</span></div>
+  <div class="header-title">
+    ADMIN SETTINGS
+    <span class="header-badge" id="roleBadgeHeader">USER</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ═══════════════════════════════════════════
+       SEZIONE 1: PROFILO UTENTE
+  ═══════════════════════════════════════════ -->
+  <div class="card">
+    <div class="section-label">01 // PROFILO UTENTE</div>
+
+    <div class="profile-header">
+      <div class="avatar-container" id="avatarDisplay">
+        <span id="avatarInitial">M</span>
+      </div>
+      <div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:16px;color:var(--cyan);margin-bottom:4px;" id="displayName">Matteo</div>
+        <div style="font-size:11px;color:var(--text-dim);" id="displayEmail">mattecava02@gmail.com</div>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-field">
+        <div class="info-field-label">Nome</div>
+        <div class="info-field-value" id="infoName">Matteo</div>
+      </div>
+      <div class="info-field">
+        <div class="info-field-label">Email</div>
+        <div class="info-field-value" id="infoEmail" style="font-size:12px">mattecava02@gmail.com</div>
+      </div>
+      <div class="info-field">
+        <div class="info-field-label">User ID</div>
+        <div class="info-field-value" style="font-size:12px;color:var(--text-dim)" id="infoId">USR-2402-ALFA</div>
+      </div>
+      <div class="info-field">
+        <div class="info-field-label">Ruolo</div>
+        <div class="info-field-value">
+          <span class="role-badge" id="roleBadge">USER</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row mt8">
+      <button class="btn btn-cyan" onclick="openEditModal()">✎ MODIFICA PROFILO</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- CHANGE PASSWORD -->
+    <div class="section-label" style="margin-bottom:16px">CHANGE PASSWORD</div>
+    <div class="pwd-grid">
+      <div class="input-group">
+        <label class="input-label">Password attuale</label>
+        <input type="password" id="pwdCurrent" placeholder="••••••••">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Nuova password</label>
+        <input type="password" id="pwdNew" placeholder="••••••••" oninput="validatePwd()">
+        <div class="input-error" id="pwdNewErr"></div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Conferma password</label>
+        <input type="password" id="pwdConfirm" placeholder="••••••••" oninput="validatePwd()">
+        <div class="input-error" id="pwdConfirmErr"></div>
+      </div>
+    </div>
+    <div class="btn-row mt16">
+      <button class="btn btn-orange" onclick="changePassword()">🔑 CAMBIA PASSWORD</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SEZIONE 2: IMPOSTAZIONI APP
+  ═══════════════════════════════════════════ -->
+  <div class="card" id="appSettingsCard">
+    <div class="section-label">02 // IMPOSTAZIONI APP</div>
+    <div id="appSettingsContent">
+      <!-- filled by JS based on role -->
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SEZIONE 2B: NETWORK & CONNECTIVITY
+  ═══════════════════════════════════════════ -->
+  <div class="card">
+    <div class="section-label">02B // NETWORK &amp; CONNECTIVITY</div>
+
+    <!-- SPEED TEST -->
+    <div class="section-label" style="font-size:9px;color:var(--text-dim);margin-bottom:12px">SPEED TEST QUICK</div>
+    <div class="progress-bar-wrap" id="speedProgressWrap" style="display:none">
+      <div class="progress-bar-fill" id="speedProgressFill"></div>
+    </div>
+    <div class="gauge-row" id="gaugeRow" style="display:none">
+      <div class="gauge-wrap">
+        <svg width="70" height="70" viewBox="0 0 70 70">
+          <circle cx="35" cy="35" r="28" fill="none" stroke="#0a1520" stroke-width="6"/>
+          <circle cx="35" cy="35" r="28" fill="none" stroke="#00e5ff" stroke-width="6" stroke-dasharray="175.9" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 35 35)" id="gaugePing" style="filter:drop-shadow(0 0 4px #00e5ff)"/>
+          <text x="35" y="38" text-anchor="middle" font-family="Orbitron" font-size="12" fill="#00e5ff" id="gaugePingVal">—</text>
+        </svg>
+        <div class="gauge-label">PING</div>
+      </div>
+      <div class="gauge-wrap">
+        <svg width="70" height="70" viewBox="0 0 70 70">
+          <circle cx="35" cy="35" r="28" fill="none" stroke="#0a1520" stroke-width="6"/>
+          <circle cx="35" cy="35" r="28" fill="none" stroke="#4488ff" stroke-width="6" stroke-dasharray="175.9" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 35 35)" id="gaugeDl" style="filter:drop-shadow(0 0 4px #4488ff)"/>
+          <text x="35" y="38" text-anchor="middle" font-family="Orbitron" font-size="10" fill="#4488ff" id="gaugeDlVal">—</text>
+        </svg>
+        <div class="gauge-label">DL Mbps</div>
+      </div>
+      <div class="gauge-wrap">
+        <svg width="70" height="70" viewBox="0 0 70 70">
+          <circle cx="35" cy="35" r="28" fill="none" stroke="#0a1520" stroke-width="6"/>
+          <circle cx="35" cy="35" r="28" fill="none" stroke="#ff6b00" stroke-width="6" stroke-dasharray="175.9" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 35 35)" id="gaugeUl" style="filter:drop-shadow(0 0 4px #ff6b00)"/>
+          <text x="35" y="38" text-anchor="middle" font-family="Orbitron" font-size="10" fill="#ff6b00" id="gaugeUlVal">—</text>
+        </svg>
+        <div class="gauge-label">UL Mbps</div>
+      </div>
+    </div>
+    <div class="speed-test-ts" id="speedTestTs"></div>
+    <div class="btn-row mt8">
+      <button class="btn btn-cyan" id="speedTestBtn" onclick="runSpeedTest()">▶ RUN SPEED TEST</button>
+    </div>
+    <div class="toggle-row mt8">
+      <div class="toggle-info">
+        <div class="toggle-title">Testa automaticamente al caricamento</div>
+        <div class="toggle-desc">Esegui speed test all'apertura della pagina</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="autoTestToggle" onchange="saveAutoTest()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- PING TOOL -->
+    <div class="section-label" style="font-size:9px;color:var(--text-dim);margin-bottom:12px">PING TOOL</div>
+    <div class="input-row">
+      <div class="input-group">
+        <label class="input-label">Host</label>
+        <input type="text" id="pingHost" placeholder="google.com" onkeydown="if(event.key==='Enter')pingHost_()">
+      </div>
+      <button class="btn btn-cyan btn-sm" onclick="pingHost_()">PING</button>
+    </div>
+    <div id="pingResult"></div>
+    <div class="toggle-row" style="padding:10px 0">
+      <div class="toggle-info">
+        <div class="toggle-title">Mostra ICMP details</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="icmpToggle" onchange="toggleICMP()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="icmp-details" id="icmpDetails">
+      TTL: 64 &nbsp;|&nbsp; Protocol: ICMP &nbsp;|&nbsp; Packet size: 64 bytes<br>
+      Sequence: 1 &nbsp;|&nbsp; Checksum: 0x3A2F &nbsp;|&nbsp; Flags: DF
+    </div>
+    <div class="ping-history" id="pingHistoryWrap" style="display:none">
+      <div style="font-size:10px;color:var(--text-dim);letter-spacing:2px;margin-bottom:8px">STORICO PING</div>
+      <div id="pingHistoryList"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- CONNECTED DEVICES -->
+    <div class="section-label" style="font-size:9px;color:var(--text-dim);margin-bottom:4px">CONNECTED DEVICES</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px">Tot. <span style="color:var(--cyan)" id="deviceCount">12</span> device</div>
+    <div class="devices-scroll">
+      <table class="devices-table">
+        <thead>
+          <tr>
+            <th>Device</th>
+            <th>IP</th>
+            <th>Status</th>
+            <th>Last Seen</th>
+          </tr>
+        </thead>
+        <tbody id="devicesBody"></tbody>
+      </table>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 7-DAY SPEED HISTORY -->
+    <div class="section-label" style="font-size:9px;color:var(--text-dim);margin-bottom:12px">7-DAY SPEED HISTORY</div>
+    <div id="avgBadges">
+      <span class="avg-badge" id="dlAvgBadge">DL media: — Mbps</span>
+      <span class="avg-badge" style="border-color:var(--orange);color:var(--orange);background:rgba(255,107,0,0.05)" id="ulAvgBadge">UL media: — Mbps</span>
+    </div>
+    <div class="chart-wrap mt8">
+      <canvas id="speedChart"></canvas>
+      <div class="chart-tooltip" id="chartTooltip"></div>
+    </div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#4488ff"></div>Download</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff6b00"></div>Upload</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- UPTIME TRACKER -->
+    <div class="section-label" style="font-size:9px;color:var(--text-dim);margin-bottom:8px">UPTIME TRACKER // 7 GIORNI</div>
+    <div class="uptime-avg-badge" id="uptimeAvg">99.8% UPTIME</div>
+    <div class="uptime-bars" id="uptimeBars"></div>
+
+    <div class="divider"></div>
+
+    <!-- NETWORK SETTINGS ADMIN -->
+    <div id="networkAdminWrap"></div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SEZIONE 3: DATI & EXPORT
+  ═══════════════════════════════════════════ -->
+  <div class="card">
+    <div class="section-label">03 // DATI &amp; EXPORT</div>
+    <div class="btn-row">
+      <button class="btn btn-cyan" onclick="exportData()">⬇ EXPORT DATI (JSON)</button>
+      <button class="btn btn-gray" onclick="clearLocalData()">✕ CANCELLA DATI LOCALI</button>
+    </div>
+    <div class="text-dim mt8">Export include: profilo, network history, impostazioni.</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SEZIONE 4: LOGOUT
+  ═══════════════════════════════════════════ -->
+  <div class="card logout-section">
+    <div class="section-label">04 // SESSIONE</div>
+    <div class="text-dim" style="margin-bottom:16px">Sessione attiva. Disconnettersi terminerà la sessione corrente.</div>
+    <button class="btn btn-red" style="min-width:200px" onclick="showLogout()">⏻ LOGOUT</button>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODAL: MODIFICA PROFILO
+═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeEditModal()">✕</button>
+    <div class="modal-title">✎ MODIFICA PROFILO</div>
+    <div class="input-group">
+      <label class="input-label">Nome</label>
+      <input type="text" id="editName" placeholder="Il tuo nome">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Email</label>
+      <input type="email" id="editEmail" placeholder="email@example.com">
+      <div class="input-error" id="editEmailErr"></div>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Avatar URL (opzionale)</label>
+      <input type="url" id="editAvatar" placeholder="https://..." oninput="previewAvatar()">
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+      <div class="avatar-container" id="avatarPreview" style="width:56px;height:56px;font-size:22px">
+        <span id="avatarPreviewInitial">M</span>
+      </div>
+      <div class="text-dim">Preview avatar</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-orange" onclick="saveProfile()">✓ SALVA</button>
+      <button class="btn btn-gray" onclick="closeEditModal()">✕ ANNULLA</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM LOGOUT -->
+<div class="confirm-overlay" id="logoutConfirm">
+  <div class="confirm-box">
+    <div class="confirm-text">DISCONNESSIONE</div>
+    <div class="confirm-sub">Verrai disconnesso. Proseguire?</div>
+    <div class="btn-row" style="justify-content:center">
+      <button class="btn btn-red" onclick="doLogout()">⏻ CONFERMA LOGOUT</button>
+      <button class="btn btn-gray" onclick="hideLogout()">ANNULLA</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// STATE & MOCK DATA
+// ═══════════════════════════════════════════
+const USER = {
+  name: 'Matteo',
+  email: 'mattecava02@gmail.com',
+  id: 'USR-2402-ALFA',
+  role: 'admin', // change to 'user' to test non-admin view
+  avatar: ''
+};
+
+const MOCK_DEVICES = [
+  { name: 'MacBook Pro', ip: '192.168.1.10', status: 'online', last_seen: '2026-04-24T14:40:00Z' },
+  { name: 'iPhone 15', ip: '192.168.1.50', status: 'online', last_seen: '2026-04-24T14:38:00Z' },
+  { name: 'iPad Pro', ip: '192.168.1.51', status: 'online', last_seen: '2026-04-24T14:35:00Z' },
+  { name: 'Smart TV', ip: '192.168.1.100', status: 'online', last_seen: '2026-04-24T12:00:00Z' },
+  { name: 'PS5', ip: '192.168.1.101', status: 'offline', last_seen: '2026-04-23T22:15:00Z' },
+  { name: 'Raspberry Pi', ip: '192.168.1.20', status: 'online', last_seen: '2026-04-24T14:39:00Z' },
+  { name: 'Chromecast', ip: '192.168.1.102', status: 'offline', last_seen: '2026-04-22T18:00:00Z' },
+  { name: 'Ring Doorbell', ip: '192.168.1.200', status: 'online', last_seen: '2026-04-24T14:41:00Z' },
+  { name: 'NAS Synology', ip: '192.168.1.5', status: 'online', last_seen: '2026-04-24T14:41:00Z' },
+  { name: 'Google Home', ip: '192.168.1.201', status: 'online', last_seen: '2026-04-24T14:30:00Z' },
+  { name: 'Printer HP', ip: '192.168.1.150', status: 'offline', last_seen: '2026-04-21T09:00:00Z' },
+  { name: 'Switch Nintendo', ip: '192.168.1.103', status: 'offline', last_seen: '2026-04-20T20:00:00Z' },
+];
+
+const MOCK_7DAY = {
+  days: ['LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB', 'DOM'],
+  dl:   [410, 438, 460, 445, 480, 455, 470],
+  ul:   [105, 118, 122, 110, 130, 115, 125],
+};
+
+const MOCK_UPTIME = [0.998, 0.997, 0.999, 0.995, 0.998, 0.999, 0.997];
+
+// localStorage key
+const LS_KEY = 'jarvis_network';
+const LS_DEBUG = 'jarvis_debug';
+const LS_PROFILE = 'jarvis_profile';
+
+function loadLS() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch { return {}; }
+}
+
+function saveLS(data) {
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  loadProfile();
+  renderProfileInfo();
+  renderAppSettings();
+  renderNetworkAdmin();
+  renderDevices();
+  renderChart();
+  renderUptime();
+  loadNetworkPrefs();
+  checkAutoTest();
+  loadPingHistory();
+  loadLastSpeedTest();
+});
+
+// ═══════════════════════════════════════════
+// PROFILE
+// ═══════════════════════════════════════════
+function loadProfile() {
+  const saved = JSON.parse(localStorage.getItem(LS_PROFILE) || 'null');
+  if (saved) {
+    USER.name = saved.name || USER.name;
+    USER.email = saved.email || USER.email;
+    USER.avatar = saved.avatar || '';
+    USER.role = saved.role || USER.role;
+  }
+}
+
+function renderProfileInfo() {
+  document.getElementById('infoName').textContent = USER.name;
+  document.getElementById('infoEmail').textContent = USER.email;
+  document.getElementById('displayName').textContent = USER.name;
+  document.getElementById('displayEmail').textContent = USER.email;
+  const roleBadge = document.getElementById('roleBadge');
+  const roleHeader = document.getElementById('roleBadgeHeader');
+  roleBadge.textContent = USER.role.toUpperCase();
+  roleHeader.textContent = USER.role.toUpperCase();
+  roleBadge.className = 'role-badge ' + (USER.role === 'admin' ? 'role-admin' : 'role-user');
+  updateAvatar(document.getElementById('avatarDisplay'), 'avatarInitial');
+}
+
+function updateAvatar(container, initialId) {
+  if (USER.avatar) {
+    container.innerHTML = `<img src="${USER.avatar}" onerror="this.style.display='none'" alt="avatar">`;
+  } else {
+    const init = USER.name ? USER.name[0].toUpperCase() : '?';
+    container.innerHTML = `<span id="${initialId}">${init}</span>`;
+  }
+}
+
+function openEditModal() {
+  document.getElementById('editName').value = USER.name;
+  document.getElementById('editEmail').value = USER.email;
+  document.getElementById('editAvatar').value = USER.avatar || '';
+  previewAvatar();
+  document.getElementById('editModal').classList.add('active');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('active');
+  document.getElementById('editEmailErr').textContent = '';
+}
+
+function previewAvatar() {
+  const url = document.getElementById('editAvatar').value.trim();
+  const prev = document.getElementById('avatarPreview');
+  if (url) {
+    prev.innerHTML = `<img src="${url}" onerror="this.style.display='none'" alt="preview">`;
+  } else {
+    const init = document.getElementById('editName').value.trim()[0]?.toUpperCase() || '?';
+    prev.innerHTML = `<span id="avatarPreviewInitial">${init}</span>`;
+  }
+}
+
+function saveProfile() {
+  const name = document.getElementById('editName').value.trim();
+  const email = document.getElementById('editEmail').value.trim();
+  const avatar = document.getElementById('editAvatar').value.trim();
+  if (!name) { toast('Nome obbligatorio', 'error'); return; }
+  if (!email || !email.includes('@')) {
+    document.getElementById('editEmailErr').textContent = 'Email non valida';
+    return;
+  }
+  document.getElementById('editEmailErr').textContent = '';
+  USER.name = name;
+  USER.email = email;
+  USER.avatar = avatar;
+  localStorage.setItem(LS_PROFILE, JSON.stringify({ name, email, avatar, role: USER.role }));
+  renderProfileInfo();
+  closeEditModal();
+  toast('Profilo aggiornato', 'success');
+}
+
+// ═══════════════════════════════════════════
+// PASSWORD
+// ═══════════════════════════════════════════
+function validatePwd() {
+  const pwd = document.getElementById('pwdNew').value;
+  const conf = document.getElementById('pwdConfirm').value;
+  let err = '';
+  if (pwd.length > 0 && pwd.length < 8) err = 'Min 8 caratteri';
+  else if (pwd.length >= 8 && !/[A-Z]/.test(pwd)) err = 'Almeno 1 maiuscola';
+  else if (pwd.length >= 8 && !/[0-9]/.test(pwd)) err = 'Almeno 1 numero';
+  document.getElementById('pwdNewErr').textContent = err;
+  let confErr = '';
+  if (conf.length > 0 && conf !== pwd) confErr = 'Le password non coincidono';
+  document.getElementById('pwdConfirmErr').textContent = confErr;
+  return !err && !confErr;
+}
+
+async function changePassword() {
+  const curr = document.getElementById('pwdCurrent').value;
+  const newPwd = document.getElementById('pwdNew').value;
+  const conf = document.getElementById('pwdConfirm').value;
+  if (!curr) { toast('Inserisci la password attuale', 'error'); return; }
+  if (!newPwd || !validatePwd()) { toast('Controlla i campi password', 'error'); return; }
+  if (newPwd !== conf) { toast('Le password non coincidono', 'error'); return; }
+  // Mock API call
+  toast('Invio richiesta...', 'info');
+  await sleep(800);
+  // POST /api/change-password
+  toast('Password aggiornata ✓', 'success');
+  document.getElementById('pwdCurrent').value = '';
+  document.getElementById('pwdNew').value = '';
+  document.getElementById('pwdConfirm').value = '';
+}
+
+// ═══════════════════════════════════════════
+// APP SETTINGS
+// ═══════════════════════════════════════════
+function renderAppSettings() {
+  const wrap = document.getElementById('appSettingsContent');
+  if (USER.role !== 'admin') {
+    document.getElementById('appSettingsCard').classList.add('card-admin-warn');
+    wrap.innerHTML = `
+      <div class="admin-only-msg">
+        <span style="font-size:20px">⚠</span>
+        Questa sezione è disponibile solo per amministratori.
+      </div>`;
+    return;
+  }
+
+  const regsOpen = localStorage.getItem('jarvis_regs_open') !== 'false';
+  const debugOn = localStorage.getItem(LS_DEBUG) === 'true';
+
+  wrap.innerHTML = `
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-title">Consenti nuove registrazioni</div>
+        <div class="toggle-desc">Quando disattivato, solo admin possono accedere</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="regsToggle" ${regsOpen ? 'checked' : ''} onchange="setRegistrations()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-title">Abilita debug mode</div>
+        <div class="toggle-desc">Log verbose API, dump localStorage in console</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="debugToggle" ${debugOn ? 'checked' : ''} onchange="setDebugMode()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div style="margin-top:16px">
+      <button class="btn btn-cyan btn-sm" onclick="goAdmin()">⬡ VAI A ADMIN PANEL</button>
+    </div>`;
+}
+
+async function setRegistrations() {
+  const val = document.getElementById('regsToggle').checked;
+  localStorage.setItem('jarvis_regs_open', val);
+  // PATCH /api/admin/config
+  await sleep(400);
+  toast('Modifiche salvate', 'success');
+  if (localStorage.getItem(LS_DEBUG) === 'true') console.log('[JARVIS DEBUG] PATCH /api/admin/config', { registrations_open: val });
+}
+
+function setDebugMode() {
+  const val = document.getElementById('debugToggle').checked;
+  localStorage.setItem(LS_DEBUG, val);
+  if (val) {
+    console.log('[JARVIS DEBUG] Debug mode ON');
+    console.log('[JARVIS DEBUG] localStorage:', JSON.stringify({ ...localStorage }, null, 2));
+    toast('Debug mode attivo — vedi console', 'info');
+  } else {
+    toast('Debug mode disattivato', 'info');
+  }
+}
+
+function goAdmin() { window.open('/admin/index.html', '_blank'); }
+
+// ═══════════════════════════════════════════
+// NETWORK ADMIN
+// ═══════════════════════════════════════════
+function renderNetworkAdmin() {
+  const wrap = document.getElementById('networkAdminWrap');
+  if (USER.role !== 'admin') { wrap.innerHTML = ''; return; }
+
+  const monEnabled = localStorage.getItem('jarvis_net_mon') === 'true';
+  const interval = localStorage.getItem('jarvis_net_interval') || '5';
+
+  wrap.innerHTML = `
+    <div class="section-label" style="font-size:9px;color:var(--text-dim);margin-bottom:12px">NETWORK SETTINGS // ADMIN</div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-title">Abilita monitoraggio rete</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="netMonToggle" ${monEnabled ? 'checked' : ''} onchange="saveNetMon()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="input-group mt16">
+      <label class="input-label">Intervallo check (minuti)</label>
+      <input type="number" id="netIntervalInput" min="1" max="60" value="${interval}" onchange="saveNetInterval()">
+    </div>
+    <div class="btn-row mt16" style="align-items:center">
+      <button class="btn btn-cyan btn-sm" onclick="testApiHealth()">⬡ TEST CONNESSIONE SERVER API</button>
+      <span id="healthResult"></span>
+    </div>`;
+}
+
+function saveNetMon() {
+  const val = document.getElementById('netMonToggle').checked;
+  localStorage.setItem('jarvis_net_mon', val);
+  toast(val ? 'Monitoraggio rete attivo' : 'Monitoraggio rete disattivo', 'info');
+}
+
+function saveNetInterval() {
+  const val = document.getElementById('netIntervalInput').value;
+  localStorage.setItem('jarvis_net_interval', val);
+}
+
+async function testApiHealth() {
+  const el = document.getElementById('healthResult');
+  el.innerHTML = '<span style="color:var(--text-dim);font-size:11px;margin-left:12px">testing...</span>';
+  try {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 3000);
+    const res = await fetch('/api/health', { signal: ctrl.signal });
+    clearTimeout(tid);
+    if (res.ok) {
+      el.innerHTML = '<span class="health-result health-ok">API OK ✓</span>';
+    } else {
+      el.innerHTML = '<span class="health-result health-err">HTTP ' + res.status + '</span>';
+    }
+  } catch {
+    // mock: random ok/fail
+    const ok = Math.random() > 0.4;
+    el.innerHTML = ok
+      ? '<span class="health-result health-ok">API OK ✓</span>'
+      : '<span class="health-result health-err">TIMEOUT ✗</span>';
+  }
+}
+
+// ═══════════════════════════════════════════
+// SPEED TEST
+// ═══════════════════════════════════════════
+let speedTestRunning = false;
+
+function loadNetworkPrefs() {
+  const data = loadLS();
+  if (data.auto_test_enabled !== undefined) {
+    document.getElementById('autoTestToggle').checked = data.auto_test_enabled;
+  }
+}
+
+function saveAutoTest() {
+  const data = loadLS();
+  data.auto_test_enabled = document.getElementById('autoTestToggle').checked;
+  saveLS(data);
+}
+
+function checkAutoTest() {
+  const data = loadLS();
+  if (data.auto_test_enabled) setTimeout(runSpeedTest, 800);
+}
+
+function loadLastSpeedTest() {
+  const data = loadLS();
+  if (data.last_speed_test) {
+    document.getElementById('speedTestTs').textContent = 'Ultima esecuzione: ' + fmtTs(data.last_speed_test);
+    if (data.speed_test_results && data.speed_test_results.length > 0) {
+      const last = data.speed_test_results[data.speed_test_results.length - 1];
+      showGauges(last.ping_ms, last.dl_mbps, last.ul_mbps);
+    }
+  }
+}
+
+async function runSpeedTest() {
+  if (speedTestRunning) return;
+  speedTestRunning = true;
+  const btn = document.getElementById('speedTestBtn');
+  btn.disabled = true;
+  btn.textContent = '⟳ RUNNING...';
+
+  document.getElementById('speedProgressWrap').style.display = 'block';
+  document.getElementById('gaugeRow').style.display = 'none';
+  const fill = document.getElementById('speedProgressFill');
+
+  // Animate progress
+  const duration = 3000 + Math.random() * 2000;
+  const start = Date.now();
+  const animLoop = () => {
+    const elapsed = Date.now() - start;
+    const pct = Math.min(100, (elapsed / duration) * 100);
+    fill.style.width = pct + '%';
+    if (pct < 100) requestAnimationFrame(animLoop);
+  };
+  animLoop();
+
+  await sleep(duration);
+
+  // Mock results
+  const ping = Math.floor(Math.random() * 30) + 5;
+  const dl = Math.floor(Math.random() * 150) + 380;
+  const ul = Math.floor(Math.random() * 50) + 100;
+
+  document.getElementById('speedProgressWrap').style.display = 'none';
+  showGauges(ping, dl, ul);
+
+  const ts = new Date().toISOString();
+  document.getElementById('speedTestTs').textContent = 'Ultima esecuzione: ' + fmtTs(ts);
+
+  // Save to LS
+  const data = loadLS();
+  data.last_speed_test = ts;
+  if (!data.speed_test_results) data.speed_test_results = [];
+  data.speed_test_results.push({ timestamp: ts, ping_ms: ping, dl_mbps: dl, ul_mbps: ul });
+  if (data.speed_test_results.length > 50) data.speed_test_results.shift();
+  saveLS(data);
+
+  btn.disabled = false;
+  btn.textContent = '▶ RUN SPEED TEST';
+  speedTestRunning = false;
+  toast(`DL: ${dl} Mbps | UL: ${ul} Mbps | Ping: ${ping}ms`, 'success');
+}
+
+function showGauges(ping, dl, ul) {
+  document.getElementById('gaugeRow').style.display = 'flex';
+  // Ping gauge (0-200ms → 0-100%)
+  setGauge('gaugePing', 'gaugePingVal', ping, 200, ping + 'ms');
+  // DL gauge (0-600 Mbps)
+  setGauge('gaugeDl', 'gaugeDlVal', dl, 600, dl);
+  // UL gauge (0-200 Mbps)
+  setGauge('gaugeUl', 'gaugeUlVal', ul, 200, ul);
+}
+
+function setGauge(circleId, valId, value, max, label) {
+  const pct = Math.min(1, value / max);
+  const circumference = 175.9;
+  const offset = circumference * (1 - pct);
+  const circle = document.getElementById(circleId);
+  circle.style.strokeDashoffset = offset;
+  document.getElementById(valId).textContent = label;
+}
+
+// ═══════════════════════════════════════════
+// PING
+// ═══════════════════════════════════════════
+let pingHistory = [];
+
+function loadPingHistory() {
+  const data = loadLS();
+  pingHistory = data.ping_history || [];
+  renderPingHistory();
+}
+
+async function pingHost_() {
+  const host = document.getElementById('pingHost').value.trim() || 'google.com';
+  const resEl = document.getElementById('pingResult');
+  resEl.innerHTML = '<div class="ping-result">Pinging ' + host + '...</div>';
+  await sleep(300 + Math.random() * 400);
+
+  const timeout = Math.random() < 0.08;
+  const ms = timeout ? null : Math.floor(Math.random() * 190) + 10;
+  const ts = new Date().toISOString();
+
+  if (timeout) {
+    resEl.innerHTML = `<div class="ping-result timeout">PING ${host} → timeout ✗</div>`;
+  } else {
+    resEl.innerHTML = `<div class="ping-result ok">PING ${host} → ${ms}ms ✓</div>`;
+  }
+
+  // Update ICMP details mock
+  document.getElementById('icmpDetails').innerHTML = `
+    TTL: ${Math.floor(Math.random()*64)+32} &nbsp;|&nbsp; Protocol: ICMP &nbsp;|&nbsp; Packet size: 64 bytes<br>
+    Sequence: ${Math.floor(Math.random()*100)+1} &nbsp;|&nbsp; Checksum: 0x${Math.floor(Math.random()*65535).toString(16).toUpperCase().padStart(4,'0')} &nbsp;|&nbsp; Flags: DF<br>
+    ${timeout ? 'Status: TIMEOUT' : 'RTT min/avg/max: ' + (ms-2) + '/' + ms + '/' + (ms+3) + ' ms'}
+  `;
+
+  const entry = { timestamp: ts, host, ms: ms || null };
+  pingHistory.unshift(entry);
+  if (pingHistory.length > 5) pingHistory = pingHistory.slice(0, 5);
+
+  const data = loadLS();
+  data.ping_history = pingHistory;
+  saveLS(data);
+  renderPingHistory();
+}
+
+function renderPingHistory() {
+  if (pingHistory.length === 0) {
+    document.getElementById('pingHistoryWrap').style.display = 'none';
+    return;
+  }
+  document.getElementById('pingHistoryWrap').style.display = 'block';
+  document.getElementById('pingHistoryList').innerHTML = pingHistory.map(p => `
+    <div class="ping-history-item">
+      <span>${p.host}</span>
+      <span>${fmtTs(p.timestamp)}</span>
+      <span class="ms">${p.ms === null ? 'timeout' : p.ms + 'ms'}</span>
+    </div>`).join('');
+}
+
+function toggleICMP() {
+  const el = document.getElementById('icmpDetails');
+  el.classList.toggle('visible', document.getElementById('icmpToggle').checked);
+}
+
+// ═══════════════════════════════════════════
+// DEVICES
+// ═══════════════════════════════════════════
+function renderDevices() {
+  const tbody = document.getElementById('devicesBody');
+  document.getElementById('deviceCount').textContent = MOCK_DEVICES.length;
+  tbody.innerHTML = MOCK_DEVICES.map(d => `
+    <tr>
+      <td>${d.name}</td>
+      <td style="color:var(--text-dim);font-size:11px">${d.ip}</td>
+      <td>
+        <span class="status-dot ${d.status === 'online' ? 'status-online' : 'status-offline'}"></span>
+        <span style="color:${d.status === 'online' ? 'var(--green)' : 'var(--text-dim)'}">${d.status}</span>
+      </td>
+      <td style="color:var(--text-dim);font-size:10px">${fmtTs(d.last_seen)}</td>
+    </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// CHART
+// ═══════════════════════════════════════════
+function renderChart() {
+  const canvas = document.getElementById('speedChart');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+
+  function draw() {
+    const W = canvas.parentElement.clientWidth;
+    const H = 120;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.scale(dpr, dpr);
+
+    const pad = { top: 10, right: 20, bottom: 30, left: 45 };
+    const cw = W - pad.left - pad.right;
+    const ch = H - pad.top - pad.bottom;
+
+    ctx.clearRect(0, 0, W, H);
+
+    const allVals = [...MOCK_7DAY.dl, ...MOCK_7DAY.ul];
+    const minV = Math.min(...allVals) * 0.9;
+    const maxV = Math.max(...allVals) * 1.05;
+    const n = MOCK_7DAY.days.length;
+
+    const xScale = i => pad.left + (i / (n-1)) * cw;
+    const yScale = v => pad.top + ch - ((v - minV) / (maxV - minV)) * ch;
+
+    // Grid
+    ctx.strokeStyle = 'rgba(0,229,255,0.08)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = pad.top + (i / 4) * ch;
+      ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cw, y); ctx.stroke();
+    }
+
+    // Y labels
+    ctx.fillStyle = 'rgba(96,112,128,0.8)';
+    ctx.font = '9px Share Tech Mono';
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= 4; i++) {
+      const v = minV + ((4-i)/4) * (maxV - minV);
+      const y = pad.top + (i / 4) * ch;
+      ctx.fillText(Math.round(v), pad.left - 4, y + 3);
+    }
+
+    // X labels
+    ctx.textAlign = 'center';
+    MOCK_7DAY.days.forEach((d, i) => {
+      ctx.fillText(d, xScale(i), H - 6);
+    });
+
+    // Lines
+    [
+      { data: MOCK_7DAY.dl, color: '#4488ff' },
+      { data: MOCK_7DAY.ul, color: '#ff6b00' }
+    ].forEach(({ data, color }) => {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 4;
+      ctx.beginPath();
+      data.forEach((v, i) => {
+        const x = xScale(i), y = yScale(v);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Dots
+      data.forEach((v, i) => {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(xScale(i), yScale(v), 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    });
+
+    canvas._meta = { pad, cw, ch, xScale, yScale, minV, maxV };
+  }
+
+  draw();
+  window.addEventListener('resize', draw);
+
+  // Hover tooltip
+  canvas.addEventListener('mousemove', e => {
+    const meta = canvas._meta;
+    if (!meta) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const n = MOCK_7DAY.days.length;
+    let closest = 0, minDist = Infinity;
+    for (let i = 0; i < n; i++) {
+      const dist = Math.abs(meta.xScale(i) - mx);
+      if (dist < minDist) { minDist = dist; closest = i; }
+    }
+    if (minDist < 40) {
+      const tip = document.getElementById('chartTooltip');
+      tip.style.display = 'block';
+      tip.style.left = (meta.xScale(closest) - 60) + 'px';
+      tip.style.top = '0px';
+      tip.innerHTML = `<span style="color:var(--text-dim)">${MOCK_7DAY.days[closest]}</span><br>
+        <span style="color:#4488ff">DL: ${MOCK_7DAY.dl[closest]} Mbps</span><br>
+        <span style="color:#ff6b00">UL: ${MOCK_7DAY.ul[closest]} Mbps</span>`;
+    } else {
+      document.getElementById('chartTooltip').style.display = 'none';
+    }
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    document.getElementById('chartTooltip').style.display = 'none';
+  });
+
+  // Averages
+  const dlAvg = Math.round(MOCK_7DAY.dl.reduce((a,b)=>a+b,0) / MOCK_7DAY.dl.length);
+  const ulAvg = Math.round(MOCK_7DAY.ul.reduce((a,b)=>a+b,0) / MOCK_7DAY.ul.length);
+  document.getElementById('dlAvgBadge').textContent = `DL media: ${dlAvg} Mbps`;
+  document.getElementById('ulAvgBadge').textContent = `UL media: ${ulAvg} Mbps`;
+}
+
+// ═══════════════════════════════════════════
+// UPTIME
+// ═══════════════════════════════════════════
+function renderUptime() {
+  const days = ['LUN','MAR','MER','GIO','VEN','SAB','DOM'];
+  const wrap = document.getElementById('uptimeBars');
+  wrap.innerHTML = '';
+  MOCK_UPTIME.forEach((val, i) => {
+    const pct = Math.round(val * 100 * 10) / 10;
+    const color = val >= 0.999 ? 'var(--green)' : val >= 0.995 ? 'var(--yellow)' : 'var(--red)';
+    const barH = Math.max(10, Math.round(val * 70));
+    wrap.innerHTML += `
+      <div class="uptime-day">
+        <div class="uptime-pct" style="color:${color}">${pct}%</div>
+        <div class="uptime-bar" style="height:${barH}px;background:${color};box-shadow:0 0 6px ${color}60"></div>
+        <div class="uptime-day-label">${days[i]}</div>
+      </div>`;
+  });
+
+  const avg = (MOCK_UPTIME.reduce((a,b)=>a+b,0)/MOCK_UPTIME.length * 100).toFixed(1);
+  document.getElementById('uptimeAvg').textContent = avg + '% UPTIME';
+}
+
+// ═══════════════════════════════════════════
+// LOGOUT
+// ═══════════════════════════════════════════
+function showLogout() { document.getElementById('logoutConfirm').classList.add('active'); }
+function hideLogout() { document.getElementById('logoutConfirm').classList.remove('active'); }
+
+function doLogout() {
+  ['jarvis_token','jarvis_session','jarvis_auth','jarvis_user'].forEach(k => localStorage.removeItem(k));
+  toast('Disconnessione in corso...', 'info');
+  setTimeout(() => { window.location.href = '/'; }, 1000);
+}
+
+// ═══════════════════════════════════════════
+// DATI & EXPORT
+// ═══════════════════════════════════════════
+function exportData() {
+  const data = {
+    profile: { name: USER.name, email: USER.email, id: USER.id, role: USER.role },
+    network: loadLS(),
+    prefs: {
+      debug: localStorage.getItem(LS_DEBUG),
+      regs: localStorage.getItem('jarvis_regs_open'),
+      net_mon: localStorage.getItem('jarvis_net_mon'),
+    },
+    exported_at: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `jarvis_export_${Date.now()}.json`;
+  a.click();
+  toast('Export completato', 'success');
+}
+
+function clearLocalData() {
+  if (!confirm('Cancellare tutti i dati locali JARVIS?')) return;
+  [LS_KEY, LS_DEBUG, LS_PROFILE, 'jarvis_regs_open', 'jarvis_net_mon', 'jarvis_net_interval'].forEach(k => localStorage.removeItem(k));
+  toast('Dati locali cancellati', 'info');
+  setTimeout(() => location.reload(), 800);
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+function toast(msg, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(100px)';
+    el.style.transition = 'all 0.3s';
+    setTimeout(() => el.remove(), 300);
+  }, 3000);
+}
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function fmtTs(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('it-IT') + ' ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+}
+</script>
+</body>
+</html>
