@@ -141,16 +141,57 @@
   /* SHUTDOWN BUTTON */
   .shutdown-btn {
     position:fixed; bottom:40px; right:20px; z-index:150;
-    padding:12px 18px; background:#c41e3a; border:1px solid #ff4455;
-    font-family:'Orbitron',monospace; font-size:11px; letter-spacing:2px; color:#fff;
-    cursor:pointer; transition:all .25s; text-decoration:none;
-    box-shadow:0 0 16px rgba(196,30,58,0.4);
+    padding:10px 16px; background:rgba(196,30,58,0.12); border:1px solid #c41e3a;
+    font-family:'Orbitron',monospace; font-size:10px; letter-spacing:2px; color:#ff4455;
+    cursor:pointer; transition:all .25s; display:flex; align-items:center; gap:8px;
+    box-shadow:0 0 12px rgba(196,30,58,0.25); backdrop-filter:blur(8px);
   }
+  .shutdown-btn::before { content:''; position:absolute; top:-1px; left:10px; width:20px; height:2px; background:#c41e3a; }
   .shutdown-btn:hover {
-    background:#d42a4a; box-shadow:0 0 24px rgba(196,30,58,0.7), inset 0 0 12px rgba(255,68,85,0.2);
-    transform:translateY(-2px);
+    background:rgba(196,30,58,0.25); border-color:#ff4455;
+    box-shadow:0 0 22px rgba(196,30,58,0.55), inset 0 0 10px rgba(255,68,85,0.1);
+    color:#fff; transform:translateY(-1px);
   }
-  .shutdown-btn:active { transform:translateY(0); }
+  .shutdown-btn:active { transform:translateY(1px); }
+  .sdb-icon { font-size:13px; animation:sdp 3s ease-in-out infinite; }
+  @keyframes sdp { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+  /* SHUTDOWN MODAL */
+  .sd-overlay {
+    position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.7); backdrop-filter:blur(6px);
+    display:none; align-items:center; justify-content:center;
+  }
+  .sd-overlay.active { display:flex; }
+  .sd-modal {
+    border:1px solid #c41e3a; background:rgba(10,0,8,0.97); padding:36px 40px;
+    max-width:400px; width:90%; position:relative; text-align:center;
+    box-shadow:0 0 40px rgba(196,30,58,0.4), inset 0 0 30px rgba(196,30,58,0.05);
+    animation:sdIn .25s ease;
+  }
+  @keyframes sdIn { from{opacity:0;transform:scale(.92)} to{opacity:1;transform:scale(1)} }
+  .sd-modal::before { content:''; position:absolute; top:-1px; left:50%; transform:translateX(-50%); width:60px; height:2px; background:#c41e3a; }
+  .sd-modal::after  { content:''; position:absolute; bottom:-1px; left:50%; transform:translateX(-50%); width:30px; height:2px; background:rgba(196,30,58,.5); }
+  .sd-icon  { font-size:36px; margin-bottom:12px; }
+  .sd-title { font-family:'Orbitron',monospace; font-size:14px; letter-spacing:4px; color:#ff4455; margin-bottom:8px; }
+  .sd-sub   { font-size:10px; letter-spacing:2px; color:var(--text2); margin-bottom:28px; line-height:1.7; }
+  .sd-btns  { display:flex; gap:10px; justify-content:center; }
+  .sd-btn   { padding:10px 22px; font-family:'Orbitron',monospace; font-size:9px; letter-spacing:2px; cursor:pointer; border:1px solid; transition:all .2s; background:transparent; }
+  .sd-btn.cancel { border-color:var(--bc); color:var(--text2); }
+  .sd-btn.cancel:hover { border-color:var(--cyan); color:var(--cyan); }
+  .sd-btn.confirm { border-color:#c41e3a; color:#ff4455; }
+  .sd-btn.confirm:hover { background:rgba(196,30,58,0.2); color:#fff; border-color:#ff4455; box-shadow:0 0 12px rgba(196,30,58,0.4); }
+
+  /* SHUTDOWN SEQUENCE */
+  .sd-seq {
+    position:fixed; inset:0; z-index:9999; background:#000;
+    display:none; align-items:center; justify-content:center; flex-direction:column; gap:16px;
+  }
+  .sd-seq.active { display:flex; }
+  .sd-seq-title { font-family:'Orbitron',monospace; font-size:18px; letter-spacing:6px; color:#ff4455; animation:flicker 0.15s infinite; }
+  @keyframes flicker { 0%,100%{opacity:1} 50%{opacity:.7} }
+  .sd-seq-bar { width:260px; height:2px; background:rgba(196,30,58,.2); border-radius:1px; overflow:hidden; }
+  .sd-seq-fill { height:100%; background:#c41e3a; width:0%; transition:width 1.8s ease; box-shadow:0 0 8px #c41e3a; }
+  .sd-seq-msg { font-size:9px; letter-spacing:3px; color:rgba(196,30,58,.7); }
 
   @media(max-width:700px) { .stats-row{grid-template-columns:repeat(2,1fr)} .hero-metrics{display:none} }
 </style>
@@ -308,7 +349,30 @@
 
 </div>
 
-<a href="../../" class="shutdown-btn">◉ SPEGNI SISTEMA</a>
+<!-- SHUTDOWN BUTTON -->
+<button class="shutdown-btn" onclick="openShutdown()">
+  <span class="sdb-icon">◉</span> SPEGNI SISTEMA
+</button>
+
+<!-- CONFIRM MODAL -->
+<div class="sd-overlay" id="sdOverlay">
+  <div class="sd-modal">
+    <div class="sd-icon">⚠️</div>
+    <div class="sd-title">CONFERMA SPEGNIMENTO</div>
+    <div class="sd-sub">JARVIS sta per essere disattivato.<br>Tutti i moduli attivi verranno terminati.</div>
+    <div class="sd-btns">
+      <button class="sd-btn cancel" onclick="closeShutdown()">✕ ANNULLA</button>
+      <button class="sd-btn confirm" onclick="doShutdown()">◉ CONFERMA</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHUTDOWN SEQUENCE -->
+<div class="sd-seq" id="sdSeq">
+  <div class="sd-seq-title">SISTEMA IN SPEGNIMENTO</div>
+  <div class="sd-seq-bar"><div class="sd-seq-fill" id="sdFill"></div></div>
+  <div class="sd-seq-msg" id="sdMsg">CHIUSURA MODULI IN CORSO...</div>
+</div>
 
 <div class="botbar">
   <span>JARVIS v4.2 — STARK INDUSTRIES</span>
@@ -385,6 +449,38 @@ panel.scrollTop=panel.scrollHeight;
 // Botbar cycle
 const bb=['SISTEMA OPERATIVO','AES-256 ACTIVE','STARK INDUSTRIES v4.2','JARVIS PRONTO, SIR'];
 let bi=0; setInterval(()=>{ document.getElementById('bbmid').textContent=bb[++bi%bb.length]; },5000);
+
+// Shutdown
+function openShutdown(){
+  document.getElementById('sdOverlay').classList.add('active');
+}
+function closeShutdown(){
+  document.getElementById('sdOverlay').classList.remove('active');
+}
+function doShutdown(){
+  document.getElementById('sdOverlay').classList.remove('active');
+  const seq = document.getElementById('sdSeq');
+  const fill = document.getElementById('sdFill');
+  const msg  = document.getElementById('sdMsg');
+  seq.classList.add('active');
+  const msgs = [
+    'CHIUSURA MODULI IN CORSO...',
+    'TERMINAZIONE SESSIONI ATTIVE...',
+    'PULIZIA BUFFER DI SISTEMA...',
+    'DISCONNESSIONE SICURA...',
+    'ARRIVEDERCI, OPERATORE.'
+  ];
+  let step = 0;
+  setTimeout(()=>{ fill.style.width='100%'; },50);
+  const iv = setInterval(()=>{
+    step++;
+    if(step < msgs.length) { msg.textContent = msgs[step]; }
+    if(step >= msgs.length){
+      clearInterval(iv);
+      setTimeout(()=>{ window.location.href='../../index.html'; }, 500);
+    }
+  }, 400);
+}
 </script>
 </body>
 </html>
