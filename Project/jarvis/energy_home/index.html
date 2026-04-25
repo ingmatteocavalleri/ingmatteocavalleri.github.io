@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J.A.R.V.I.S. — SISTEMA ENERGETICO & DOMOTICA</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #00060f;
+  --bg2: #001525;
+  --bg3: rgba(0,35,60,0.55);
+  --cyan: #00d4ff;
+  --cyan2: #0088aa;
+  --cglow: rgba(0,212,255,0.15);
+  --orange: #ff6b00;
+  --oglow: rgba(255,107,0,0.18);
+  --green: #00ff41;
+  --gglow: rgba(0,255,65,0.15);
+  --red: #ff2244;
+  --text: #c8eeff;
+  --text2: #6a9aaa;
+  --bc: rgba(0,212,255,0.22);
+  --bo: rgba(255,107,0,0.35);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(0,212,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.05) 1px,transparent 1px);background-size:40px 40px}
+body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.05) 2px,rgba(0,0,0,0.05) 4px)}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:200;height:40px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(0,6,15,0.97);border-bottom:1px solid var(--bc);backdrop-filter:blur(12px)}
+.tb-logo{font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:4px;color:var(--cyan);text-shadow:0 0 14px rgba(0,212,255,0.65);text-decoration:none}
+.tb-title{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:var(--orange)}
+.tb-right{display:flex;align-items:center;gap:20px;font-size:9px;letter-spacing:2px;color:var(--text2)}
+.tb-clock{font-family:'Orbitron',monospace;font-size:12px;color:var(--cyan)}
+.dot-on{width:6px;height:6px;border-radius:50%;background:var(--green);animation:dp 2s infinite;display:inline-block}
+@keyframes dp{0%,100%{opacity:1;box-shadow:0 0 6px var(--green)}50%{opacity:.4;box-shadow:none}}
+
+/* LAYOUT */
+.layout{position:relative;z-index:2;display:grid;grid-template-columns:1fr 200px;gap:0;padding-top:40px;min-height:100vh}
+.main-col{padding:16px 16px 60px 16px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.sidebar{border-left:1px solid var(--bc);background:rgba(0,6,15,0.85);padding:12px;display:flex;flex-direction:column;gap:8px;position:sticky;top:40px;height:calc(100vh - 40px);overflow-y:auto}
+
+/* SECTION HEADER */
+.sec{display:flex;align-items:center;gap:10px;font-family:'Orbitron',monospace;font-size:9px;letter-spacing:3px;color:var(--orange);margin-bottom:8px}
+.secl{flex:1;height:1px;background:rgba(255,107,0,.2)}
+.sec-icon{font-size:14px}
+
+/* CARDS */
+.card{border:1px solid var(--bc);background:var(--bg3);backdrop-filter:blur(8px);position:relative;padding:14px}
+.card::before{content:'';position:absolute;top:-1px;left:12px;width:24px;height:2px;background:var(--orange)}
+.card.green-accent::before{background:var(--green)}
+.card.cyan-accent::before{background:var(--cyan)}
+
+/* ===== SECTION 1: QUICK STATS ===== */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat-card{padding:14px;border:1px solid var(--bc);background:rgba(0,21,37,.6);position:relative;overflow:hidden;transition:border-color .3s}
+.stat-card::before{content:'';position:absolute;top:-1px;left:12px;width:24px;height:2px;background:var(--cyan)}
+.stat-card.alert{border-color:var(--red);animation:alertPulse 1.5s infinite}
+@keyframes alertPulse{0%,100%{box-shadow:0 0 8px rgba(255,34,68,.3)}50%{box-shadow:0 0 20px rgba(255,34,68,.6)}}
+.stat-card.alert::before{background:var(--red)}
+.slabel{font-size:8px;letter-spacing:2px;color:var(--text2);margin-bottom:6px}
+.sval{font-family:'Orbitron',monospace;font-size:20px;font-weight:700}
+.sval.cy{color:var(--cyan)}
+.sval.g{color:var(--green)}
+.sval.o{color:var(--orange)}
+.sval.r{color:var(--red)}
+.ssub{font-size:9px;color:var(--text2);margin-top:4px}
+.sbadge{display:inline-block;padding:2px 8px;border:1px solid var(--orange);color:var(--orange);font-size:8px;letter-spacing:2px;font-family:'Orbitron',monospace;margin-top:6px}
+.sbadge.active{background:rgba(255,107,0,.15);box-shadow:0 0 8px rgba(255,107,0,.3)}
+.sbadge.green-badge{border-color:var(--green);color:var(--green)}
+.sbadge.red-badge{border-color:var(--red);color:var(--red);background:rgba(255,34,68,.1);animation:alertPulse 1.5s infinite}
+.trend{font-size:9px;margin-top:4px}
+.trend.up{color:var(--green)}
+.trend.down{color:var(--red)}
+
+/* ===== SECTION 2: PLANIMETRIA ===== */
+.floor-plan-wrap{position:relative}
+#floorPlanSvg{width:100%;max-width:700px;cursor:pointer}
+.room-group{cursor:pointer;transition:all .3s}
+.room-rect{fill:rgba(0,20,40,.8);stroke:rgba(0,212,255,.4);stroke-width:1.5;transition:all .3s}
+.room-group:hover .room-rect,.room-group.active .room-rect{stroke:var(--cyan);fill:rgba(0,60,80,.5);filter:drop-shadow(0 0 8px rgba(0,212,255,.5))}
+.room-group.has-device .room-rect{stroke:rgba(0,212,255,.7)}
+.room-group.selected .room-rect{stroke:var(--orange);fill:rgba(40,20,0,.5)}
+.room-label{fill:var(--text2);font-family:monospace;font-size:11px;letter-spacing:2px}
+.room-group:hover .room-label,.room-group.active .room-label{fill:var(--cyan)}
+.room-watt-badge{fill:var(--red);rx:3;ry:3}
+.room-watt-text{fill:#fff;font-family:monospace;font-size:9px;font-weight:bold}
+.device-icon{font-size:12px;fill:var(--cyan)}
+
+/* ===== SECTION 3: ENERGY CHARTS ===== */
+.chart-tabs{display:flex;gap:6px;margin-bottom:12px}
+.chart-tab{padding:5px 14px;border:1px solid var(--bc);background:transparent;color:var(--text2);font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.chart-tab.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.08)}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chart-wrap{position:relative}
+.chart-label{font-size:8px;letter-spacing:2px;color:var(--text2);margin-bottom:6px}
+canvas.chart-canvas{width:100%;display:block;border:1px solid rgba(0,212,255,.1);background:rgba(0,6,15,.8)}
+.chart-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.cstat{padding:8px;border:1px solid var(--bc);background:rgba(0,21,37,.4)}
+.cstat-label{font-size:7px;letter-spacing:2px;color:var(--text2);margin-bottom:3px}
+.cstat-val{font-family:'Orbitron',monospace;font-size:14px;color:var(--cyan)}
+.device-toggles{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.dev-toggle{display:flex;align-items:center;gap:6px;font-size:9px;cursor:pointer;padding:4px 8px;border:1px solid rgba(0,212,255,.1);transition:all .2s}
+.dev-toggle:hover{border-color:var(--cyan)}
+.dev-toggle input{cursor:pointer;accent-color:var(--cyan)}
+
+/* ===== SECTION 4: SMART HOME ===== */
+.room-filter{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.room-btn{padding:5px 14px;border:1px solid var(--bc);background:transparent;color:var(--text2);font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1px;cursor:pointer;transition:all .2s}
+.room-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.08)}
+.scene-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.scene-btn{padding:7px 18px;border:1px solid var(--bo);background:transparent;color:var(--orange);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .25s;position:relative}
+.scene-btn.active{background:rgba(255,107,0,.15);box-shadow:0 0 14px rgba(255,107,0,.3);color:var(--orange)}
+.scene-btn.active::after{content:'●';position:absolute;top:3px;right:5px;font-size:6px;color:var(--orange)}
+.scene-btn:hover{background:rgba(255,107,0,.1)}
+.devices-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.device-card{border:1px solid var(--bc);background:rgba(0,15,30,.7);padding:14px;position:relative;transition:all .25s;cursor:default}
+.device-card:hover{border-color:var(--cyan);box-shadow:0 0 16px rgba(0,212,255,.12);transform:translateY(-1px)}
+.device-card.off{opacity:.65}
+.device-card.energivore{border-color:var(--red)!important;box-shadow:0 0 10px rgba(255,34,68,.2)!important}
+.dc-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.dc-icon{font-size:20px}
+.dc-name{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:1px;flex:1}
+.dc-room{font-size:8px;color:var(--text2);letter-spacing:1px}
+.toggle-switch{position:relative;width:34px;height:18px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:rgba(0,212,255,.1);border:1px solid var(--bc);border-radius:9px;cursor:pointer;transition:.3s}
+.toggle-slider::before{content:'';position:absolute;width:12px;height:12px;left:3px;top:2px;background:var(--text2);border-radius:50%;transition:.3s}
+.toggle-switch input:checked+.toggle-slider{background:rgba(0,212,255,.2);border-color:var(--cyan);box-shadow:0 0 8px rgba(0,212,255,.3)}
+.toggle-switch input:checked+.toggle-slider::before{left:17px;background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
+.dc-control{margin-top:8px}
+.ctrl-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:9px;color:var(--text2)}
+.ctrl-label{width:70px;flex-shrink:0}
+input[type=range].hud-range{flex:1;-webkit-appearance:none;height:3px;border-radius:2px;outline:none;cursor:pointer}
+input[type=range].hud-range::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--cyan);cursor:pointer;box-shadow:0 0 6px var(--cyan)}
+.range-val{font-family:'Orbitron',monospace;font-size:10px;color:var(--cyan);width:40px;text-align:right;flex-shrink:0}
+.temp-big{font-family:'Orbitron',monospace;font-size:28px;font-weight:700;color:var(--orange);text-align:center;margin:4px 0}
+.mode-radio{display:flex;gap:6px}
+.mode-radio label{padding:3px 8px;border:1px solid var(--bc);font-size:8px;letter-spacing:1px;cursor:pointer;transition:all .2s}
+.mode-radio input{display:none}
+.mode-radio input:checked+label{border-color:var(--orange);color:var(--orange);background:rgba(255,107,0,.1)}
+.gauge-wrap{display:flex;align-items:center;gap:8px;margin-top:4px}
+.gauge-bar{flex:1;height:6px;background:rgba(0,212,255,.1);border-radius:3px;overflow:hidden}
+.gauge-fill{height:100%;background:var(--green);border-radius:3px;transition:width .5s;box-shadow:0 0 6px var(--green)}
+.gauge-val{font-family:'Orbitron',monospace;font-size:10px;color:var(--green);width:40px;text-align:right}
+.livestream-canvas{width:100%;height:80px;background:#000;border:1px solid rgba(0,212,255,.2);display:block;margin-top:6px}
+.dc-log{margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,212,255,.1);display:none}
+.device-card:hover .dc-log{display:block}
+.dc-log-entry{font-size:8px;color:var(--text2);margin-bottom:2px}
+.dc-log-entry span{color:var(--cyan)}
+
+/* ===== SECTION 5: AUTOMAZIONI ===== */
+.auto-form{display:grid;grid-template-columns:120px 1fr 1fr 1fr auto;gap:8px;align-items:end;margin-bottom:14px;padding:12px;border:1px solid var(--bc);background:rgba(0,15,30,.5)}
+.auto-form label{display:block;font-size:8px;letter-spacing:1px;color:var(--text2);margin-bottom:4px}
+.hud-input,.hud-select{width:100%;background:rgba(0,15,30,.8);border:1px solid var(--bc);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:10px;padding:6px 8px;outline:none;transition:border-color .2s}
+.hud-input:focus,.hud-select:focus{border-color:var(--cyan);box-shadow:0 0 8px rgba(0,212,255,.15)}
+.hud-select option{background:#001525}
+.add-btn{padding:8px 14px;border:1px solid var(--cyan);background:rgba(0,212,255,.08);color:var(--cyan);font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.add-btn:hover{background:rgba(0,212,255,.18);box-shadow:0 0 10px rgba(0,212,255,.2)}
+.auto-master{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:10px}
+.master-toggle{width:44px;height:22px;position:relative}
+.master-toggle input{opacity:0;width:0;height:0}
+.master-slider{position:absolute;inset:0;background:rgba(0,212,255,.1);border:1px solid var(--bc);border-radius:11px;cursor:pointer;transition:.3s}
+.master-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:2px;background:var(--text2);border-radius:50%;transition:.3s}
+.master-toggle input:checked+.master-slider{background:rgba(0,212,255,.2);border-color:var(--cyan);box-shadow:0 0 10px rgba(0,212,255,.25)}
+.master-toggle input:checked+.master-slider::before{left:23px;background:var(--cyan)}
+#timelineSvg{width:100%;border:1px solid rgba(0,212,255,.15);background:rgba(0,6,15,.8);cursor:pointer;display:block}
+.auto-log{margin-top:10px;max-height:120px;overflow-y:auto;border:1px solid rgba(0,212,255,.1);padding:8px;background:rgba(0,6,15,.5);scrollbar-width:thin;scrollbar-color:var(--cyan2) transparent}
+.auto-log-entry{font-size:9px;padding:3px 0;border-bottom:1px solid rgba(0,212,255,.05);color:var(--text2)}
+.auto-log-entry .al-time{color:var(--cyan)}
+.auto-log-entry .al-action{color:var(--text)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal-box{border:1px solid var(--cyan);background:rgba(0,15,30,.97);padding:28px;max-width:380px;width:90%;position:relative;box-shadow:0 0 40px rgba(0,212,255,.2)}
+.modal-box::before{content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:50px;height:2px;background:var(--cyan)}
+.modal-title{font-family:'Orbitron',monospace;font-size:12px;letter-spacing:3px;color:var(--cyan);margin-bottom:16px}
+.modal-row{margin-bottom:12px}
+.modal-btns{display:flex;gap:8px;margin-top:16px}
+.modal-btn{flex:1;padding:8px;border:1px solid;font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;cursor:pointer;background:transparent;transition:all .2s}
+.modal-btn.cancel{border-color:var(--bc);color:var(--text2)}
+.modal-btn.cancel:hover{border-color:var(--cyan);color:var(--cyan)}
+.modal-btn.save{border-color:var(--cyan);color:var(--cyan)}
+.modal-btn.save:hover{background:rgba(0,212,255,.15)}
+.modal-btn.del{border-color:var(--red);color:var(--red)}
+.modal-btn.del:hover{background:rgba(255,34,68,.15)}
+
+/* SIDEBAR LOG */
+.sidebar-title{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:3px;color:var(--orange);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bo)}
+.log-entry{padding:5px 0;border-bottom:1px solid rgba(0,212,255,.07);font-size:8px}
+.log-time{color:var(--text2);margin-bottom:2px}
+.log-msg{color:var(--text)}
+.log-msg.lc{color:var(--cyan)}
+.log-msg.lo{color:var(--orange)}
+.log-msg.lg{color:var(--green)}
+
+/* TOAST */
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;z-index:9999;padding:10px 22px;border:1px solid var(--green);background:rgba(0,20,0,.95);color:var(--green);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* DEVICE EXPAND MODAL */
+.dev-chart-canvas{width:100%;height:100px;display:block;border:1px solid rgba(0,212,255,.1);margin-top:8px}
+
+/* CO2 GAUGE */
+.co2-section{display:flex;align-items:center;gap:16px;padding:12px;border:1px solid rgba(0,255,65,.2);background:rgba(0,255,65,.02)}
+.co2-gauge{width:80px;height:80px;flex-shrink:0}
+.co2-info{flex:1}
+.co2-label{font-size:8px;letter-spacing:2px;color:var(--text2);margin-bottom:4px}
+.co2-val{font-family:'Orbitron',monospace;font-size:22px;color:var(--green)}
+
+/* BOTBAR */
+.botbar{position:fixed;bottom:0;left:0;right:0;z-index:200;height:26px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(0,6,15,.97);border-top:1px solid var(--bc);font-size:8px;letter-spacing:2px;color:var(--text2)}
+.export-btn{padding:2px 10px;border:1px solid rgba(0,255,65,.3);color:var(--green);background:transparent;font-family:'Share Tech Mono',monospace;font-size:8px;cursor:pointer;transition:all .2s}
+.export-btn:hover{background:rgba(0,255,65,.1);border-color:var(--green)}
+
+/* PEAK BANNER */
+.peak-banner{display:none;padding:8px 16px;border:1px solid var(--red);background:rgba(255,34,68,.08);font-size:9px;letter-spacing:2px;color:var(--red);align-items:center;gap:10px}
+.peak-banner.show{display:flex;animation:alertPulse 2s infinite}
+.peak-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:alertPulse 1s infinite;flex-shrink:0}
+
+/* RANGE COLORS */
+input[type=range].hud-range.light-range{background:linear-gradient(to right,rgba(0,212,255,.3),rgba(0,212,255,.3))}
+input[type=range].hud-range.temp-range{background:linear-gradient(to right,rgba(255,107,0,.3),rgba(255,107,0,.3))}
+input[type=range].hud-range.temp-range::-webkit-slider-thumb{background:var(--orange);box-shadow:0 0 6px var(--orange)}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .charts-grid{grid-template-columns:1fr}
+  .auto-form{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="../" class="tb-logo" style="text-decoration:none">◀ J.A.R.V.I.S.</a>
+  <div class="tb-title">SISTEMA ENERGETICO &amp; DOMOTICA</div>
+  <div class="tb-right">
+    <span><span class="dot-on"></span> ONLINE</span>
+    <span class="tb-clock" id="clock">--:--:--</span>
+  </div>
+</div>
+
+<!-- PEAK BANNER -->
+<div class="peak-banner" id="peakBanner" style="position:relative;z-index:3;margin-top:40px">
+  <div class="peak-dot"></div>
+  <span id="peakBannerMsg">CONSUMO ANOMALO RILEVATO</span>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+<div class="main-col">
+
+  <!-- ===== SECTION 1: QUICK STATS ===== -->
+  <div class="sec"><span class="sec-icon">⚡</span>QUICK STATS<div class="secl"></div></div>
+  <div class="stats-row">
+    <div class="stat-card" id="sc-energy">
+      <div class="slabel">CONSUMO OGGI</div>
+      <div class="sval cy" id="stat-kwh">—</div>
+      <div class="ssub" id="stat-cost">Costo: —</div>
+      <div class="ssub trend up" id="stat-saving">↓ — vs settimana</div>
+    </div>
+    <div class="stat-card" id="sc-devices">
+      <div class="slabel">DISPOSITIVI</div>
+      <div class="sval g" id="stat-devon">—</div>
+      <div class="ssub" id="stat-devw">Totale: — W</div>
+    </div>
+    <div class="stat-card" id="sc-anomaly">
+      <div class="slabel">ANOMALIA</div>
+      <div class="sval g" id="stat-anomaly">NESSUNA</div>
+      <div class="ssub" id="stat-anomaly-sub">Sistema stabile</div>
+    </div>
+    <div class="stat-card" id="sc-scene">
+      <div class="slabel">SCENA ATTIVA</div>
+      <div class="sval o" id="stat-scene">—</div>
+      <div id="stat-scene-badge"></div>
+    </div>
+  </div>
+
+  <!-- CO2 + SAVING -->
+  <div class="card">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="co2-section">
+        <svg class="co2-gauge" viewBox="0 0 80 80" id="co2Svg"></svg>
+        <div class="co2-info">
+          <div class="co2-label">CO₂ OGGI</div>
+          <div class="co2-val" id="co2Val">—</div>
+          <div style="font-size:8px;color:var(--text2);margin-top:2px">kg · Goal: <span id="co2Goal" style="color:var(--cyan)">—</span> kg</div>
+        </div>
+      </div>
+      <div style="padding:12px;border:1px solid rgba(0,212,255,.15)">
+        <div class="slabel">DEVICE PIÙ ENERGIVORO</div>
+        <div id="topDevice" style="font-family:'Orbitron',monospace;font-size:13px;color:var(--red);margin-top:6px">—</div>
+        <div id="topDeviceW" style="font-size:9px;color:var(--text2);margin-top:4px">—</div>
+        <div class="slabel" style="margin-top:10px">ORARIO PICCO</div>
+        <div id="peakHour" style="font-family:'Orbitron',monospace;font-size:13px;color:var(--orange)">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 2: PLANIMETRIA ===== -->
+  <div class="sec"><span class="sec-icon">🏠</span>PLANIMETRIA<div class="secl"></div></div>
+  <div class="card cyan-accent floor-plan-wrap">
+    <svg id="floorPlanSvg" viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg">
+      <!-- Room: Cucina -->
+      <g class="room-group" data-room="Cucina" id="room-Cucina">
+        <rect class="room-rect" x="10" y="10" width="180" height="120" rx="2"/>
+        <text class="room-label" x="100" y="55" text-anchor="middle">CUCINA</text>
+        <text class="room-device-icons" x="100" y="75" text-anchor="middle" fill="#00d4ff" font-size="14" id="ri-Cucina"></text>
+        <rect class="room-watt-badge" id="rb-Cucina" x="130" y="12" width="55" height="16" rx="3" fill="#ff2244"/>
+        <text class="room-watt-text" id="rt-Cucina" x="157" y="24" text-anchor="middle"></text>
+      </g>
+      <!-- Room: Soggiorno -->
+      <g class="room-group" data-room="Soggiorno" id="room-Soggiorno">
+        <rect class="room-rect" x="200" y="10" width="200" height="180" rx="2"/>
+        <text class="room-label" x="300" y="90" text-anchor="middle">SOGGIORNO</text>
+        <text class="room-device-icons" x="300" y="110" text-anchor="middle" fill="#00d4ff" font-size="14" id="ri-Soggiorno"></text>
+        <rect class="room-watt-badge" id="rb-Soggiorno" x="340" y="12" width="55" height="16" rx="3" fill="#ff2244"/>
+        <text class="room-watt-text" id="rt-Soggiorno" x="367" y="24" text-anchor="middle"></text>
+      </g>
+      <!-- Room: Camera -->
+      <g class="room-group" data-room="Camera" id="room-Camera">
+        <rect class="room-rect" x="410" y="10" width="180" height="120" rx="2"/>
+        <text class="room-label" x="500" y="55" text-anchor="middle">CAMERA</text>
+        <text class="room-device-icons" x="500" y="75" text-anchor="middle" fill="#00d4ff" font-size="14" id="ri-Camera"></text>
+        <rect class="room-watt-badge" id="rb-Camera" x="540" y="12" width="45" height="16" rx="3" fill="#ff2244"/>
+        <text class="room-watt-text" id="rt-Camera" x="562" y="24" text-anchor="middle"></text>
+      </g>
+      <!-- Room: Bagno -->
+      <g class="room-group" data-room="Bagno" id="room-Bagno">
+        <rect class="room-rect" x="10" y="140" width="180" height="120" rx="2"/>
+        <text class="room-label" x="100" y="195" text-anchor="middle">BAGNO</text>
+        <text class="room-device-icons" x="100" y="215" text-anchor="middle" fill="#00d4ff" font-size="14" id="ri-Bagno"></text>
+        <rect class="room-watt-badge" id="rb-Bagno" x="130" y="142" width="45" height="16" rx="3" fill="#ff2244"/>
+        <text class="room-watt-text" id="rt-Bagno" x="152" y="154" text-anchor="middle"></text>
+      </g>
+      <!-- Room: Studio -->
+      <g class="room-group" data-room="Studio" id="room-Studio">
+        <rect class="room-rect" x="410" y="140" width="180" height="120" rx="2"/>
+        <text class="room-label" x="500" y="195" text-anchor="middle">STUDIO</text>
+        <text class="room-device-icons" x="500" y="215" text-anchor="middle" fill="#00d4ff" font-size="14" id="ri-Studio"></text>
+        <rect class="room-watt-badge" id="rb-Studio" x="540" y="142" width="45" height="16" rx="3" fill="#ff2244"/>
+        <text class="room-watt-text" id="rt-Studio" x="562" y="154" text-anchor="middle"></text>
+      </g>
+      <!-- Corridoio connector lines -->
+      <line x1="200" y1="200" x2="410" y2="200" stroke="rgba(0,212,255,.2)" stroke-width="1" stroke-dasharray="4,4"/>
+      <line x1="300" y1="190" x2="300" y2="260" stroke="rgba(0,212,255,.15)" stroke-width="1" stroke-dasharray="4,4"/>
+    </svg>
+    <div style="margin-top:8px;font-size:8px;letter-spacing:2px;color:var(--text2)">CLICK STANZA → FILTRA DISPOSITIVI</div>
+  </div>
+
+  <!-- ===== SECTION 3: ENERGY REAL-TIME ===== -->
+  <div class="sec"><span class="sec-icon">📊</span>ENERGY REAL-TIME<div class="secl"></div></div>
+  <div class="card">
+    <div class="chart-tabs">
+      <button class="chart-tab active" data-range="24h">24h</button>
+      <button class="chart-tab" data-range="7gg">7 GG</button>
+      <button class="chart-tab" data-range="30gg">30 GG</button>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-wrap">
+        <div class="chart-label">CONSUMO TOTALE (W)</div>
+        <canvas class="chart-canvas" id="lineChart" height="160"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-label">BREAKDOWN PER DEVICE</div>
+        <canvas class="chart-canvas" id="barChart" height="160"></canvas>
+      </div>
+    </div>
+    <div class="device-toggles" id="deviceToggles"></div>
+    <div class="chart-stats">
+      <div class="cstat"><div class="cstat-label">PICCO OGGI</div><div class="cstat-val" id="peakWatt">—</div><div style="font-size:8px;color:var(--text2)" id="peakTime">—</div></div>
+      <div class="cstat"><div class="cstat-label">MEDIA</div><div class="cstat-val" id="avgKwh">—</div><div style="font-size:8px;color:var(--text2)">kWh/day</div></div>
+      <div class="cstat"><div class="cstat-label">COSTO STIMATO</div><div class="cstat-val" id="costDay">—</div><div style="font-size:8px;color:var(--text2)" id="costMonth">€/mese: —</div></div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 4: SMART HOME ===== -->
+  <div class="sec"><span class="sec-icon">🏡</span>SMART HOME CONTROL<div class="secl"></div></div>
+  <div class="card">
+    <div class="scene-row" id="sceneRow">
+      <button class="scene-btn" data-scene="lavoro">LAVORO</button>
+      <button class="scene-btn" data-scene="relax">RELAX</button>
+      <button class="scene-btn" data-scene="cinema">CINEMA</button>
+      <button class="scene-btn" data-scene="notte">NOTTE</button>
+    </div>
+    <div class="room-filter" id="roomFilter">
+      <button class="room-btn active" data-room="Tutti">TUTTI</button>
+      <button class="room-btn" data-room="Cucina">CUCINA</button>
+      <button class="room-btn" data-room="Soggiorno">SOGGIORNO</button>
+      <button class="room-btn" data-room="Camera">CAMERA</button>
+      <button class="room-btn" data-room="Bagno">BAGNO</button>
+      <button class="room-btn" data-room="Studio">STUDIO</button>
+    </div>
+    <div class="devices-grid" id="devicesGrid"></div>
+  </div>
+
+  <!-- ===== SECTION 5: AUTOMAZIONI ===== -->
+  <div class="sec"><span class="sec-icon">⏰</span>AUTOMAZIONI<div class="secl"></div></div>
+  <div class="card">
+    <div class="auto-master">
+      <label class="master-toggle"><input type="checkbox" id="masterAuto" checked><span class="master-slider"></span></label>
+      <span>AUTOMAZIONI ATTIVE</span>
+    </div>
+    <div class="auto-form">
+      <div>
+        <label>ORARIO</label>
+        <input type="time" class="hud-input" id="autoTime" value="08:00">
+      </div>
+      <div>
+        <label>DEVICE</label>
+        <select class="hud-select" id="autoDevice"></select>
+      </div>
+      <div>
+        <label>AZIONE</label>
+        <select class="hud-select" id="autoAction">
+          <option value="turn_on">Accendi</option>
+          <option value="turn_off">Spegni</option>
+          <option value="set_brightness">Imposta luminosità</option>
+          <option value="set_temp">Imposta temperatura</option>
+        </select>
+      </div>
+      <div>
+        <label>VALORE</label>
+        <input type="number" class="hud-input" id="autoValue" placeholder="(opzionale)" min="0" max="100">
+      </div>
+      <button class="add-btn" id="addAutoBtn">+ ADD</button>
+    </div>
+    <div class="chart-label">TIMELINE AUTOMAZIONI (0-24h)</div>
+    <svg id="timelineSvg" viewBox="0 0 700 80" height="80"></svg>
+    <div class="chart-label" style="margin-top:12px">STORICO ESECUZIONI</div>
+    <div class="auto-log" id="autoLog"></div>
+  </div>
+
+</div><!-- /main-col -->
+
+<!-- SIDEBAR LOG -->
+<div class="sidebar">
+  <div class="sidebar-title">SYSTEM LOG</div>
+  <div id="sidebarLog"></div>
+</div>
+</div><!-- /layout -->
+
+<!-- BOTBAR -->
+<div class="botbar">
+  <span>JARVIS · ENERGIA &amp; DOMOTICA · v1.0</span>
+  <button class="export-btn" id="exportCsvBtn">⬇ EXPORT CSV</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- AUTOMATION MODAL -->
+<div class="modal-overlay" id="autoModal">
+  <div class="modal-box">
+    <div class="modal-title">AUTOMAZIONE</div>
+    <div class="modal-row"><label>ORARIO</label><input type="time" class="hud-input" id="modalTime"></div>
+    <div class="modal-row"><label>DEVICE</label><select class="hud-select" id="modalDevice"></select></div>
+    <div class="modal-row"><label>AZIONE</label><select class="hud-select" id="modalAction">
+      <option value="turn_on">Accendi</option>
+      <option value="turn_off">Spegni</option>
+      <option value="set_brightness">Imposta luminosità</option>
+      <option value="set_temp">Imposta temperatura</option>
+    </select></div>
+    <div class="modal-row"><label>VALORE</label><input type="number" class="hud-input" id="modalValue" min="0" max="100"></div>
+    <div class="modal-btns">
+      <button class="modal-btn cancel" id="modalCancel">ANNULLA</button>
+      <button class="modal-btn del" id="modalDelete">ELIMINA</button>
+      <button class="modal-btn save" id="modalSave">SALVA</button>
+    </div>
+  </div>
+</div>
+
+<!-- DEVICE DETAIL MODAL -->
+<div class="modal-overlay" id="devModal">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-title" id="devModalTitle">DEVICE</div>
+    <div style="font-size:9px;color:var(--text2);margin-bottom:8px" id="devModalSub"></div>
+    <canvas class="dev-chart-canvas" id="devChart" height="100"></canvas>
+    <div class="modal-btns">
+      <button class="modal-btn cancel" id="devModalClose">CHIUDI</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA LAYER
+// ============================================================
+const DEVICE_COLORS = {
+  frigo: '#00ff41', pc: '#00d4ff', riscaldamento: '#ff6b00',
+  luci: '#ffe000', prese: '#aa44ff', camera: '#ff44aa', altro: '#88aacc'
+};
+
+const DEFAULT_DEVICES = [
+  {id:'light_cucina',    name:'Luce Cucina',      type:'light',      room:'Cucina',    state:{power:true, brightness:80, color_temp:4000}, power_rating_w:60, color_key:'luci', cmds:[]},
+  {id:'light_soggiorno', name:'Luce Soggiorno',   type:'light',      room:'Soggiorno', state:{power:true, brightness:60, color_temp:3000}, power_rating_w:40, color_key:'luci', cmds:[]},
+  {id:'light_camera',    name:'Luce Camera',      type:'light',      room:'Camera',    state:{power:false,brightness:50, color_temp:2700}, power_rating_w:25, color_key:'luci', cmds:[]},
+  {id:'light_bagno',     name:'Luce Bagno',       type:'light',      room:'Bagno',     state:{power:false,brightness:100,color_temp:6500}, power_rating_w:20, color_key:'luci', cmds:[]},
+  {id:'light_studio',    name:'Luce Studio',      type:'light',      room:'Studio',    state:{power:true, brightness:90, color_temp:5000}, power_rating_w:35, color_key:'luci', cmds:[]},
+  {id:'thermostat_main', name:'Termostato',        type:'thermostat', room:'Soggiorno', state:{temp_current:19.5,temp_setpoint:21,mode:'heating'}, power_rating_w:1800, color_key:'riscaldamento', cmds:[]},
+  {id:'frigo',           name:'Frigorifero',       type:'outlet',     room:'Cucina',    state:{power:true, watts_current:120}, power_rating_w:150, color_key:'frigo', cmds:[]},
+  {id:'plug_tv',         name:'TV',                type:'outlet',     room:'Soggiorno', state:{power:false,watts_current:0},   power_rating_w:120, color_key:'prese', cmds:[]},
+  {id:'pc_studio',       name:'PC',                type:'outlet',     room:'Studio',    state:{power:true, watts_current:280}, power_rating_w:300, color_key:'pc', cmds:[]},
+  {id:'camera_ingresso', name:'Camera Sicurezza',  type:'camera',     room:'Soggiorno', state:{power:true}, power_rating_w:8, color_key:'camera', cmds:[]},
+];
+
+const DEFAULT_AUTOMATIONS = [
+  {id:'auto_1', time:'07:00', device_id:'light_cucina',    action:'turn_on',         value:null,  active:true},
+  {id:'auto_2', time:'08:30', device_id:'thermostat_main', action:'set_temp',        value:21,    active:true},
+  {id:'auto_3', time:'18:00', device_id:'light_soggiorno', action:'set_brightness',  value:80,    active:true},
+  {id:'auto_4', time:'23:00', device_id:'light_cucina',    action:'turn_off',        value:null,  active:true},
+  {id:'auto_5', time:'23:30', device_id:'light_studio',    action:'turn_off',        value:null,  active:true},
+];
+
+function loadData(){
+  let d = localStorage.getItem('jarvis_energy');
+  if(d){try{return JSON.parse(d)}catch(e){}}
+  return {devices: JSON.parse(JSON.stringify(DEFAULT_DEVICES)), automations: JSON.parse(JSON.stringify(DEFAULT_AUTOMATIONS)), active_scene:null, energy_readings:[], device_order:{}};
+}
+function saveData(){localStorage.setItem('jarvis_energy', JSON.stringify(APP));}
+
+let APP = loadData();
+if(!APP.devices || APP.devices.length===0){ APP.devices = JSON.parse(JSON.stringify(DEFAULT_DEVICES)); }
+if(!APP.automations){ APP.automations = JSON.parse(JSON.stringify(DEFAULT_AUTOMATIONS)); }
+if(!APP.energy_readings) APP.energy_readings = [];
+if(!APP.device_order) APP.device_order = {};
+
+// ============================================================
+// ENERGY SIMULATION
+// ============================================================
+const DEVICE_COLORS_CHART = ['#00d4ff','#ff6b00','#00ff41','#ffe000','#aa44ff','#ff44aa','#88aacc','#44ffcc','#ffaa00','#ff88aa'];
+
+function baseWatts(hour){
+  // sin daily pattern: low night, peak morning+evening
+  return 200 + 150*Math.sin((hour-6)*Math.PI/12) + (hour>17&&hour<21?180:0);
+}
+
+function generateReadings(rangeKey){
+  const now = new Date();
+  const pts = rangeKey==='24h'?96 : rangeKey==='7gg'?168 : 360;
+  const stepMin = rangeKey==='24h'?15 : rangeKey==='7gg'?60 : 120;
+  const readings=[];
+  for(let i=pts-1;i>=0;i--){
+    const t = new Date(now.getTime() - i*stepMin*60000);
+    const h = t.getHours() + t.getMinutes()/60;
+    const base = baseWatts(h);
+    const noise = (Math.random()-0.5)*80;
+    const spike = Math.random()<0.03 ? 400+Math.random()*300 : 0; // occasional spike
+    readings.push({ts:t, watts: Math.max(50, base+noise+spike)});
+  }
+  return readings;
+}
+
+function deviceBreakdownData(readings){
+  // Distribute total watts among device color categories proportionally
+  const cats = ['luci','frigo','pc','riscaldamento','prese','camera'];
+  const ratios = [0.12, 0.18, 0.22, 0.28, 0.15, 0.05];
+  return cats.map((c,i)=>({
+    label:c.toUpperCase(), color: Object.values(DEVICE_COLORS)[i]||'#aaa',
+    values: readings.map(r=>r.watts*ratios[i])
+  }));
+}
+
+// ============================================================
+// STATS CALC
+// ============================================================
+function totalWatts(){
+  return APP.devices.reduce((s,d)=>{
+    if(!d.state.power) return s;
+    if(d.type==='outlet') return s+(d.state.watts_current||d.power_rating_w||0);
+    return s+d.power_rating_w;
+  },0);
+}
+function deviceOnCount(){return APP.devices.filter(d=>d.state.power).length;}
+
+function costForDay(readings){
+  // cost = Σ watts/1000 * (minutes) * rate
+  let cost=0;
+  readings.forEach((r,i)=>{
+    if(i===0) return;
+    const prev=readings[i-1];
+    const dtH=(r.ts-prev.ts)/3600000;
+    const h=r.ts.getHours();
+    const rate=(h>=6&&h<22)?0.45:0.20;
+    cost+=r.watts/1000*dtH*rate;
+  });
+  return cost;
+}
+
+function anomalyCheck(readings){
+  const vals=readings.map(r=>r.watts);
+  const mean=vals.reduce((s,v)=>s+v,0)/vals.length;
+  const std=Math.sqrt(vals.reduce((s,v)=>s+(v-mean)**2,0)/vals.length);
+  const threshold=mean+2*std;
+  const spikes=readings.filter(r=>r.watts>threshold);
+  return {detected:spikes.length>0, threshold, spikes, mean, std};
+}
+
+function roomWatts(room){
+  return APP.devices.filter(d=>d.room===room&&d.state.power).reduce((s,d)=>{
+    if(d.type==='outlet') return s+(d.state.watts_current||d.power_rating_w||0);
+    return s+d.power_rating_w;
+  },0);
+}
+
+// ============================================================
+// CLOCK
+// ============================================================
+function updateClock(){
+  const n=new Date();
+  document.getElementById('clock').textContent=n.toLocaleTimeString('it-IT');
+}
+setInterval(updateClock,1000); updateClock();
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg,color='var(--green)'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.borderColor=color; t.style.color=color;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ============================================================
+// SYSTEM LOG
+// ============================================================
+const LOG_COLORS={light:'lc',thermostat:'lo',outlet:'lg',camera:'lc'};
+function addLog(msg, type='light'){
+  const now=new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+  const div=document.createElement('div');
+  div.className='log-entry';
+  div.innerHTML=`<div class="log-time">${now}</div><div class="log-msg ${LOG_COLORS[type]||''}">${msg}</div>`;
+  const sl=document.getElementById('sidebarLog');
+  sl.insertBefore(div,sl.firstChild);
+  while(sl.children.length>10) sl.removeChild(sl.lastChild);
+}
+
+// ============================================================
+// FLOOR PLAN
+// ============================================================
+const ROOMS=['Cucina','Soggiorno','Camera','Bagno','Studio'];
+const ROOM_ICONS={light:'💡',thermostat:'🌡',outlet:'🔌',camera:'📷'};
+let selectedRoom='Tutti';
+
+function updateFloorPlan(){
+  ROOMS.forEach(room=>{
+    const grp=document.getElementById('room-'+room);
+    if(!grp) return;
+    const w=roomWatts(room);
+    const devs=APP.devices.filter(d=>d.room===room);
+    const on=devs.some(d=>d.state.power);
+    const rect=grp.querySelector('.room-rect');
+    if(on){grp.classList.add('has-device');}else{grp.classList.remove('has-device');}
+    if(room===selectedRoom){grp.classList.add('selected');}else{grp.classList.remove('selected');}
+    // badges
+    const rb=document.getElementById('rb-'+room);
+    const rt=document.getElementById('rt-'+room);
+    if(rb&&rt){
+      if(w>0){rb.style.display='';rt.textContent=w+'W';}
+      else{rb.style.display='none';rt.textContent='';}
+    }
+    // device icons
+    const ri=document.getElementById('ri-'+room);
+    if(ri){
+      const icons=devs.filter(d=>d.state.power).map(d=>ROOM_ICONS[d.type]||'•').join(' ');
+      ri.textContent=icons;
+    }
+  });
+}
+
+document.querySelectorAll('.room-group').forEach(g=>{
+  g.addEventListener('click',()=>{
+    const room=g.dataset.room;
+    selectedRoom=room;
+    // sync room filter buttons
+    document.querySelectorAll('.room-btn').forEach(b=>b.classList.toggle('active',b.dataset.room===room));
+    updateFloorPlan();
+    renderDevices();
+  });
+});
+
+// ============================================================
+// QUICK STATS UPDATE
+// ============================================================
+let currentReadings=[];
+let currentRange='24h';
+
+function updateStats(){
+  currentReadings=generateReadings(currentRange);
+  const w=totalWatts();
+  const on=deviceOnCount();
+  const cost=costForDay(currentReadings);
+  const kwh=cost; // approx kWh equiv for display
+  const ano=anomalyCheck(currentReadings);
+
+  // kWh card
+  document.getElementById('stat-kwh').textContent=(kwh*2.2).toFixed(1)+' kWh';
+  document.getElementById('stat-cost').textContent='Costo: €'+cost.toFixed(2);
+  const saving=Math.round((Math.random()*20-10));
+  const stEl=document.getElementById('stat-saving');
+  stEl.textContent=(saving>=0?'↓':'↑')+Math.abs(saving)+'% vs settimana';
+  stEl.className='ssub trend '+(saving>=0?'up':'down');
+
+  // devices
+  document.getElementById('stat-devon').textContent=on+'/'+APP.devices.length;
+  document.getElementById('stat-devw').textContent='Totale: '+Math.round(w)+' W';
+
+  // anomaly
+  const anEl=document.getElementById('sc-anomaly');
+  const anVal=document.getElementById('stat-anomaly');
+  const anSub=document.getElementById('stat-anomaly-sub');
+  if(ano.detected){
+    anEl.classList.add('alert');
+    anVal.textContent='⚠ SPIKE';
+    anVal.className='sval r';
+    anSub.textContent='>'+Math.round(ano.threshold)+'W rilevato';
+    document.getElementById('peakBanner').classList.add('show');
+    document.getElementById('peakBannerMsg').textContent='CONSUMO ANOMALO: >'+Math.round(ano.threshold)+'W RILEVATO';
+  } else {
+    anEl.classList.remove('alert');
+    anVal.textContent='NESSUNA';
+    anVal.className='sval g';
+    anSub.textContent='Sistema stabile';
+    document.getElementById('peakBanner').classList.remove('show');
+  }
+
+  // scene
+  document.getElementById('stat-scene').textContent=APP.active_scene?APP.active_scene.toUpperCase():'NESSUNA';
+  const sb=document.getElementById('stat-scene-badge');
+  if(APP.active_scene){sb.innerHTML=`<span class="sbadge active">ATTIVA</span>`;}else{sb.innerHTML='';}
+
+  // chart stats
+  const vals=currentReadings.map(r=>r.watts);
+  const peakVal=Math.max(...vals);
+  const peakIdx=vals.indexOf(peakVal);
+  const peakT=currentReadings[peakIdx]?.ts;
+  document.getElementById('peakWatt').textContent=Math.round(peakVal/1000*10)/10+' kW';
+  document.getElementById('peakTime').textContent=peakT?peakT.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}):'';
+  document.getElementById('avgKwh').textContent=(vals.reduce((s,v)=>s+v,0)/vals.length/1000*24).toFixed(1);
+  document.getElementById('costDay').textContent='€'+cost.toFixed(2);
+  document.getElementById('costMonth').textContent='€/mese: €'+(cost*30).toFixed(0);
+  document.getElementById('peakHour').textContent=peakT?peakT.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}):'—';
+
+  // top device (most power)
+  const topD=APP.devices.filter(d=>d.state.power).sort((a,b)=>{
+    const pw=(d)=>d.type==='outlet'?(d.state.watts_current||d.power_rating_w):d.power_rating_w;
+    return pw(b)-pw(a);
+  })[0];
+  if(topD){
+    document.getElementById('topDevice').textContent=topD.name;
+    const tw=topD.type==='outlet'?(topD.state.watts_current||topD.power_rating_w):topD.power_rating_w;
+    document.getElementById('topDeviceW').textContent=tw+' W';
+  }
+
+  // CO2 (approx: 0.233 kg CO2/kWh Italy average)
+  const co2=(kwh*2.2*0.233).toFixed(2);
+  const co2Goal=(kwh*2.2*0.233*0.8).toFixed(2);
+  document.getElementById('co2Val').textContent=co2+' kg';
+  document.getElementById('co2Goal').textContent=co2Goal;
+  drawCo2Gauge(parseFloat(co2), parseFloat(co2Goal)*1.5);
+
+  // Energivore highlight
+  APP.devices.forEach(d=>{
+    const card=document.getElementById('dcard-'+d.id);
+    if(!card) return;
+    card.classList.toggle('energivore', topD&&d.id===topD.id&&d.state.power);
+  });
+
+  updateFloorPlan();
+  drawCharts();
+}
+
+// ============================================================
+// CO2 GAUGE (SVG arc)
+// ============================================================
+function drawCo2Gauge(val, max){
+  const svg=document.getElementById('co2Svg');
+  if(!svg) return;
+  const pct=Math.min(1,val/max);
+  const r=32; const cx=40; const cy=44;
+  const startAngle=-Math.PI*0.8; const endAngle=Math.PI*0.8;
+  const totalArc=endAngle-startAngle;
+  const fillArc=totalArc*pct;
+  function arc(a1,a2,color,w){
+    const x1=cx+r*Math.cos(a1); const y1=cy+r*Math.sin(a1);
+    const x2=cx+r*Math.cos(a2); const y2=cy+r*Math.sin(a2);
+    const lg=a2-a1>Math.PI?1:0;
+    return `<path d="M${x1},${y1} A${r},${r} 0 ${lg},1 ${x2},${y2}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round"/>`;
+  }
+  const color=pct>0.8?'#ff2244':pct>0.6?'#ff6b00':'#00ff41';
+  svg.innerHTML=arc(startAngle,endAngle,'rgba(0,212,255,.1)',4)+arc(startAngle,startAngle+fillArc,color,4)+
+    `<text x="${cx}" y="${cy+4}" text-anchor="middle" fill="${color}" font-family="monospace" font-size="9" font-weight="bold">${(pct*100).toFixed(0)}%</text>`;
+}
+
+// ============================================================
+// CHARTS (Canvas)
+// ============================================================
+let deviceFilter={};
+function initDeviceFilter(){
+  const cats=['luci','frigo','pc','riscaldamento','prese','camera'];
+  cats.forEach(c=>{if(deviceFilter[c]===undefined) deviceFilter[c]=true;});
+}
+initDeviceFilter();
+
+function renderDeviceToggles(){
+  const wrap=document.getElementById('deviceToggles');
+  const cats=['luci','frigo','pc','riscaldamento','prese','camera'];
+  const colors=Object.values(DEVICE_COLORS);
+  wrap.innerHTML=cats.map((c,i)=>`
+    <label class="dev-toggle">
+      <input type="checkbox" ${deviceFilter[c]?'checked':''} data-cat="${c}">
+      <span style="width:8px;height:8px;background:${colors[i]};border-radius:50%;display:inline-block"></span>
+      ${c.toUpperCase()}
+    </label>
+  `).join('');
+  wrap.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('change',()=>{deviceFilter[inp.dataset.cat]=inp.checked; drawCharts();});
+  });
+}
+
+function drawLineChart(readings){
+  const canvas=document.getElementById('lineChart');
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth||400; canvas.height=160;
+  const w=canvas.width; const h=canvas.height;
+  const pad={t:10,r:10,b:24,l:44};
+  ctx.clearRect(0,0,w,h);
+  if(!readings.length) return;
+  const vals=readings.map(r=>r.watts);
+  const minV=Math.min(...vals)*0.9; const maxV=Math.max(...vals)*1.1;
+  const ano=anomalyCheck(readings);
+
+  function xp(i){return pad.l+(i/(readings.length-1))*(w-pad.l-pad.r);}
+  function yp(v){return pad.t+(1-(v-minV)/(maxV-minV))*(h-pad.t-pad.b);}
+
+  // grid
+  ctx.strokeStyle='rgba(0,212,255,.07)'; ctx.lineWidth=1;
+  for(let i=0;i<5;i++){const y=pad.t+i*(h-pad.t-pad.b)/4; ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();}
+
+  // anomaly regions
+  if(ano.detected){
+    const thY=yp(ano.threshold);
+    ctx.fillStyle='rgba(255,34,68,.06)';
+    ctx.fillRect(pad.l,pad.t,w-pad.l-pad.r,thY-pad.t);
+    ctx.strokeStyle='rgba(255,34,68,.3)';ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(pad.l,thY);ctx.lineTo(w-pad.r,thY);ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // line
+  ctx.strokeStyle='#00d4ff'; ctx.lineWidth=1.5;
+  ctx.shadowBlur=8; ctx.shadowColor='#00d4ff';
+  ctx.beginPath();
+  readings.forEach((r,i)=>{i===0?ctx.moveTo(xp(i),yp(r.watts)):ctx.lineTo(xp(i),yp(r.watts));});
+  ctx.stroke(); ctx.shadowBlur=0;
+
+  // spike dots
+  if(ano.detected){
+    readings.forEach((r,i)=>{
+      if(r.watts>ano.threshold){
+        ctx.fillStyle='#ff2244'; ctx.shadowBlur=10; ctx.shadowColor='#ff2244';
+        ctx.beginPath(); ctx.arc(xp(i),yp(r.watts),4,0,Math.PI*2); ctx.fill();
+        ctx.shadowBlur=0;
+      }
+    });
+  }
+
+  // y labels
+  ctx.fillStyle='rgba(0,212,255,.6)'; ctx.font='9px monospace'; ctx.textAlign='right';
+  for(let i=0;i<5;i++){
+    const v=minV+(maxV-minV)*i/4;
+    ctx.fillText(Math.round(v)+'W',pad.l-3,yp(v)+3);
+  }
+
+  // x labels (time)
+  ctx.textAlign='center'; ctx.fillStyle='rgba(0,212,255,.4)'; ctx.font='8px monospace';
+  const step=Math.ceil(readings.length/6);
+  for(let i=0;i<readings.length;i+=step){
+    const t=readings[i].ts;
+    const lbl=currentRange==='24h'?t.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}):t.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
+    ctx.fillText(lbl,xp(i),h-4);
+  }
+}
+
+function drawBarChart(readings){
+  const canvas=document.getElementById('barChart');
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth||400; canvas.height=160;
+  const w=canvas.width; const h=canvas.height;
+  const pad={t:10,r:10,b:24,l:44};
+  ctx.clearRect(0,0,w,h);
+  if(!readings.length) return;
+
+  const cats=['luci','frigo','pc','riscaldamento','prese','camera'];
+  const ratios=[0.12,0.18,0.22,0.28,0.15,0.05];
+  const colors=cats.map(c=>DEVICE_COLORS[c]||'#aaa');
+  const filteredCats=cats.filter(c=>deviceFilter[c]);
+  const filteredRatios=cats.map((c,i)=>deviceFilter[c]?ratios[i]:0);
+  const filteredColors=cats.map((c,i)=>colors[i]);
+
+  // downsample
+  const maxBars=40;
+  const step=Math.max(1,Math.floor(readings.length/maxBars));
+  const sampled=readings.filter((_,i)=>i%step===0);
+
+  const stacks=sampled.map(r=>filteredRatios.map(ratio=>r.watts*ratio));
+  const maxTotal=Math.max(...stacks.map(s=>s.reduce((a,b)=>a+b,0)));
+
+  function xp(i){return pad.l+i*(w-pad.l-pad.r)/sampled.length;}
+  const bw=Math.max(2,(w-pad.l-pad.r)/sampled.length-1);
+
+  ctx.fillStyle='rgba(0,212,255,.07)';
+  for(let i=0;i<5;i++){const y=pad.t+i*(h-pad.t-pad.b)/4; ctx.fillRect(pad.l,y,w-pad.l-pad.r,1);}
+
+  sampled.forEach((r,i)=>{
+    let yBase=h-pad.b;
+    stacks[i].forEach((val,ci)=>{
+      if(!val) return;
+      const bh=(val/maxTotal)*(h-pad.t-pad.b);
+      ctx.fillStyle=filteredColors[ci];
+      ctx.shadowBlur=3; ctx.shadowColor=filteredColors[ci];
+      ctx.fillRect(xp(i),yBase-bh,bw,bh);
+      ctx.shadowBlur=0;
+      yBase-=bh;
+    });
+  });
+
+  // y labels
+  ctx.fillStyle='rgba(0,212,255,.6)'; ctx.font='9px monospace'; ctx.textAlign='right';
+  for(let i=0;i<5;i++){
+    const v=maxTotal*i/4;
+    ctx.fillText(Math.round(v)+'W',pad.l-3,h-pad.b-(i/4)*(h-pad.t-pad.b)+3);
+  }
+
+  // x labels
+  ctx.textAlign='center'; ctx.fillStyle='rgba(0,212,255,.4)'; ctx.font='8px monospace';
+  const lstep=Math.ceil(sampled.length/6);
+  for(let i=0;i<sampled.length;i+=lstep){
+    const t=sampled[i].ts;
+    const lbl=currentRange==='24h'?t.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}):t.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
+    ctx.fillText(lbl,xp(i)+bw/2,h-4);
+  }
+}
+
+function drawCharts(){
+  drawLineChart(currentReadings);
+  drawBarChart(currentReadings);
+}
+
+// Chart tab switching
+document.querySelectorAll('.chart-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.chart-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentRange=btn.dataset.range;
+    updateStats();
+  });
+});
+
+// ============================================================
+// DEVICE CARDS
+// ============================================================
+const SCENE_CONFIGS={
+  lavoro:{luci:{brightness:100,color_temp:4000,power:true}, termo:{setpoint:21}, tv:{power:true}},
+  relax: {luci:{brightness:40, color_temp:2700,power:true}, termo:{setpoint:21}, tv:{power:false}},
+  cinema:{luci:{brightness:10, color_temp:2700,power:true}, termo:{setpoint:20}, tv:{power:true}},
+  notte: {luci:{brightness:0,  color_temp:2700,power:false},termo:{setpoint:18}, tv:{power:false}},
+};
+
+function applyScene(sceneName){
+  const cfg=SCENE_CONFIGS[sceneName];
+  APP.devices.forEach(d=>{
+    if(d.type==='light'){Object.assign(d.state,cfg.luci);}
+    if(d.type==='thermostat'){d.state.temp_setpoint=cfg.termo.setpoint;}
+    if(d.id==='plug_tv'){d.state.power=cfg.tv.power;}
+  });
+  APP.active_scene=sceneName;
+  saveData();
+  addLog('Scena '+sceneName+' attivata','light');
+  showToast("Scena '"+sceneName.toUpperCase()+"' attivata");
+  document.querySelectorAll('.scene-btn').forEach(b=>{b.classList.toggle('active',b.dataset.scene===sceneName);});
+  renderDevices(); updateStats();
+}
+
+document.getElementById('sceneRow').addEventListener('click',e=>{
+  const btn=e.target.closest('.scene-btn');
+  if(btn) applyScene(btn.dataset.scene);
+});
+
+function makeDeviceCard(d){
+  const div=document.createElement('div');
+  div.className='device-card'+(d.state.power?'':' off');
+  div.id='dcard-'+d.id;
+  div.dataset.deviceId=d.id;
+
+  const icon={light:'💡',thermostat:'🌡',outlet:'🔌',camera:'📷'}[d.type]||'●';
+  let controls='';
+
+  if(d.type==='light'){
+    const trackW=Math.round((d.state.brightness/100)*100);
+    controls=`
+      <div class="dc-control">
+        <div class="ctrl-row"><span class="ctrl-label">LUMINOSITÀ</span>
+          <input type="range" class="hud-range light-range" style="background:linear-gradient(to right,rgba(0,212,255,.5) ${trackW}%,rgba(0,212,255,.1) ${trackW}%)"
+            data-prop="brightness" min="0" max="100" value="${d.state.brightness}" data-id="${d.id}">
+          <span class="range-val" id="rv-br-${d.id}">${d.state.brightness}%</span>
+        </div>
+        <div class="ctrl-row"><span class="ctrl-label">TEMP.COLORE</span>
+          <input type="range" class="hud-range temp-range"
+            data-prop="color_temp" min="2700" max="6500" value="${d.state.color_temp}" data-id="${d.id}">
+          <span class="range-val" id="rv-ct-${d.id}">${d.state.color_temp}K</span>
+        </div>
+      </div>`;
+  } else if(d.type==='thermostat'){
+    controls=`
+      <div class="dc-control">
+        <div class="temp-big" id="tc-${d.id}">${d.state.temp_current?.toFixed(1)||'—'}°C</div>
+        <div class="ctrl-row"><span class="ctrl-label">SETPOINT</span>
+          <input type="range" class="hud-range temp-range"
+            data-prop="temp_setpoint" min="14" max="30" value="${d.state.temp_setpoint}" data-id="${d.id}" step="0.5">
+          <span class="range-val" id="rv-sp-${d.id}">${d.state.temp_setpoint}°C</span>
+        </div>
+        <div class="ctrl-row">
+          <div class="mode-radio">
+            <input type="radio" name="mode-${d.id}" id="mr-h-${d.id}" value="heating" data-id="${d.id}" ${d.state.mode==='heating'?'checked':''}><label for="mr-h-${d.id}">RISC</label>
+            <input type="radio" name="mode-${d.id}" id="mr-c-${d.id}" value="cooling"  data-id="${d.id}" ${d.state.mode==='cooling'?'checked':''}><label for="mr-c-${d.id}">RAFFR</label>
+            <input type="radio" name="mode-${d.id}" id="mr-a-${d.id}" value="auto"    data-id="${d.id}" ${d.state.mode==='auto'?'checked':''}><label for="mr-a-${d.id}">AUTO</label>
+          </div>
+        </div>
+      </div>`;
+  } else if(d.type==='outlet'){
+    const gaugePct=Math.min(100,((d.state.watts_current||0)/d.power_rating_w*100));
+    controls=`
+      <div class="dc-control">
+        <div class="gauge-wrap">
+          <div class="gauge-bar"><div class="gauge-fill" id="gf-${d.id}" style="width:${gaugePct}%;background:${gaugePct>80?'var(--red)':'var(--green)'}"></div></div>
+          <span class="gauge-val" id="gv-${d.id}">${d.state.watts_current||0}W</span>
+        </div>
+      </div>`;
+  } else if(d.type==='camera'){
+    controls=`
+      <div class="dc-control">
+        ${d.state.power?'<canvas class="livestream-canvas" id="cam-'+d.id+'"></canvas>':'<div style="font-size:8px;color:var(--text2);margin-top:6px">OFFLINE</div>'}
+      </div>`;
+  }
+
+  const lastCmds=(d.cmds||[]).slice(-3).reverse();
+  const logHtml=lastCmds.length>0?lastCmds.map(c=>`<div class="dc-log-entry"><span>${c.time}</span> ${c.msg}</div>`).join(''):'<div class="dc-log-entry" style="color:var(--text2)">Nessun comando</div>';
+
+  div.innerHTML=`
+    <div class="dc-header">
+      <span class="dc-icon">${icon}</span>
+      <div><div class="dc-name">${d.name}</div><div class="dc-room">${d.room}</div></div>
+      <label class="toggle-switch"><input type="checkbox" ${d.state.power?'checked':''} data-id="${d.id}"><span class="toggle-slider"></span></label>
+    </div>
+    ${controls}
+    <div class="dc-log">${logHtml}</div>
+  `;
+
+  // Toggle power
+  div.querySelector('.toggle-switch input').addEventListener('change',function(){
+    const dev=APP.devices.find(x=>x.id===this.dataset.id);
+    if(!dev) return;
+    dev.state.power=this.checked;
+    const t=new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+    dev.cmds=dev.cmds||[];
+    dev.cmds.push({time:t, msg:(this.checked?'Acceso':'Spento')});
+    if(dev.cmds.length>10) dev.cmds.shift();
+    saveData();
+    addLog(dev.name+' '+(this.checked?'ON':'OFF'),dev.type);
+    div.classList.toggle('off',!this.checked);
+    updateStats();
+  });
+
+  // Range sliders
+  div.querySelectorAll('input[type=range]').forEach(inp=>{
+    inp.addEventListener('input',function(){
+      const dev=APP.devices.find(x=>x.id===this.dataset.id);
+      if(!dev) return;
+      const prop=this.dataset.prop;
+      dev.state[prop]=parseFloat(this.value);
+      const t=new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+      dev.cmds=dev.cmds||[];
+      dev.cmds.push({time:t, msg:prop+'='+this.value});
+      if(dev.cmds.length>10) dev.cmds.shift();
+      // update display
+      if(prop==='brightness'){
+        const el=document.getElementById('rv-br-'+this.dataset.id);
+        if(el) el.textContent=this.value+'%';
+        const pct=Math.round(this.value);
+        this.style.background=`linear-gradient(to right,rgba(0,212,255,.5) ${pct}%,rgba(0,212,255,.1) ${pct}%)`;
+      }
+      if(prop==='color_temp'){const el=document.getElementById('rv-ct-'+this.dataset.id);if(el) el.textContent=this.value+'K';}
+      if(prop==='temp_setpoint'){const el=document.getElementById('rv-sp-'+this.dataset.id);if(el) el.textContent=this.value+'°C';}
+      saveData(); updateStats();
+    });
+  });
+
+  // Mode radios
+  div.querySelectorAll('.mode-radio input').forEach(inp=>{
+    inp.addEventListener('change',function(){
+      const dev=APP.devices.find(x=>x.id===this.dataset.id);
+      if(!dev) return;
+      dev.state.mode=this.value;
+      saveData(); addLog(dev.name+' mode: '+this.value,'thermostat');
+    });
+  });
+
+  // Click card → detail modal (dblclick)
+  div.addEventListener('dblclick',()=>openDevModal(d.id));
+
+  return div;
+}
+
+function renderDevices(){
+  const grid=document.getElementById('devicesGrid');
+  grid.innerHTML='';
+  let devs=APP.devices;
+  if(selectedRoom!=='Tutti') devs=devs.filter(d=>d.room===selectedRoom);
+  devs.forEach(d=>grid.appendChild(makeDeviceCard(d)));
+
+  // Start camera canvases
+  devs.filter(d=>d.type==='camera'&&d.state.power).forEach(d=>{
+    const cnv=document.getElementById('cam-'+d.id);
+    if(cnv) startCamera(cnv);
+  });
+}
+
+// Room filter buttons
+document.getElementById('roomFilter').addEventListener('click',e=>{
+  const btn=e.target.closest('.room-btn');
+  if(!btn) return;
+  selectedRoom=btn.dataset.room;
+  document.querySelectorAll('.room-btn').forEach(b=>b.classList.toggle('active',b.dataset.room===selectedRoom));
+  // sync floor plan
+  if(selectedRoom!=='Tutti'){
+    document.querySelectorAll('.room-group').forEach(g=>g.classList.toggle('selected',g.dataset.room===selectedRoom));
+  } else {
+    document.querySelectorAll('.room-group').forEach(g=>g.classList.remove('selected'));
+  }
+  renderDevices();
+});
+
+// ============================================================
+// CAMERA MOCK STREAM
+// ============================================================
+function startCamera(canvas){
+  const ctx=canvas.getContext('2d');
+  let frame=0;
+  function draw(){
+    if(!canvas.isConnected) return;
+    ctx.fillStyle='#001a00';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle='rgba(0,255,65,.15)'; ctx.lineWidth=1;
+    for(let y=0;y<canvas.height;y+=8){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
+    // moving blobs (simulated objects)
+    const t=Date.now()/1000;
+    ctx.fillStyle='rgba(0,255,65,.12)';
+    ctx.beginPath();ctx.arc(40+Math.sin(t)*10,40,12,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(90+Math.cos(t*0.7)*15,25,8,0,Math.PI*2);ctx.fill();
+    // timestamp
+    ctx.fillStyle='rgba(0,255,65,.6)';ctx.font='7px monospace';
+    ctx.fillText(new Date().toLocaleTimeString('it-IT'),4,canvas.height-4);
+    ctx.fillText('LIVE',canvas.width-24,10);
+    ctx.strokeStyle='rgba(255,34,68,.8)';ctx.lineWidth=1;
+    ctx.strokeRect(1,1,canvas.width-2,canvas.height-2);
+    frame++; requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ============================================================
+// DEVICE DETAIL MODAL
+// ============================================================
+function openDevModal(id){
+  const d=APP.devices.find(x=>x.id===id);
+  if(!d) return;
+  document.getElementById('devModalTitle').textContent=d.name;
+  document.getElementById('devModalSub').textContent=d.room+' · '+d.type+' · '+d.power_rating_w+'W rating';
+  // draw 7-day history
+  const canvas=document.getElementById('devChart');
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth||400; canvas.height=100;
+  const pts=Array.from({length:168},(_,i)=>{
+    const h=(i%24); const ratio=d.state.power?1:0.3;
+    return Math.max(0,(baseWatts(h)/1000*d.power_rating_w*ratio+(Math.random()-0.5)*20));
+  });
+  const w=canvas.width; const hh=canvas.height;
+  const maxV=Math.max(...pts); const pad={t:8,r:8,b:16,l:36};
+  ctx.clearRect(0,0,w,hh);
+  ctx.fillStyle='rgba(0,6,15,.8)';ctx.fillRect(0,0,w,hh);
+  ctx.strokeStyle='rgba(0,212,255,.06)';
+  for(let i=0;i<4;i++){const y=pad.t+i*(hh-pad.t-pad.b)/3;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();}
+  ctx.strokeStyle='#ff6b00';ctx.lineWidth=1.5;ctx.shadowBlur=6;ctx.shadowColor='#ff6b00';
+  ctx.beginPath();
+  pts.forEach((v,i)=>{const x=pad.l+(i/(pts.length-1))*(w-pad.l-pad.r);const y=pad.t+(1-v/maxV)*(hh-pad.t-pad.b);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke();ctx.shadowBlur=0;
+  ctx.fillStyle='rgba(0,212,255,.5)';ctx.font='8px monospace';ctx.textAlign='right';
+  ctx.fillText(Math.round(maxV)+'W',pad.l-2,pad.t+6);
+  document.getElementById('devModal').classList.add('active');
+}
+document.getElementById('devModalClose').addEventListener('click',()=>document.getElementById('devModal').classList.remove('active'));
+
+// ============================================================
+// AUTOMAZIONI
+// ============================================================
+function populateDeviceDropdown(selectId){
+  const sel=document.getElementById(selectId);
+  if(!sel) return;
+  sel.innerHTML=APP.devices.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+}
+
+function renderTimeline(){
+  const svg=document.getElementById('timelineSvg');
+  if(!svg) return;
+  const w=700; const h=80;
+  const pad={l:30,r:10,t:20,b:20};
+  const autos=APP.automations.filter(a=>a.active||(document.getElementById('masterAuto')?.checked));
+  const masterOn=document.getElementById('masterAuto')?.checked;
+
+  let content=`<rect x="0" y="0" width="${w}" height="${h}" fill="rgba(0,6,15,.8)"/>`;
+  // axis
+  content+=`<line x1="${pad.l}" y1="${h-pad.b}" x2="${w-pad.r}" y2="${h-pad.b}" stroke="rgba(0,212,255,.3)" stroke-width="1"/>`;
+  // hour ticks
+  for(let hr=0;hr<=24;hr+=3){
+    const x=pad.l+(hr/24)*(w-pad.l-pad.r);
+    content+=`<line x1="${x}" y1="${h-pad.b}" x2="${x}" y2="${h-pad.b+5}" stroke="rgba(0,212,255,.3)" stroke-width="1"/>`;
+    content+=`<text x="${x}" y="${h-2}" text-anchor="middle" fill="rgba(0,212,255,.5)" font-family="monospace" font-size="8">${hr.toString().padStart(2,'0')}:00</text>`;
+  }
+  // events
+  const typeColors={light:'#00d4ff',thermostat:'#ff6b00',outlet:'#00ff41',camera:'#ff44aa'};
+  APP.automations.forEach((a,idx)=>{
+    if(!masterOn&&!a.active) return;
+    const [hh,mm]=a.time.split(':').map(Number);
+    const x=pad.l+((hh*60+mm)/(24*60))*(w-pad.l-pad.r);
+    const dev=APP.devices.find(d=>d.id===a.device_id);
+    const color=dev?typeColors[dev.type]||'#aaa':'#aaa';
+    const label=a.action.replace('_',' ');
+    content+=`<g class="auto-event" data-idx="${idx}" style="cursor:pointer">
+      <rect x="${x-3}" y="${pad.t-4}" width="6" height="${h-pad.b-pad.t+4}" rx="2" fill="${color}" opacity="0.8"/>
+      <circle cx="${x}" cy="${pad.t-4}" r="5" fill="${color}" opacity="0.9"/>
+      <title>${a.time} · ${dev?.name||a.device_id} · ${label}${a.value!=null?' = '+a.value:''}</title>
+    </g>`;
+  });
+  svg.innerHTML=content;
+
+  // event click → modal
+  svg.querySelectorAll('.auto-event').forEach(el=>{
+    el.addEventListener('click',()=>openAutoModal(parseInt(el.dataset.idx)));
+  });
+}
+
+function openAutoModal(idx){
+  const a=APP.automations[idx];
+  if(!a) return;
+  document.getElementById('modalTime').value=a.time;
+  populateDeviceDropdown('modalDevice');
+  document.getElementById('modalDevice').value=a.device_id;
+  document.getElementById('modalAction').value=a.action;
+  document.getElementById('modalValue').value=a.value||'';
+  document.getElementById('autoModal').classList.add('active');
+  document.getElementById('modalSave').onclick=()=>{
+    a.time=document.getElementById('modalTime').value;
+    a.device_id=document.getElementById('modalDevice').value;
+    a.action=document.getElementById('modalAction').value;
+    a.value=document.getElementById('modalValue').value?parseFloat(document.getElementById('modalValue').value):null;
+    saveData(); renderTimeline(); document.getElementById('autoModal').classList.remove('active');
+    showToast('Automazione aggiornata');
+  };
+  document.getElementById('modalDelete').onclick=()=>{
+    APP.automations.splice(idx,1);
+    saveData(); renderTimeline(); document.getElementById('autoModal').classList.remove('active');
+    showToast('Automazione eliminata','var(--red)');
+  };
+}
+document.getElementById('modalCancel').addEventListener('click',()=>document.getElementById('autoModal').classList.remove('active'));
+
+document.getElementById('addAutoBtn').addEventListener('click',()=>{
+  const time=document.getElementById('autoTime').value;
+  const dev_id=document.getElementById('autoDevice').value;
+  const action=document.getElementById('autoAction').value;
+  const val=document.getElementById('autoValue').value;
+  if(!time||!dev_id) return;
+  const id='auto_'+Date.now();
+  APP.automations.push({id,time,device_id:dev_id,action,value:val?parseFloat(val):null,active:true});
+  saveData(); renderTimeline();
+  const dev=APP.devices.find(d=>d.id===dev_id);
+  addAutoLog(time,dev?.name||dev_id,action);
+  showToast('Automazione aggiunta: '+time);
+});
+
+function addAutoLog(time,devName,action){
+  const log=document.getElementById('autoLog');
+  const d=document.createElement('div');
+  d.className='auto-log-entry';
+  d.innerHTML=`<span class="al-time">${time}</span> · <span class="al-action">${devName}</span> → ${action}`;
+  log.insertBefore(d,log.firstChild);
+}
+
+document.getElementById('masterAuto').addEventListener('change',()=>{renderTimeline();showToast('Automazioni '+(document.getElementById('masterAuto').checked?'attivate':'disattivate'));});
+
+// ============================================================
+// AUTOMATION EXECUTION CHECK (real-time)
+// ============================================================
+function checkAutomations(){
+  if(!document.getElementById('masterAuto')?.checked) return;
+  const now=new Date();
+  const hhmm=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  if(now.getSeconds()!==0) return; // only trigger on exact minute
+  APP.automations.forEach(a=>{
+    if(!a.active) return;
+    if(a.time!==hhmm) return;
+    const dev=APP.devices.find(d=>d.id===a.device_id);
+    if(!dev) return;
+    if(a.action==='turn_on')  dev.state.power=true;
+    if(a.action==='turn_off') dev.state.power=false;
+    if(a.action==='set_brightness' && a.value!=null) dev.state.brightness=a.value;
+    if(a.action==='set_temp' && a.value!=null) dev.state.temp_setpoint=a.value;
+    saveData();
+    addLog('AUTO: '+dev.name+' '+a.action+(a.value!=null?' '+a.value:''),dev.type);
+    addAutoLog(hhmm,dev.name,a.action);
+    renderDevices(); updateStats();
+  });
+}
+setInterval(checkAutomations,1000);
+
+// ============================================================
+// DEVICE SIMULATION (every 10s)
+// ============================================================
+function simulateDevices(){
+  const now=new Date();
+  const h=now.getHours()+now.getMinutes()/60;
+  APP.devices.forEach(d=>{
+    if(!d.state.power) return;
+    if(d.type==='thermostat'){
+      const sp=d.state.temp_setpoint;
+      const cur=d.state.temp_current||20;
+      d.state.temp_current=parseFloat((cur+(sp-cur)*0.05+(Math.random()-0.5)*0.2).toFixed(1));
+      const el=document.getElementById('tc-'+d.id);
+      if(el) el.textContent=d.state.temp_current+'°C';
+    }
+    if(d.type==='outlet'){
+      // simulate power fluctuation
+      const base=d.power_rating_w;
+      d.state.watts_current=Math.round(base*0.7+base*0.3*Math.random());
+      const pct=Math.min(100,(d.state.watts_current/base*100));
+      const gf=document.getElementById('gf-'+d.id);
+      const gv=document.getElementById('gv-'+d.id);
+      if(gf){gf.style.width=pct+'%';gf.style.background=pct>80?'var(--red)':'var(--green)';}
+      if(gv) gv.textContent=d.state.watts_current+'W';
+    }
+  });
+  saveData();
+  updateStats();
+}
+setInterval(simulateDevices,10000);
+
+// ============================================================
+// EXPORT CSV
+// ============================================================
+document.getElementById('exportCsvBtn').addEventListener('click',()=>{
+  const rows=[['timestamp','watts','devices_on']];
+  currentReadings.forEach(r=>{
+    const devOn=APP.devices.filter(d=>d.state.power).map(d=>d.id).join('|');
+    rows.push([r.ts.toISOString(),Math.round(r.watts),devOn]);
+  });
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='jarvis_energy_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV esportato');
+});
+
+// ============================================================
+// SCENE INIT
+// ============================================================
+function initSceneBtns(){
+  if(APP.active_scene){
+    document.querySelectorAll('.scene-btn').forEach(b=>{b.classList.toggle('active',b.dataset.scene===APP.active_scene);});
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init(){
+  populateDeviceDropdown('autoDevice');
+  populateDeviceDropdown('modalDevice');
+  renderDeviceToggles();
+  renderDevices();
+  updateStats();
+  renderTimeline();
+  initSceneBtns();
+  addLog('Sistema avviato','light');
+  addLog('Device caricati: '+APP.devices.length,'outlet');
+
+  // resize observer for chart redraws
+  const ro=new ResizeObserver(()=>drawCharts());
+  ro.observe(document.getElementById('lineChart'));
+  ro.observe(document.getElementById('barChart'));
+}
+
+window.addEventListener('load',init);
+window.addEventListener('resize',()=>{setTimeout(drawCharts,100);});
+</script>
+</body>
+</html>
