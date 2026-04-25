@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS // CONTROL SIMULATOR</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cyan: #00e5ff;
+    --cyan-dim: #007a8a;
+    --orange: #ff6d00;
+    --orange-dim: #7a3300;
+    --bg: #000d14;
+    --panel: #001a26;
+    --panel2: #002233;
+    --green: #00ff88;
+    --red: #ff2244;
+    --grey: #4a6a7a;
+    --white: #cce8f0;
+    --blue: #2255ff;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 24px;
+    border-bottom: 1px solid var(--cyan-dim);
+    background: linear-gradient(90deg, #001a26 0%, #001020 100%);
+    position: relative;
+  }
+  header::after {
+    content: '';
+    position: absolute; bottom: -2px; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    animation: scanH 4s linear infinite;
+  }
+  @keyframes scanH { 0%{opacity:0.3} 50%{opacity:1} 100%{opacity:0.3} }
+
+  .header-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 1.4rem;
+    color: var(--cyan);
+    letter-spacing: 0.3em;
+    text-shadow: 0 0 20px var(--cyan);
+  }
+  .header-sub {
+    font-size: 0.7rem;
+    color: var(--grey);
+    letter-spacing: 0.15em;
+  }
+  .header-status {
+    display: flex; gap: 16px; align-items: center;
+  }
+
+  .btn-home {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 12px;
+    background: transparent;
+    border: 1px solid var(--cyan-dim);
+    color: var(--cyan);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-home:hover {
+    border-color: var(--cyan);
+    background: rgba(0,229,255,0.08);
+    box-shadow: 0 0 10px rgba(0,229,255,0.2);
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 58px);
+  }
+
+  /* ── LEFT PANEL ── */
+  #panel {
+    width: 320px;
+    min-width: 280px;
+    background: var(--panel);
+    border-right: 1px solid var(--cyan-dim);
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  #panel::-webkit-scrollbar { width: 4px; }
+  #panel::-webkit-scrollbar-track { background: var(--bg); }
+  #panel::-webkit-scrollbar-thumb { background: var(--cyan-dim); border-radius: 2px; }
+
+  .section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    color: var(--orange);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--orange-dim);
+    margin-bottom: 4px;
+  }
+
+  .control-group { display: flex; flex-direction: column; gap: 6px; }
+
+  label {
+    font-size: 0.72rem;
+    color: var(--cyan);
+    letter-spacing: 0.05em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  label span.val {
+    color: var(--orange);
+    font-size: 0.78rem;
+    min-width: 40px;
+    text-align: right;
+  }
+
+  select {
+    width: 100%;
+    background: var(--panel2);
+    color: var(--cyan);
+    border: 1px solid var(--cyan-dim);
+    padding: 5px 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2300e5ff'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 28px;
+  }
+  select:focus { border-color: var(--cyan); box-shadow: 0 0 8px rgba(0,229,255,0.3); }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--orange) 0%, var(--orange-dim) 100%);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 6px var(--cyan);
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 12px var(--cyan);
+  }
+
+  input[type=number] {
+    background: var(--panel2);
+    color: var(--cyan);
+    border: 1px solid var(--cyan-dim);
+    padding: 4px 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    outline: none;
+    width: 100%;
+  }
+  input[type=number]:focus { border-color: var(--cyan); }
+
+  .radio-group {
+    display: flex; gap: 8px;
+  }
+  .radio-btn {
+    flex: 1;
+    text-align: center;
+    padding: 4px;
+    border: 1px solid var(--cyan-dim);
+    color: var(--grey);
+    cursor: pointer;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .radio-btn.active {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: rgba(0,229,255,0.08);
+    box-shadow: 0 0 8px rgba(0,229,255,0.2);
+  }
+
+  .btn {
+    padding: 8px 16px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.2s;
+    outline: none;
+  }
+  .btn-primary {
+    background: transparent;
+    color: var(--cyan);
+    border: 1px solid var(--cyan);
+    box-shadow: 0 0 12px rgba(0,229,255,0.2);
+    width: 100%;
+  }
+  .btn-primary:hover {
+    background: rgba(0,229,255,0.1);
+    box-shadow: 0 0 20px rgba(0,229,255,0.4);
+    color: #fff;
+  }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-sm {
+    background: transparent;
+    color: var(--orange);
+    border: 1px solid var(--orange-dim);
+    font-size: 0.65rem;
+    padding: 4px 10px;
+  }
+  .btn-sm:hover {
+    border-color: var(--orange);
+    box-shadow: 0 0 8px rgba(255,109,0,0.3);
+  }
+
+  .btn-row { display: flex; gap: 8px; }
+
+  .error-msg {
+    color: var(--red);
+    font-size: 0.68rem;
+    padding: 4px;
+    border-left: 2px solid var(--red);
+    padding-left: 6px;
+    display: none;
+  }
+  .error-msg.visible { display: block; }
+
+  /* ── RIGHT AREA ── */
+  #right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── CANVAS AREA ── */
+  #canvas-area {
+    flex: 1;
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    min-height: 0;
+  }
+
+  .plot-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--panel);
+    border: 1px solid var(--cyan-dim);
+    position: relative;
+    box-shadow: inset 0 0 30px rgba(0,229,255,0.03);
+  }
+  .plot-wrap::before {
+    content: attr(data-label);
+    position: absolute;
+    top: 6px; left: 10px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.55rem;
+    color: var(--orange);
+    letter-spacing: 0.2em;
+    z-index: 2;
+  }
+  canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+  }
+
+  /* ── STATS BAR ── */
+  #stats-bar {
+    display: flex;
+    padding: 8px 16px;
+    background: var(--panel);
+    border-top: 1px solid var(--cyan-dim);
+    gap: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .stat-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--cyan);
+    text-shadow: 0 0 10px rgba(0,229,255,0.5);
+  }
+  .stat-val.warn { color: var(--orange); }
+  .stat-val.ok { color: var(--green); }
+  .stat-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.5rem;
+    color: var(--grey);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .stat-separator {
+    width: 1px;
+    height: 30px;
+    background: var(--cyan-dim);
+  }
+
+  /* ── SCANLINE OVERLAY ── */
+  .scanlines {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+  }
+
+  /* ── HIDDEN ── */
+  .hidden { display: none !important; }
+
+  /* ── TOOLTIP ── */
+  #tooltip {
+    position: fixed;
+    background: rgba(0,26,38,0.95);
+    border: 1px solid var(--cyan-dim);
+    color: var(--cyan);
+    font-size: 0.68rem;
+    padding: 4px 8px;
+    pointer-events: none;
+    z-index: 200;
+    display: none;
+  }
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+<div id="tooltip"></div>
+
+<!-- HEADER -->
+<header>
+  <div>
+    <div class="header-title">◈ CONTROL SIMULATOR</div>
+    <div class="header-sub">JARVIS // AUTONOMOUS SYSTEMS INTERFACE v2.1</div>
+  </div>
+  <div class="header-status">
+    <a class="btn-home" href="../home/index.html">⌂ HOME</a>
+    <div class="status-dot"></div>
+    <span style="font-size:0.65rem;color:var(--grey);letter-spacing:0.1em;" id="sys-status">SYSTEM NOMINAL</span>
+  </div>
+</header>
+
+<main>
+  <!-- LEFT PANEL -->
+  <div id="panel">
+
+    <!-- System Select -->
+    <div class="control-group">
+      <div class="section-title">▸ PLANT MODEL</div>
+      <label>SYSTEM</label>
+      <select id="sys-select">
+        <option value="pendulum">PENDULUM (LINEARIZED)</option>
+        <option value="tank">TANK / LEVEL CONTROL</option>
+        <option value="massspring">MASS-SPRING-DAMPER</option>
+        <option value="dcmotor">DC MOTOR</option>
+      </select>
+    </div>
+
+    <!-- Dynamic system params -->
+    <div class="control-group" id="sys-params"></div>
+
+    <!-- Initial State -->
+    <div class="control-group">
+      <div class="section-title">▸ INITIAL STATE</div>
+      <label>x₀ <span class="val" id="x0-val">1.00</span></label>
+      <input type="range" id="x0" min="-3" max="3" step="0.05" value="1.0">
+      <label>ẋ₀ (vel) <span class="val" id="v0-val">0.00</span></label>
+      <input type="range" id="v0" min="-3" max="3" step="0.05" value="0.0">
+      <label>SETPOINT <span class="val" id="sp-val">0.00</span></label>
+      <input type="range" id="setpoint" min="-2" max="2" step="0.05" value="0.0">
+    </div>
+
+    <!-- Controller -->
+    <div class="control-group">
+      <div class="section-title">▸ CONTROLLER</div>
+      <label>TYPE</label>
+      <div class="radio-group" id="ctrl-type">
+        <div class="radio-btn active" data-val="P">P</div>
+        <div class="radio-btn" data-val="PI">PI</div>
+        <div class="radio-btn" data-val="PID">PID</div>
+      </div>
+      <label>Kp <span class="val" id="kp-val">2.00</span></label>
+      <input type="range" id="kp" min="0" max="5" step="0.1" value="2.0">
+      <div id="ki-row">
+        <label>Ki <span class="val" id="ki-val">0.00</span></label>
+        <input type="range" id="ki" min="0" max="2" step="0.05" value="0.0">
+      </div>
+      <div id="kd-row">
+        <label>Kd <span class="val" id="kd-val">0.00</span></label>
+        <input type="range" id="kd" min="0" max="1" step="0.05" value="0.0">
+      </div>
+    </div>
+
+    <!-- Input Signal -->
+    <div class="control-group">
+      <div class="section-title">▸ INPUT SIGNAL</div>
+      <label>REFERENCE TYPE</label>
+      <select id="input-type">
+        <option value="step">STEP</option>
+        <option value="pulse">PULSE</option>
+        <option value="sine">SINE</option>
+        <option value="ramp">RAMP</option>
+      </select>
+    </div>
+
+    <!-- Solver -->
+    <div class="control-group">
+      <div class="section-title">▸ SOLVER CONFIG</div>
+      <label>INTEGRATOR</label>
+      <select id="solver">
+        <option value="rk4">RUNGE-KUTTA 4</option>
+        <option value="euler">EULER (FWD)</option>
+      </select>
+      <label>T_END [s] <span class="val" id="tend-val">10.0</span></label>
+      <input type="range" id="t-end" min="0.1" max="50" step="0.1" value="10">
+      <label>Δt [s]</label>
+      <input type="number" id="dt" min="0.001" max="0.1" step="0.001" value="0.01">
+      <div class="error-msg" id="err-msg">⚠ INVALID PARAMS</div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="control-group">
+      <button class="btn btn-primary" id="btn-sim">▶ SIMULATE</button>
+      <div class="btn-row" style="margin-top:4px">
+        <button class="btn btn-sm" id="btn-reset">↺ RESET</button>
+        <button class="btn btn-sm" id="btn-csv">⬇ EXPORT CSV</button>
+      </div>
+    </div>
+
+    <!-- Sim History -->
+    <div class="control-group">
+      <div class="section-title">▸ SIM HISTORY</div>
+      <div id="history-list" style="font-size:0.62rem;color:var(--grey);max-height:80px;overflow-y:auto;"></div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div id="right">
+    <div id="canvas-area">
+      <div class="plot-wrap" data-label="TIME RESPONSE  y(t)" id="wrap-time">
+        <canvas id="canvas-time"></canvas>
+      </div>
+      <div class="plot-wrap" data-label="PHASE PLANE  y vs ẏ" id="wrap-phase">
+        <canvas id="canvas-phase"></canvas>
+      </div>
+    </div>
+
+    <div id="stats-bar">
+      <div class="stat">
+        <div class="stat-val" id="stat-ts">—</div>
+        <div class="stat-label">SETTLING TIME</div>
+      </div>
+      <div class="stat-separator"></div>
+      <div class="stat">
+        <div class="stat-val" id="stat-os">—</div>
+        <div class="stat-label">OVERSHOOT %</div>
+      </div>
+      <div class="stat-separator"></div>
+      <div class="stat">
+        <div class="stat-val" id="stat-ss">—</div>
+        <div class="stat-label">SS ERROR</div>
+      </div>
+      <div class="stat-separator"></div>
+      <div class="stat">
+        <div class="stat-val" id="stat-ise">—</div>
+        <div class="stat-label">ISE</div>
+      </div>
+      <div class="stat-separator"></div>
+      <div class="stat">
+        <div class="stat-val" id="stat-umax">—</div>
+        <div class="stat-label">MAX |u|</div>
+      </div>
+      <div class="stat-separator"></div>
+      <div class="stat" style="margin-left:auto">
+        <div class="stat-val" id="stat-pts" style="font-size:0.8rem;color:var(--grey)">—</div>
+        <div class="stat-label">DATA PTS</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// SYSTEM DEFINITIONS
+// ═══════════════════════════════════════════════════════
+const SYSTEMS = {
+  pendulum: {
+    label: 'PENDULUM',
+    params: [
+      { id: 'p_m',  label: 'm [kg]',       min: 0.1, max: 5,    step: 0.1,  def: 1.0 },
+      { id: 'p_c',  label: 'c [N·s/m]',    min: 0,   max: 5,    step: 0.1,  def: 0.5 },
+      { id: 'p_g',  label: 'g [m/s²]',     min: 1,   max: 15,   step: 0.01, def: 9.81 },
+    ],
+    // state: [x, dx]  output: x
+    // m*ddx + c*dx + m*g*x = u
+    deriv(state, u, p) {
+      const [x, dx] = state;
+      const m = p.p_m, c = p.p_c, g = p.p_g;
+      const ddx = (u - c * dx - m * g * x) / m;
+      return [dx, ddx];
+    },
+    output(state) { return state[0]; },
+    initState(x0, v0) { return [x0, v0]; },
+    stateNames: ['θ [rad]', 'ω [rad/s]'],
+    defaultX0: 1.0, defaultV0: 0,
+  },
+  tank: {
+    label: 'TANK',
+    params: [
+      { id: 't_A',  label: 'A [m²]',       min: 0.1, max: 10,   step: 0.1,  def: 1.0 },
+      { id: 't_k',  label: 'k [outflow]',  min: 0.01,max: 2,    step: 0.01, def: 0.5 },
+    ],
+    // state: [h]  single-state
+    // A*dh/dt = u - k*sqrt(h)  (linearized at h0: sqrt approx)
+    deriv(state, u, p) {
+      const h = Math.max(0, state[0]);
+      const A = p.t_A, k = p.t_k;
+      const dh = (u - k * Math.sqrt(h)) / A;
+      return [dh, 0];  // second unused
+    },
+    output(state) { return state[0]; },
+    initState(x0, v0) { return [Math.max(0, x0), 0]; },
+    stateNames: ['h [m]', 'dh/dt'],
+    defaultX0: 0.5, defaultV0: 0,
+  },
+  massspring: {
+    label: 'MASS-SPRING',
+    params: [
+      { id: 'ms_m', label: 'm [kg]',       min: 0.1, max: 10,   step: 0.1,  def: 1.0 },
+      { id: 'ms_k', label: 'k [N/m]',      min: 0.1, max: 20,   step: 0.1,  def: 4.0 },
+      { id: 'ms_c', label: 'c [N·s/m]',    min: 0,   max: 5,    step: 0.1,  def: 0.5 },
+    ],
+    // m*ddx + c*dx + k*x = u
+    deriv(state, u, p) {
+      const [x, dx] = state;
+      const m = p.ms_m, k = p.ms_k, c = p.ms_c;
+      const ddx = (u - c * dx - k * x) / m;
+      return [dx, ddx];
+    },
+    output(state) { return state[0]; },
+    initState(x0, v0) { return [x0, v0]; },
+    stateNames: ['x [m]', 'ẋ [m/s]'],
+    defaultX0: 0.5, defaultV0: 0,
+  },
+  dcmotor: {
+    label: 'DC MOTOR',
+    params: [
+      { id: 'dc_L',  label: 'L [H]',       min: 0.001,max: 1,   step: 0.001,def: 0.1 },
+      { id: 'dc_R',  label: 'R [Ω]',       min: 0.1, max: 20,   step: 0.1,  def: 2.0 },
+      { id: 'dc_Kt', label: 'Kt [N·m/A]',  min: 0.01,max: 2,    step: 0.01, def: 0.5 },
+      { id: 'dc_Ke', label: 'Ke [V·s/rad]',min: 0.01,max: 2,    step: 0.01, def: 0.5 },
+      { id: 'dc_J',  label: 'J [kg·m²]',   min: 0.001,max: 1,   step: 0.001,def: 0.05 },
+      { id: 'dc_b',  label: 'b [friction]',min: 0,   max: 1,    step: 0.01, def: 0.02 },
+    ],
+    // state: [i, omega]
+    // di/dt = (V - Ke*omega - R*i) / L
+    // domega/dt = (Kt*i - b*omega) / J
+    // input u = voltage V
+    deriv(state, u, p) {
+      const [i, omega] = state;
+      const L = p.dc_L, R = p.dc_R, Kt = p.dc_Kt, Ke = p.dc_Ke, J = p.dc_J, b = p.dc_b;
+      const di = (u - Ke * omega - R * i) / L;
+      const domega = (Kt * i - b * omega) / J;
+      return [di, domega];
+    },
+    output(state) { return state[1]; },  // output = angular velocity
+    initState(x0, v0) { return [0, x0]; },
+    stateNames: ['i [A]', 'ω [rad/s]'],
+    defaultX0: 0, defaultV0: 0,
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let simData = null;
+let ctrlType = 'P';
+let sysName = 'pendulum';
+let sysParams = {};
+let zoomTime = 1.0;
+let zoomPhase = 1.0;
+let debounceTimer = null;
+let simHistory = JSON.parse(localStorage.getItem('jarvis_sim_history') || '[]');
+
+// ═══════════════════════════════════════════════════════
+// DYNAMIC PARAM PANEL
+// ═══════════════════════════════════════════════════════
+function buildParamPanel(name) {
+  const sys = SYSTEMS[name];
+  const container = document.getElementById('sys-params');
+  container.innerHTML = '<div class="section-title">▸ SYSTEM PARAMS</div>';
+
+  sysParams = {};
+  sys.params.forEach(p => {
+    sysParams[p.id] = p.def;
+    const valId = p.id + '_disp';
+    const row = document.createElement('div');
+    row.style.marginBottom = '4px';
+    row.innerHTML = `
+      <label>${p.label} <span class="val" id="${valId}">${p.def.toFixed(p.step < 0.01 ? 3 : 2)}</span></label>
+      <input type="range" id="${p.id}" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.def}">
+    `;
+    container.appendChild(row);
+    row.querySelector('input').addEventListener('input', e => {
+      sysParams[p.id] = parseFloat(e.target.value);
+      document.getElementById(valId).textContent = sysParams[p.id].toFixed(p.step < 0.01 ? 3 : 2);
+      scheduleSim();
+    });
+  });
+
+  // Update initial state defaults
+  const x0Sl = document.getElementById('x0');
+  const v0Sl = document.getElementById('v0');
+  x0Sl.value = sys.defaultX0;
+  v0Sl.value = sys.defaultV0;
+  document.getElementById('x0-val').textContent = sys.defaultX0.toFixed(2);
+  document.getElementById('v0-val').textContent = sys.defaultV0.toFixed(2);
+}
+
+// ═══════════════════════════════════════════════════════
+// CONTROLLER TYPE UI
+// ═══════════════════════════════════════════════════════
+function updateCtrlUI() {
+  document.querySelectorAll('.radio-btn').forEach(b => b.classList.toggle('active', b.dataset.val === ctrlType));
+  document.getElementById('ki-row').style.display = (ctrlType === 'P') ? 'none' : 'block';
+  document.getElementById('kd-row').style.display = (ctrlType !== 'PID') ? 'none' : 'block';
+}
+
+// ═══════════════════════════════════════════════════════
+// INPUT SIGNAL
+// ═══════════════════════════════════════════════════════
+function getInputSignal(t, sp, type, t_end) {
+  switch (type) {
+    case 'step': return sp;
+    case 'pulse': return (t < t_end / 2) ? sp : 0;
+    case 'sine': return sp * Math.sin(2 * Math.PI * t / (t_end / 2));
+    case 'ramp': return sp * (t / t_end);
+    default: return sp;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// SOLVERS
+// ═══════════════════════════════════════════════════════
+function eulerStep(deriv, state, u, p, dt) {
+  const d = deriv(state, u, p);
+  return state.map((s, i) => s + dt * d[i]);
+}
+
+function rk4Step(deriv, state, u, p, dt) {
+  const k1 = deriv(state, u, p);
+  const s2 = state.map((s, i) => s + dt / 2 * k1[i]);
+  const k2 = deriv(s2, u, p);
+  const s3 = state.map((s, i) => s + dt / 2 * k2[i]);
+  const k3 = deriv(s3, u, p);
+  const s4 = state.map((s, i) => s + dt * k3[i]);
+  const k4 = deriv(s4, u, p);
+  return state.map((s, i) => s + dt / 6 * (k1[i] + 2*k2[i] + 2*k3[i] + k4[i]));
+}
+
+// ═══════════════════════════════════════════════════════
+// MAIN SIMULATION
+// ═══════════════════════════════════════════════════════
+function runSimulation() {
+  const errEl = document.getElementById('err-msg');
+  errEl.classList.remove('visible');
+
+  const sys = SYSTEMS[sysName];
+  const Kp = parseFloat(document.getElementById('kp').value);
+  const Ki = parseFloat(document.getElementById('ki').value);
+  const Kd = parseFloat(document.getElementById('kd').value);
+  const x0 = parseFloat(document.getElementById('x0').value);
+  const v0 = parseFloat(document.getElementById('v0').value);
+  const sp = parseFloat(document.getElementById('setpoint').value);
+  const t_end = parseFloat(document.getElementById('t-end').value);
+  const dt = parseFloat(document.getElementById('dt').value);
+  const solver = document.getElementById('solver').value;
+  const inputType = document.getElementById('input-type').value;
+
+  // Validation
+  if (dt >= t_end || dt <= 0 || t_end <= 0 || Kp < 0 || Ki < 0 || Kd < 0) {
+    errEl.textContent = '⚠ INVALID: check dt < t_end, gains ≥ 0';
+    errEl.classList.add('visible');
+    return;
+  }
+  if (dt < 0.001) {
+    errEl.textContent = '⚠ dt too small (min 0.001s)';
+    errEl.classList.add('visible');
+    return;
+  }
+
+  const N = Math.floor(t_end / dt);
+  if (N > 200000) {
+    errEl.textContent = '⚠ Too many steps. Increase dt or reduce t_end.';
+    errEl.classList.add('visible');
+    return;
+  }
+
+  let state = sys.initState(x0, v0);
+  let integral_e = 0;
+  let prev_e = 0;
+
+  const tArr = new Float64Array(N);
+  const yArr = new Float64Array(N);
+  const uArr = new Float64Array(N);
+  const eArr = new Float64Array(N);
+  const dydtArr = new Float64Array(N);
+
+  for (let i = 0; i < N; i++) {
+    const t = i * dt;
+    const ref = getInputSignal(t, sp, inputType, t_end);
+    const y = sys.output(state);
+    const e = ref - y;
+
+    integral_e += e * dt;
+    const de_dt = (i > 0) ? (e - prev_e) / dt : 0;
+
+    let u = Kp * e;
+    if (ctrlType === 'PI' || ctrlType === 'PID') u += Ki * integral_e;
+    if (ctrlType === 'PID') u += Kd * de_dt;
+
+    tArr[i] = t;
+    yArr[i] = y;
+    uArr[i] = u;
+    eArr[i] = e;
+
+    // velocity = rate of change of output
+    const d = sys.deriv(state, u, sysParams);
+    dydtArr[i] = d[0]; // dx[0]/dt
+
+    const stepFn = solver === 'rk4' ? rk4Step : eulerStep;
+    state = stepFn(sys.deriv.bind(sys), state, u, sysParams, dt);
+    prev_e = e;
+  }
+
+  simData = { tArr, yArr, uArr, eArr, dydtArr, sp, dt, N, t_end, sysName };
+  computeStats(simData);
+  drawAll();
+  saveToHistory({ sysName, Kp, Ki, Kd, ctrlType, sp, solver, t_end, dt });
+  document.getElementById('stat-pts').textContent = N.toLocaleString();
+}
+
+// ═══════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════
+function computeStats(d) {
+  const { tArr, yArr, eArr, uArr, sp, dt } = d;
+  const N = tArr.length;
+
+  // Settling time: |e| < 5% of |sp| for 3 consecutive samples
+  const thresh = Math.abs(sp) * 0.05;
+  let settlingTime = NaN;
+  if (Math.abs(sp) > 1e-6) {
+    let streak = 0;
+    for (let i = 0; i < N; i++) {
+      if (Math.abs(eArr[i]) <= Math.max(thresh, 0.001)) {
+        streak++;
+        if (streak >= 3 && isNaN(settlingTime)) settlingTime = tArr[i];
+      } else {
+        streak = 0;
+        settlingTime = NaN;
+      }
+    }
+  }
+
+  // Overshoot
+  let maxY = -Infinity;
+  for (let i = 0; i < N; i++) if (yArr[i] > maxY) maxY = yArr[i];
+  const overshoot = (Math.abs(sp) > 1e-6) ? ((maxY - sp) / Math.abs(sp)) * 100 : 0;
+
+  // SS error
+  const ssError = eArr[N - 1];
+
+  // ISE
+  let ise = 0;
+  for (let i = 0; i < N; i++) ise += eArr[i] * eArr[i] * dt;
+
+  // Max |u|
+  let maxU = 0;
+  for (let i = 0; i < N; i++) if (Math.abs(uArr[i]) > maxU) maxU = Math.abs(uArr[i]);
+
+  const fmt = v => isNaN(v) ? '—' : v.toFixed(3);
+  const tsEl = document.getElementById('stat-ts');
+  tsEl.textContent = isNaN(settlingTime) ? '∞' : settlingTime.toFixed(2) + 's';
+  tsEl.className = 'stat-val' + (isNaN(settlingTime) ? ' warn' : ' ok');
+
+  const osEl = document.getElementById('stat-os');
+  osEl.textContent = overshoot.toFixed(1) + '%';
+  osEl.className = 'stat-val' + (overshoot > 20 ? ' warn' : overshoot < 5 ? ' ok' : '');
+
+  document.getElementById('stat-ss').textContent = fmt(ssError);
+  document.getElementById('stat-ise').textContent = ise.toFixed(4);
+  document.getElementById('stat-umax').textContent = maxU.toFixed(3);
+}
+
+// ═══════════════════════════════════════════════════════
+// DRAWING
+// ═══════════════════════════════════════════════════════
+const PAD = { top: 28, right: 14, bottom: 36, left: 50 };
+
+function resizeCanvas(cvs) {
+  const rect = cvs.parentElement.getBoundingClientRect();
+  if (cvs.width !== rect.width || cvs.height !== rect.height) {
+    cvs.width = rect.width;
+    cvs.height = rect.height;
+  }
+}
+
+function drawGrid(ctx, W, H, xMin, xMax, yMin, yMax) {
+  const gridColor = 'rgba(0,100,120,0.25)';
+  ctx.strokeStyle = gridColor;
+  ctx.lineWidth = 0.5;
+  const nX = 6, nY = 5;
+  for (let i = 0; i <= nX; i++) {
+    const x = PAD.left + (W - PAD.left - PAD.right) * i / nX;
+    ctx.beginPath(); ctx.moveTo(x, PAD.top); ctx.lineTo(x, H - PAD.bottom); ctx.stroke();
+  }
+  for (let i = 0; i <= nY; i++) {
+    const y = PAD.top + (H - PAD.top - PAD.bottom) * i / nY;
+    ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(W - PAD.right, y); ctx.stroke();
+  }
+}
+
+function drawAxes(ctx, W, H, xMin, xMax, yMin, yMax, xLabel, yLabel) {
+  ctx.strokeStyle = 'rgba(0,200,220,0.5)';
+  ctx.lineWidth = 1;
+  const pl = PAD.left, pr = PAD.right, pt = PAD.top, pb = PAD.bottom;
+  const plotW = W - pl - pr, plotH = H - pt - pb;
+
+  ctx.beginPath();
+  ctx.moveTo(pl, pt); ctx.lineTo(pl, H - pb); ctx.lineTo(W - pr, H - pb); ctx.stroke();
+
+  ctx.fillStyle = 'rgba(0,180,200,0.8)';
+  ctx.font = '9px Orbitron, monospace';
+  ctx.textAlign = 'center';
+
+  const nX = 6, nY = 5;
+  for (let i = 0; i <= nX; i++) {
+    const v = xMin + (xMax - xMin) * i / nX;
+    const px = pl + plotW * i / nX;
+    ctx.fillText(v.toFixed(1), px, H - pb + 14);
+  }
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= nY; i++) {
+    const v = yMax - (yMax - yMin) * i / nY;
+    const py = pt + plotH * i / nY;
+    ctx.fillText(v.toFixed(2), pl - 4, py + 3);
+  }
+
+  // Axis labels
+  ctx.fillStyle = 'rgba(0,229,255,0.6)';
+  ctx.font = '8px Orbitron';
+  ctx.textAlign = 'center';
+  ctx.fillText(xLabel, pl + plotW / 2, H - 2);
+  ctx.save();
+  ctx.translate(10, pt + plotH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText(yLabel, 0, 0);
+  ctx.restore();
+}
+
+function toCanvasXY(x, y, W, H, xMin, xMax, yMin, yMax) {
+  const plotW = W - PAD.left - PAD.right;
+  const plotH = H - PAD.top - PAD.bottom;
+  const cx = PAD.left + (x - xMin) / (xMax - xMin) * plotW;
+  const cy = PAD.top + (1 - (y - yMin) / (yMax - yMin)) * plotH;
+  return [cx, cy];
+}
+
+function drawTimePlot() {
+  const cvs = document.getElementById('canvas-time');
+  resizeCanvas(cvs);
+  const ctx = cvs.getContext('2d');
+  const W = cvs.width, H = cvs.height;
+  ctx.clearRect(0, 0, W, H);
+
+  ctx.fillStyle = '#001a26';
+  ctx.fillRect(0, 0, W, H);
+
+  if (!simData) {
+    ctx.fillStyle = 'rgba(0,100,120,0.4)';
+    ctx.font = '11px Orbitron';
+    ctx.textAlign = 'center';
+    ctx.fillText('NO DATA — RUN SIMULATION', W / 2, H / 2);
+    return;
+  }
+
+  const { tArr, yArr, eArr, sp, t_end } = simData;
+  const N = tArr.length;
+
+  const yAll = Array.from(yArr);
+  let yMin = Math.min(...yAll, sp);
+  let yMax = Math.max(...yAll, sp);
+  const range = Math.max(Math.abs(yMax - yMin), 0.1);
+  yMin -= range * 0.1 / zoomTime;
+  yMax += range * 0.1 / zoomTime;
+
+  // Apply zoom
+  const yCenter = (yMin + yMax) / 2;
+  const halfSpan = (yMax - yMin) / 2 / zoomTime;
+  const yMinZ = yCenter - halfSpan;
+  const yMaxZ = yCenter + halfSpan;
+
+  drawGrid(ctx, W, H, 0, t_end, yMinZ, yMaxZ);
+  drawAxes(ctx, W, H, 0, t_end, yMinZ, yMaxZ, 't [s]', 'y');
+
+  const thresh = Math.abs(sp) * 0.05;
+
+  // Error area (red where |e| > thresh)
+  ctx.save();
+  for (let i = 1; i < N; i++) {
+    if (Math.abs(eArr[i]) > thresh) {
+      const [x0, y0] = toCanvasXY(tArr[i - 1], yArr[i - 1], W, H, 0, t_end, yMinZ, yMaxZ);
+      const [x1, y1] = toCanvasXY(tArr[i], yArr[i], W, H, 0, t_end, yMinZ, yMaxZ);
+      const [, sy0] = toCanvasXY(tArr[i - 1], sp, W, H, 0, t_end, yMinZ, yMaxZ);
+      const [, sy1] = toCanvasXY(tArr[i], sp, W, H, 0, t_end, yMinZ, yMaxZ);
+      ctx.fillStyle = 'rgba(255,34,68,0.12)';
+      ctx.beginPath();
+      ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.lineTo(x1, sy1); ctx.lineTo(x0, sy0);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+  ctx.restore();
+
+  // Setpoint dashed line
+  const [, spy] = toCanvasXY(0, sp, W, H, 0, t_end, yMinZ, yMaxZ);
+  ctx.strokeStyle = 'rgba(150,150,160,0.6)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath();
+  ctx.moveTo(PAD.left, spy);
+  ctx.lineTo(W - PAD.right, spy);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // y(t) line
+  ctx.strokeStyle = '#00e5ff';
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = 'rgba(0,229,255,0.5)';
+  ctx.shadowBlur = 4;
+  ctx.beginPath();
+  for (let i = 0; i < N; i++) {
+    const [cx, cy] = toCanvasXY(tArr[i], yArr[i], W, H, 0, t_end, yMinZ, yMaxZ);
+    if (i === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+
+function drawPhasePlot() {
+  const cvs = document.getElementById('canvas-phase');
+  resizeCanvas(cvs);
+  const ctx = cvs.getContext('2d');
+  const W = cvs.width, H = cvs.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#001a26';
+  ctx.fillRect(0, 0, W, H);
+
+  if (!simData) {
+    ctx.fillStyle = 'rgba(0,100,120,0.4)';
+    ctx.font = '11px Orbitron';
+    ctx.textAlign = 'center';
+    ctx.fillText('NO DATA — RUN SIMULATION', W / 2, H / 2);
+    return;
+  }
+
+  const { yArr, dydtArr, sp, N } = simData;
+
+  const yAll = Array.from(yArr);
+  const dAll = Array.from(dydtArr);
+  let yMin = Math.min(...yAll) - 0.1;
+  let yMax = Math.max(...yAll) + 0.1;
+  let dMin = Math.min(...dAll) - 0.1;
+  let dMax = Math.max(...dAll) + 0.1;
+
+  const yCen = (yMin + yMax) / 2;
+  const dCen = (dMin + dMax) / 2;
+  const yHalf = (yMax - yMin) / 2 / zoomPhase;
+  const dHalf = (dMax - dMin) / 2 / zoomPhase;
+  const yMinZ = yCen - yHalf;
+  const yMaxZ = yCen + yHalf;
+  const dMinZ = dCen - dHalf;
+  const dMaxZ = dCen + dHalf;
+
+  drawGrid(ctx, W, H, yMinZ, yMaxZ, dMinZ, dMaxZ);
+  const sys = SYSTEMS[sysName];
+  drawAxes(ctx, W, H, yMinZ, yMaxZ, dMinZ, dMaxZ, sys.stateNames[0], sys.stateNames[1]);
+
+  // Trajectory
+  ctx.strokeStyle = '#00e5ff';
+  ctx.lineWidth = 1.2;
+  ctx.shadowColor = 'rgba(0,229,255,0.4)';
+  ctx.shadowBlur = 3;
+  ctx.beginPath();
+  for (let i = 0; i < N; i++) {
+    const [cx, cy] = toCanvasXY(yArr[i], dydtArr[i], W, H, yMinZ, yMaxZ, dMinZ, dMaxZ);
+    if (i === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Start point (green)
+  const [sx, sy] = toCanvasXY(yArr[0], dydtArr[0], W, H, yMinZ, yMaxZ, dMinZ, dMaxZ);
+  ctx.fillStyle = '#00ff88';
+  ctx.shadowColor = '#00ff88';
+  ctx.shadowBlur = 8;
+  ctx.beginPath(); ctx.arc(sx, sy, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Equilibrium point (blue X) at setpoint, dydt=0
+  const [ex, ey] = toCanvasXY(sp, 0, W, H, yMinZ, yMaxZ, dMinZ, dMaxZ);
+  ctx.strokeStyle = '#2255ff';
+  ctx.lineWidth = 2;
+  ctx.shadowColor = '#2255ff';
+  ctx.shadowBlur = 8;
+  const s = 6;
+  ctx.beginPath(); ctx.moveTo(ex - s, ey - s); ctx.lineTo(ex + s, ey + s);
+  ctx.moveTo(ex + s, ey - s); ctx.lineTo(ex - s, ey + s);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Arrow direction on trajectory (midpoint)
+  if (N > 10) {
+    const mi = Math.floor(N / 2);
+    const [ax1, ay1] = toCanvasXY(yArr[mi - 1], dydtArr[mi - 1], W, H, yMinZ, yMaxZ, dMinZ, dMaxZ);
+    const [ax2, ay2] = toCanvasXY(yArr[mi], dydtArr[mi], W, H, yMinZ, yMaxZ, dMinZ, dMaxZ);
+    const angle = Math.atan2(ay2 - ay1, ax2 - ax1);
+    ctx.fillStyle = 'rgba(0,229,255,0.8)';
+    ctx.save();
+    ctx.translate(ax2, ay2);
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(-10, -5); ctx.lineTo(-10, 5); ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawAll() {
+  drawTimePlot();
+  drawPhasePlot();
+}
+
+// ═══════════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════════
+function saveToHistory(entry) {
+  entry.ts = new Date().toISOString();
+  simHistory.unshift(entry);
+  if (simHistory.length > 5) simHistory = simHistory.slice(0, 5);
+  localStorage.setItem('jarvis_sim_history', JSON.stringify(simHistory));
+  renderHistory();
+}
+
+function renderHistory() {
+  const el = document.getElementById('history-list');
+  if (!simHistory.length) { el.textContent = 'NO HISTORY'; return; }
+  el.innerHTML = simHistory.map((h, i) =>
+    `<div style="padding:2px 0;border-bottom:1px solid #002233;cursor:pointer;color:${i===0?'var(--cyan)':'var(--grey)'}"
+       title="${new Date(h.ts).toLocaleTimeString()}">
+      ${i+1}. ${h.sysName.toUpperCase()} | ${h.ctrlType} Kp=${h.Kp} | sp=${h.sp}
+    </div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// CSV EXPORT
+// ═══════════════════════════════════════════════════════
+function exportCSV() {
+  if (!simData) return;
+  const { tArr, yArr, uArr, eArr, dydtArr, N } = simData;
+  let csv = 't,y,u,e,dydt\n';
+  for (let i = 0; i < N; i++) {
+    csv += `${tArr[i].toFixed(5)},${yArr[i].toFixed(6)},${uArr[i].toFixed(6)},${eArr[i].toFixed(6)},${dydtArr[i].toFixed(6)}\n`;
+  }
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `jarvis_sim_${sysName}_${Date.now()}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════════════
+// RESET
+// ═══════════════════════════════════════════════════════
+function resetParams() {
+  const sys = SYSTEMS[sysName];
+  sys.params.forEach(p => {
+    const el = document.getElementById(p.id);
+    if (el) { el.value = p.def; sysParams[p.id] = p.def; }
+    const disp = document.getElementById(p.id + '_disp');
+    if (disp) disp.textContent = p.def.toFixed(p.step < 0.01 ? 3 : 2);
+  });
+  document.getElementById('x0').value = sys.defaultX0;
+  document.getElementById('v0').value = sys.defaultV0;
+  document.getElementById('x0-val').textContent = sys.defaultX0.toFixed(2);
+  document.getElementById('v0-val').textContent = sys.defaultV0.toFixed(2);
+  document.getElementById('kp').value = 2.0;
+  document.getElementById('ki').value = 0.0;
+  document.getElementById('kd').value = 0.0;
+  document.getElementById('kp-val').textContent = '2.00';
+  document.getElementById('ki-val').textContent = '0.00';
+  document.getElementById('kd-val').textContent = '0.00';
+  zoomTime = 1.0; zoomPhase = 1.0;
+  scheduleSim();
+}
+
+// ═══════════════════════════════════════════════════════
+// DEBOUNCED AUTO-SIM
+// ═══════════════════════════════════════════════════════
+function scheduleSim() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(runSimulation, 500);
+}
+
+// ═══════════════════════════════════════════════════════
+// EVENT LISTENERS
+// ═══════════════════════════════════════════════════════
+document.getElementById('sys-select').addEventListener('change', e => {
+  sysName = e.target.value;
+  buildParamPanel(sysName);
+  zoomTime = 1.0; zoomPhase = 1.0;
+  scheduleSim();
+});
+
+document.getElementById('btn-sim').addEventListener('click', runSimulation);
+document.getElementById('btn-reset').addEventListener('click', resetParams);
+document.getElementById('btn-csv').addEventListener('click', exportCSV);
+
+// Slider live update helpers
+function bindSlider(id, dispId, decimals, cb) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    document.getElementById(dispId).textContent = parseFloat(el.value).toFixed(decimals);
+    if (cb) cb();
+    scheduleSim();
+  });
+}
+bindSlider('x0', 'x0-val', 2);
+bindSlider('v0', 'v0-val', 2);
+bindSlider('setpoint', 'sp-val', 2);
+bindSlider('kp', 'kp-val', 2);
+bindSlider('ki', 'ki-val', 2);
+bindSlider('kd', 'kd-val', 2);
+bindSlider('t-end', 'tend-val', 1);
+
+document.getElementById('dt').addEventListener('input', scheduleSim);
+document.getElementById('input-type').addEventListener('change', scheduleSim);
+document.getElementById('solver').addEventListener('change', scheduleSim);
+
+// Controller type radio
+document.querySelectorAll('.radio-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    ctrlType = btn.dataset.val;
+    updateCtrlUI();
+    scheduleSim();
+  });
+});
+
+// Zoom on canvas
+document.getElementById('canvas-time').addEventListener('wheel', e => {
+  e.preventDefault();
+  zoomTime *= e.deltaY > 0 ? 0.85 : 1.18;
+  zoomTime = Math.max(0.1, Math.min(20, zoomTime));
+  drawTimePlot();
+});
+document.getElementById('canvas-phase').addEventListener('wheel', e => {
+  e.preventDefault();
+  zoomPhase *= e.deltaY > 0 ? 0.85 : 1.18;
+  zoomPhase = Math.max(0.1, Math.min(20, zoomPhase));
+  drawPhasePlot();
+});
+
+// Resize observer
+const ro = new ResizeObserver(() => drawAll());
+ro.observe(document.getElementById('canvas-area'));
+
+// ═══════════════════════════════════════════════════════
+// LOAD FROM LOCALSTORAGE
+// ═══════════════════════════════════════════════════════
+function loadLastSetup() {
+  const saved = localStorage.getItem('jarvis_last_setup');
+  if (!saved) return;
+  try {
+    const s = JSON.parse(saved);
+    if (s.sysName && SYSTEMS[s.sysName]) {
+      document.getElementById('sys-select').value = s.sysName;
+      sysName = s.sysName;
+      buildParamPanel(sysName);
+      if (s.params) {
+        Object.entries(s.params).forEach(([k, v]) => {
+          const el = document.getElementById(k);
+          if (el) { el.value = v; sysParams[k] = v; }
+        });
+      }
+      if (s.kp != null) { document.getElementById('kp').value = s.kp; document.getElementById('kp-val').textContent = parseFloat(s.kp).toFixed(2); }
+      if (s.ki != null) { document.getElementById('ki').value = s.ki; document.getElementById('ki-val').textContent = parseFloat(s.ki).toFixed(2); }
+      if (s.kd != null) { document.getElementById('kd').value = s.kd; document.getElementById('kd-val').textContent = parseFloat(s.kd).toFixed(2); }
+      if (s.ctrlType) { ctrlType = s.ctrlType; updateCtrlUI(); }
+      if (s.sp != null) { document.getElementById('setpoint').value = s.sp; document.getElementById('sp-val').textContent = parseFloat(s.sp).toFixed(2); }
+      if (s.t_end) { document.getElementById('t-end').value = s.t_end; document.getElementById('tend-val').textContent = parseFloat(s.t_end).toFixed(1); }
+      if (s.dt) { document.getElementById('dt').value = s.dt; }
+      if (s.solver) document.getElementById('solver').value = s.solver;
+      if (s.inputType) document.getElementById('input-type').value = s.inputType;
+      if (s.x0 != null) { document.getElementById('x0').value = s.x0; document.getElementById('x0-val').textContent = parseFloat(s.x0).toFixed(2); }
+      if (s.v0 != null) { document.getElementById('v0').value = s.v0; document.getElementById('v0-val').textContent = parseFloat(s.v0).toFixed(2); }
+    }
+  } catch(e) {}
+}
+
+// Save setup on simulate
+const origSim = runSimulation;
+window.runSimulation = function() {
+  origSim();
+  const setup = {
+    sysName, ctrlType, params: { ...sysParams },
+    kp: document.getElementById('kp').value,
+    ki: document.getElementById('ki').value,
+    kd: document.getElementById('kd').value,
+    sp: document.getElementById('setpoint').value,
+    t_end: document.getElementById('t-end').value,
+    dt: document.getElementById('dt').value,
+    solver: document.getElementById('solver').value,
+    inputType: document.getElementById('input-type').value,
+    x0: document.getElementById('x0').value,
+    v0: document.getElementById('v0').value,
+  };
+  localStorage.setItem('jarvis_last_setup', JSON.stringify(setup));
+};
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+sysName = 'pendulum';
+buildParamPanel(sysName);
+updateCtrlUI();
+loadLastSetup();
+renderHistory();
+// Initial simulation with defaults
+setTimeout(runSimulation, 200);
+</script>
+</body>
+</html>
