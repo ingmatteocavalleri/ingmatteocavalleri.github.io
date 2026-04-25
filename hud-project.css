@@ -7,20 +7,20 @@
 
 /* ── HUD PALETTE ── */
 :root {
-    --hud-bg:          #020810;
-    --hud-surface:     #05101a;
-    --hud-surface2:    #071520;
+    --hud-bg:          #040f1e;
+    --hud-surface:     #081728;
+    --hud-surface2:    #0a1e32;
     --hud-cyan:        #00d4ff;
-    --hud-cyan-dim:    rgba(0, 212, 255, 0.07);
-    --hud-cyan-border: rgba(0, 212, 255, 0.18);
+    --hud-cyan-dim:    rgba(0, 212, 255, 0.10);
+    --hud-cyan-border: rgba(0, 212, 255, 0.25);
     --hud-orange:      #ff7700;
     --hud-green:       #00ff88;
     --hud-red:         #ff2244;
     --hud-yellow:      #ffcc00;
     --hud-purple:      #a371f7;
-    --hud-text:        rgba(200, 230, 255, 0.75);
-    --hud-text-dim:    rgba(0, 212, 255, 0.35);
-    --hud-border:      rgba(0, 212, 255, 0.13);
+    --hud-text:        rgba(210, 235, 255, 0.88);
+    --hud-text-dim:    rgba(0, 212, 255, 0.55);
+    --hud-border:      rgba(0, 212, 255, 0.20);
 
     /* Legacy aliases */
     --bg:       var(--hud-bg);
@@ -87,7 +87,7 @@ nav.top-nav {
     position: sticky; top: 0; z-index: 200;
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 clamp(20px, 5vw, 60px); height: 50px;
-    background: rgba(2, 8, 16, 0.94); backdrop-filter: blur(12px);
+    background: rgba(4, 15, 30, 0.94); backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--hud-cyan-border);
 }
 .nav-logo {
@@ -407,7 +407,7 @@ nav.top-nav {
 
 /* ── CODE BLOCK ── */
 .code-block {
-    background: #010508; border: 1px solid var(--hud-cyan-border);
+    background: #030c18; border: 1px solid var(--hud-cyan-border);
     border-left: 2px solid var(--hud-green);
     padding: 16px 20px; margin: 14px 0; overflow-x: auto;
 }
@@ -463,7 +463,7 @@ footer {
     border-top: 1px solid var(--hud-cyan-border);
     padding: 22px clamp(20px, 6vw, 100px);
     display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
-    background: rgba(2, 8, 16, 0.9);
+    background: rgba(4, 15, 30, 0.9);
 }
 footer p { font-family: 'Share Tech Mono', monospace; font-size: .62rem; color: var(--hud-text-dim); letter-spacing: .06em; }
 
@@ -518,7 +518,7 @@ footer p { font-family: 'Share Tech Mono', monospace; font-size: .62rem; color: 
 
 /* HMI Screen mockup */
 .hmi-screen {
-    background: #010508; border: 1px solid var(--hud-cyan-border);
+    background: #030c18; border: 1px solid var(--hud-cyan-border);
     border-top: 2px solid var(--hud-cyan);
     padding: 18px 20px; margin: 16px 0; font-family: 'Share Tech Mono', monospace;
     font-size: .76rem; overflow: hidden; position: relative;
