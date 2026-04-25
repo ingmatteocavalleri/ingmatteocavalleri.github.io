@@ -5,18 +5,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
 
 :root {
-    --hud-bg:          #020810;
-    --hud-surface:     #05101a;
-    --hud-surface2:    #071520;
+    --hud-bg:          #07111e;
+    --hud-surface:     #0c1a28;
+    --hud-surface2:    #102030;
     --hud-cyan:        #00d4ff;
-    --hud-cyan-dim:    rgba(0, 212, 255, 0.07);
-    --hud-cyan-border: rgba(0, 212, 255, 0.18);
+    --hud-cyan-dim:    rgba(0, 212, 255, 0.10);
+    --hud-cyan-border: rgba(0, 212, 255, 0.25);
     --hud-orange:      #ff7700;
     --hud-green:       #00ff88;
     --hud-yellow:      #ffcc00;
-    --hud-text:        rgba(200, 230, 255, 0.75);
-    --hud-text-dim:    rgba(0, 212, 255, 0.35);
-    --hud-border:      rgba(0, 212, 255, 0.13);
+    --hud-text:        rgba(210, 235, 255, 0.88);
+    --hud-text-dim:    rgba(0, 212, 255, 0.50);
+    --hud-border:      rgba(0, 212, 255, 0.20);
     --accent:   var(--hud-cyan);
     --accent2:  var(--hud-orange);
     --bg:       var(--hud-bg);
@@ -65,7 +65,7 @@ nav {
     position: sticky; top: 0; z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 clamp(20px, 5vw, 60px); height: 50px;
-    background: rgba(2,8,16,.94); backdrop-filter: blur(12px);
+    background: rgba(7,17,30,.94); backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--hud-cyan-border);
 }
 .nav-logo {
@@ -251,7 +251,7 @@ footer {
     border-top: 1px solid var(--hud-cyan-border);
     padding: 22px clamp(20px,8vw,120px);
     display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
-    background: rgba(2,8,16,.9);
+    background: rgba(7,17,30,.9);
 }
 footer p { font-family: 'Share Tech Mono', monospace; font-size: .62rem; color: var(--hud-text-dim); }
 
