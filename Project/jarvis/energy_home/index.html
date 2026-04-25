@@ -36,8 +36,8 @@ body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;back
 .tb-clock{font-family:'Orbitron',monospace;font-size:12px;color:var(--cyan)}
 .dot-on{width:6px;height:6px;border-radius:50%;background:var(--green);animation:dp 2s infinite;display:inline-block}
 @keyframes dp{0%,100%{opacity:1;box-shadow:0 0 6px var(--green)}50%{opacity:.4;box-shadow:none}}
-.back-btn{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border:1px solid var(--bc);background:transparent;color:var(--text2);font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;cursor:pointer;text-decoration:none;transition:all .2s;margin:10px 16px 0}
-.back-btn:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.06);box-shadow:0 0 10px rgba(0,212,255,.1)}
+.tb-back-btn{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border:1px solid var(--bc);background:transparent;color:var(--text2);font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;cursor:pointer;text-decoration:none;transition:all .2s;white-space:nowrap}
+.tb-back-btn:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.07);box-shadow:0 0 8px rgba(0,212,255,.15)}
 
 /* LAYOUT */
 .layout{position:relative;z-index:2;display:grid;grid-template-columns:1fr 200px;gap:0;padding-top:0;min-height:100vh}
@@ -133,11 +133,16 @@ canvas.chart-canvas{width:100%;display:block;border:1px solid rgba(0,212,255,.1)
 .toggle-switch input:checked+.toggle-slider{background:rgba(0,212,255,.2);border-color:var(--cyan);box-shadow:0 0 8px rgba(0,212,255,.3)}
 .toggle-switch input:checked+.toggle-slider::before{left:17px;background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
 .dc-control{margin-top:8px}
-.ctrl-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:9px;color:var(--text2)}
-.ctrl-label{width:70px;flex-shrink:0}
-input[type=range].hud-range{flex:1;-webkit-appearance:none;height:3px;border-radius:2px;outline:none;cursor:pointer}
-input[type=range].hud-range::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--cyan);cursor:pointer;box-shadow:0 0 6px var(--cyan)}
-.range-val{font-family:'Orbitron',monospace;font-size:10px;color:var(--cyan);width:40px;text-align:right;flex-shrink:0}
+.ctrl-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:9px;color:var(--text2);flex-wrap:nowrap;min-width:0}
+.ctrl-label{width:56px;flex-shrink:0;font-size:8px;letter-spacing:1px}
+input[type=range].hud-range{flex:1;min-width:0;-webkit-appearance:none;height:3px;border-radius:2px;outline:none;cursor:pointer;background:rgba(0,212,255,.15)}
+input[type=range].hud-range::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:rgba(0,212,255,.15)}
+input[type=range].hud-range::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--cyan);cursor:pointer;box-shadow:0 0 6px var(--cyan);margin-top:-4.5px}
+input[type=range].hud-range::-moz-range-track{height:3px;border-radius:2px;background:rgba(0,212,255,.15);border:none}
+input[type=range].hud-range::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--cyan);cursor:pointer;box-shadow:0 0 6px var(--cyan);border:none}
+input[type=range].hud-range.temp-range::-webkit-slider-thumb{background:var(--orange);box-shadow:0 0 6px var(--orange)}
+input[type=range].hud-range.temp-range::-moz-range-thumb{background:var(--orange);box-shadow:0 0 6px var(--orange)}
+.range-val{font-family:'Orbitron',monospace;font-size:9px;color:var(--cyan);width:36px;text-align:right;flex-shrink:0}
 .temp-big{font-family:'Orbitron',monospace;font-size:28px;font-weight:700;color:var(--orange);text-align:center;margin:4px 0}
 .mode-radio{display:flex;gap:6px}
 .mode-radio label{padding:3px 8px;border:1px solid var(--bc);font-size:8px;letter-spacing:1px;cursor:pointer;transition:all .2s}
@@ -224,10 +229,6 @@ input[type=range].hud-range::-webkit-slider-thumb{-webkit-appearance:none;width:
 .peak-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:alertPulse 1s infinite;flex-shrink:0}
 
 /* RANGE COLORS */
-input[type=range].hud-range.light-range{background:linear-gradient(to right,rgba(0,212,255,.3),rgba(0,212,255,.3))}
-input[type=range].hud-range.temp-range{background:linear-gradient(to right,rgba(255,107,0,.3),rgba(255,107,0,.3))}
-input[type=range].hud-range.temp-range::-webkit-slider-thumb{background:var(--orange);box-shadow:0 0 6px var(--orange)}
-
 @media(max-width:900px){
   .layout{grid-template-columns:1fr}
   .sidebar{display:none}
@@ -241,7 +242,7 @@ input[type=range].hud-range.temp-range::-webkit-slider-thumb{background:var(--or
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <a href="../" class="tb-logo" style="text-decoration:none">◀ J.A.R.V.I.S.</a>
+  <a href="../home/index.html" class="tb-back-btn">◀ HOME</a>
   <div class="tb-title">SISTEMA ENERGETICO &amp; DOMOTICA</div>
   <div class="tb-right">
     <span><span class="dot-on"></span> ONLINE</span>
@@ -249,11 +250,8 @@ input[type=range].hud-range.temp-range::-webkit-slider-thumb{background:var(--or
   </div>
 </div>
 
-<!-- BACK BTN -->
-<a href="../home/index.html" class="back-btn" style="position:relative;z-index:3;margin-top:40px">◀ BACK TO HOME</a>
-
 <!-- PEAK BANNER -->
-<div class="peak-banner" id="peakBanner" style="position:relative;z-index:3;margin-top:4px">
+<div class="peak-banner" id="peakBanner" style="position:relative;z-index:3;margin-top:40px">
   <div class="peak-dot"></div>
   <span id="peakBannerMsg">CONSUMO ANOMALO RILEVATO</span>
 </div>
